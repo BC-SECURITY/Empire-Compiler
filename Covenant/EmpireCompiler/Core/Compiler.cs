@@ -121,41 +121,6 @@ namespace EmpireCompiler.Core
 
         }
 
-        private static byte[] CompileCSharpCoreSubProcess(CsharpCoreCompilationRequest request)
-        {
-            System.Diagnostics.Process p = new System.Diagnostics.Process();
-            p.StartInfo.WorkingDirectory = request.SourceDirectory;
-            p.StartInfo.FileName = "dotnet";
-            p.StartInfo.Arguments = $"publish -c release -r {RuntimeIdentifiers[request.RuntimeIdentifier]}";
-            p.StartInfo.UseShellExecute = false;
-            p.StartInfo.CreateNoWindow = true;
-            p.Start();
-            p.WaitForExit();
-            try
-            {
-                string dir = Path.Combine(request.SourceDirectory, "bin", "Release", RuntimeIdentifiers[request.RuntimeIdentifier], "publish");
-                IEnumerable<string> files = Directory.EnumerateFiles(dir);
-                string file = files
-                    .Select(F => new FileInfo(F))
-                    .FirstOrDefault(F => F.DirectoryName == dir &&
-                                    F.Name.Contains(request.ResultName, StringComparison.CurrentCultureIgnoreCase) &&
-                                    !F.Name.EndsWith(".pdb", StringComparison.CurrentCultureIgnoreCase) &&
-                                    !F.Name.EndsWith(".deps.json", StringComparison.CurrentCultureIgnoreCase))
-                    .FullName;
-                byte[] bytes = File.ReadAllBytes(file);
-                if (request.Confuse)
-                {
-                    return ConfuseAssembly(bytes);
-                }
-                return bytes;
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine("Exception: " + e.Message + Environment.NewLine + e.StackTrace);
-            }
-            return null;
-        }
-
         private static byte[] CompileCSharpRoslyn(CsharpFrameworkCompilationRequest request)
         {
             // Gather SyntaxTrees for compilation
@@ -400,20 +365,6 @@ namespace EmpireCompiler.Core
             }
             return currentUsedTypes;
         }
-
-        public static byte[] Compress(byte[] bytes)
-        {
-            byte[] compressedILBytes;
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                using (DeflateStream deflateStream = new DeflateStream(memoryStream, CompressionMode.Compress))
-                {
-                    deflateStream.Write(bytes, 0, bytes.Length);
-                }
-                compressedILBytes = memoryStream.ToArray();
-            }
-            return compressedILBytes;
-        }
     }
 
     public class CompilerException : Exception
@@ -424,11 +375,6 @@ namespace EmpireCompiler.Core
         }
 
         public CompilerException(string message) : base(message)
-        {
-
-        }
-
-        public CompilerException(string message, Exception inner) : base(message, inner)
         {
 
         }

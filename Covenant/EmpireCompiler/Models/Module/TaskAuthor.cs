@@ -1,16 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
-using Microsoft.CodeAnalysis;
 
 using Newtonsoft.Json;
 using YamlDotNet.Serialization;
 
-using EmpireCompiler.Core;
 
 namespace EmpireCompiler.Models.Grunts
 {

@@ -1,9 +1,3 @@
-C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\obj\Debug\net6.0\EmpireCompiler.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\obj\Debug\net6.0\EmpireCompiler.AssemblyInfoInputs.cache
-C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\obj\Debug\net6.0\EmpireCompiler.AssemblyInfo.cs
-C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\obj\Debug\net6.0\EmpireCompiler.csproj.CoreCompileInputs.cache
-C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\obj\Debug\net6.0\EmpireCompiler.MvcApplicationPartsAssemblyInfo.cs
-C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\obj\Debug\net6.0\EmpireCompiler.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\bin\Debug\net6.0\libman.json
 C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\bin\Debug\net6.0\EmpireCompiler.exe
 C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\bin\Debug\net6.0\EmpireCompiler.deps.json
@@ -100,6 +94,12 @@ C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\bin\Debug\ne
 C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\bin\Debug\net6.0\dnlib.dll
 C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\bin\Debug\net6.0\Donut.dll
 C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\bin\Debug\net6.0\PeNet.dll
+C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\obj\Debug\net6.0\EmpireCompiler.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\obj\Debug\net6.0\EmpireCompiler.AssemblyInfoInputs.cache
+C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\obj\Debug\net6.0\EmpireCompiler.AssemblyInfo.cs
+C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\obj\Debug\net6.0\EmpireCompiler.csproj.CoreCompileInputs.cache
+C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\obj\Debug\net6.0\EmpireCompiler.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\obj\Debug\net6.0\EmpireCompiler.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\obj\Debug\net6.0\staticwebassets.build.json
 C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\obj\Debug\net6.0\staticwebassets.development.json
 C:\Users\dredg\source\repos\Empire-Compiler\Covenant\EmpireCompiler\obj\Debug\net6.0\scopedcss\bundle\EmpireCompiler.styles.css
