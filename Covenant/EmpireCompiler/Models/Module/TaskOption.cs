@@ -7,7 +7,7 @@ using YamlDotNet.Serialization;
 
 namespace EmpireCompiler.Models.Grunts
 {
-    public class GruntTaskOption : ISerializable<GruntTaskOption>
+    public class TaskOption : ISerializable<TaskOption>
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
@@ -39,7 +39,7 @@ namespace EmpireCompiler.Models.Grunts
             };
         }
 
-        internal GruntTaskOption FromSerializedGruntTaskOption(SerializedGruntTaskOption option)
+        internal TaskOption FromSerializedGruntTaskOption(SerializedGruntTaskOption option)
         {
             this.Name = option.Name;
             this.Value = option.Value;
@@ -58,7 +58,7 @@ namespace EmpireCompiler.Models.Grunts
             return serializer.Serialize(this.ToSerializedGruntTaskOption());
         }
 
-        public GruntTaskOption FromYaml(string yaml)
+        public TaskOption FromYaml(string yaml)
         {
             IDeserializer deserializer = new DeserializerBuilder().Build();
             SerializedGruntTaskOption option = deserializer.Deserialize<SerializedGruntTaskOption>(yaml);
@@ -70,7 +70,7 @@ namespace EmpireCompiler.Models.Grunts
             return JsonConvert.SerializeObject(this.ToSerializedGruntTaskOption());
         }
 
-        public GruntTaskOption FromJson(string json)
+        public TaskOption FromJson(string json)
         {
             SerializedGruntTaskOption option = JsonConvert.DeserializeObject<SerializedGruntTaskOption>(json);
             return this.FromSerializedGruntTaskOption(option);

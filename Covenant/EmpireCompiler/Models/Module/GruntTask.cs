@@ -31,7 +31,7 @@ namespace EmpireCompiler.Models.Grunts
         public int Id { get; set; }
 
         public int AuthorId { get; set; }
-        public GruntTaskAuthor Author { get; set; } = new GruntTaskAuthor();
+        public TaskAuthor Author { get; set; } = new TaskAuthor();
 
         [Required]
         public string Name { get; set; } = "GenericTask";
@@ -59,7 +59,7 @@ namespace EmpireCompiler.Models.Grunts
         public bool UnsafeCompile { get; set; } = false;
         public bool TokenTask { get; set; } = false;
 
-        public List<GruntTaskOption> Options { get; set; } = new List<GruntTaskOption>();
+        public List<TaskOption> Options { get; set; } = new List<TaskOption>();
 
         public void Add(ReferenceSourceLibrary library)
         {
@@ -150,7 +150,7 @@ namespace EmpireCompiler.Models.Grunts
         internal GruntTask FromSerializedGruntTask(SerializedGruntTask task)
         {
             this.Name = task.Name;
-            this.Author = new GruntTaskAuthor().FromSerializedGruntTaskAuthor(task.Author);
+            this.Author = new TaskAuthor().FromSerializedGruntTaskAuthor(task.Author);
             this.Aliases = task.Aliases;
             this.Description = task.Description;
             this.Help = task.Help;
@@ -162,7 +162,7 @@ namespace EmpireCompiler.Models.Grunts
             this.TaskingType = task.TaskingType;
             this.UnsafeCompile = task.UnsafeCompile;
             this.TokenTask = task.TokenTask;
-            this.Options = task.Options.Select(O => new GruntTaskOption().FromSerializedGruntTaskOption(O)).ToList();
+            this.Options = task.Options.Select(O => new TaskOption().FromSerializedGruntTaskOption(O)).ToList();
             this.Options.ForEach(O => O.GruntTaskId = this.Id);
             task.ReferenceSourceLibraries.ForEach(RSL => this.Add(new ReferenceSourceLibrary().FromSerializedReferenceSourceLibrary(RSL)));
             task.ReferenceAssemblies.ForEach(RA => this.Add(new ReferenceAssembly().FromSerializedReferenceAssembly(RA)));

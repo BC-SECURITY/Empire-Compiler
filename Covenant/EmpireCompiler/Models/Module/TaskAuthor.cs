@@ -14,7 +14,7 @@ using EmpireCompiler.Core;
 
 namespace EmpireCompiler.Models.Grunts
 {
-    public class GruntTaskAuthor : ISerializable<GruntTaskAuthor>
+    public class TaskAuthor : ISerializable<TaskAuthor>
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
@@ -34,7 +34,7 @@ namespace EmpireCompiler.Models.Grunts
             };
         }
 
-        internal GruntTaskAuthor FromSerializedGruntTaskAuthor(SerializedGruntTaskAuthor author)
+        internal TaskAuthor FromSerializedGruntTaskAuthor(SerializedGruntTaskAuthor author)
         {
             this.Name = author.Name;
             this.Handle = author.Handle;
@@ -48,7 +48,7 @@ namespace EmpireCompiler.Models.Grunts
             return serializer.Serialize(this.ToSerializedGruntTaskAuthor());
         }
 
-        public GruntTaskAuthor FromYaml(string yaml)
+        public TaskAuthor FromYaml(string yaml)
         {
             IDeserializer deserializer = new DeserializerBuilder().Build();
             SerializedGruntTaskAuthor author = deserializer.Deserialize<SerializedGruntTaskAuthor>(yaml);
@@ -60,7 +60,7 @@ namespace EmpireCompiler.Models.Grunts
             return JsonConvert.SerializeObject(this.ToSerializedGruntTaskAuthor());
         }
 
-        public GruntTaskAuthor FromJson(string json)
+        public TaskAuthor FromJson(string json)
         {
             SerializedGruntTaskAuthor author = JsonConvert.DeserializeObject<SerializedGruntTaskAuthor>(json);
             return this.FromSerializedGruntTaskAuthor(author);

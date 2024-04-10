@@ -82,9 +82,9 @@ namespace EmpireCompiler.Core
 
     public interface IGruntTaskOptionService
     {
-        Task<GruntTaskOption> EditGruntTaskOption(GruntTaskOption option);
-        Task<GruntTaskOption> CreateGruntTaskOption(GruntTaskOption option);
-        Task<IEnumerable<GruntTaskOption>> CreateGruntTaskOptions(params GruntTaskOption[] options);
+        Task<TaskOption> EditGruntTaskOption(TaskOption option);
+        Task<TaskOption> CreateGruntTaskOption(TaskOption option);
+        Task<IEnumerable<TaskOption>> CreateGruntTaskOptions(params TaskOption[] options);
     }
 
 
@@ -317,17 +317,17 @@ namespace EmpireCompiler.Core
             //Need to consider restructuring this method and the context class 
             //The way it is currently done is built around interacting with a sqllite db. 
             //need to decide if the Empire server will manage the DB directly.
-            List<GruntTaskOption> options = task.Options.ToList();
+            List<TaskOption> options = task.Options.ToList();
             List<EmbeddedResource> resources = task.EmbeddedResources.ToList();
             List<ReferenceAssembly> assemblies = task.ReferenceAssemblies.ToList();
             List<ReferenceSourceLibrary> libraries = task.ReferenceSourceLibraries.ToList();
-            task.Options = new List<GruntTaskOption>();
+            task.Options = new List<TaskOption>();
             task.EmbeddedResources.ForEach(ER => task.Remove(ER));
             task.ReferenceAssemblies.ForEach(RA => task.Remove(RA));
             task.ReferenceSourceLibraries.ForEach(RSL => task.Remove(RSL));
             task.Id = _context.GetNextTaskID();
 
-            foreach (GruntTaskOption option in options)
+            foreach (TaskOption option in options)
             {
                 option.GruntTaskId = task.Id;
                 //since the option is being added to the task not sure the options need to be stored separately 
@@ -636,14 +636,14 @@ public static class Task
         #endregion
 
         #region GruntTaskOption Actions
-        public async Task<GruntTaskOption> EditGruntTaskOption(GruntTaskOption option)
+        public async Task<TaskOption> EditGruntTaskOption(TaskOption option)
         {
             /*_context.Entry(option).State = EntityState.Modified;
             await _context.SaveChangesAsync();*/
             return option;
         }
 
-        public async Task<GruntTaskOption> CreateGruntTaskOption(GruntTaskOption option)
+        public async Task<TaskOption> CreateGruntTaskOption(TaskOption option)
         {
             _context.Add(option);
             
@@ -651,7 +651,7 @@ public static class Task
             return option;
         }
 
-        public async Task<IEnumerable<GruntTaskOption>> CreateGruntTaskOptions(params GruntTaskOption[] options)
+        public async Task<IEnumerable<TaskOption>> CreateGruntTaskOptions(params TaskOption[] options)
         {
             _context.gruntTaskOptions.AddRange(options);
             

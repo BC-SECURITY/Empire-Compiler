@@ -74,8 +74,8 @@
     <Compile Remove="Core\NotificationService.cs" />
     <Compile Remove="Covenant.cs" />
     <Compile Remove="Models\CovenantContext.cs" />
-    <Compile Remove="Models\Grunts\Grunt.cs" />
-    <Compile Remove="Models\Grunts\ImplantTemplate.cs" />
+    <Compile Remove="Models\Module\Grunt.cs" />
+    <Compile Remove="Models\Module\ImplantTemplate.cs" />
     <Compile Remove="Startup.cs" />
   </ItemGroup>
 

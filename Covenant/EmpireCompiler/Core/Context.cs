@@ -21,7 +21,7 @@ namespace EmpireCompiler.Core.Empire
         public List<ReferenceSourceLibrary> referenceSourceLibraries { get; set; }
         public List<ReferenceSourceLibraryReferenceAssembly> referenceSourceLibraryReferenceAssemblies { get; set; }
 
-        public List<GruntTaskOption> gruntTaskOptions { get; set; }
+        public List<TaskOption> gruntTaskOptions { get; set; }
 
         public List<GruntTask> gruntTasks { get; set; }
 
@@ -33,7 +33,7 @@ namespace EmpireCompiler.Core.Empire
             embeddedResources = new List<EmbeddedResource>();
             referenceSourceLibraries = new List<ReferenceSourceLibrary>();
             referenceSourceLibraryReferenceAssemblies = new List<ReferenceSourceLibraryReferenceAssembly>();
-            gruntTaskOptions = new List<GruntTaskOption>();
+            gruntTaskOptions = new List<TaskOption>();
             gruntTasks = new List<GruntTask>();
             nextTaskId = 0;
 
@@ -69,7 +69,7 @@ namespace EmpireCompiler.Core.Empire
             gruntTasks.Add(entity);
         }
         //Not sure why the grunt options are added separately instead of a member of the Grunt Task class
-        public void Add(GruntTaskOption entity)
+        public void Add(TaskOption entity)
         {
             gruntTaskOptions.Add(entity);
         }
