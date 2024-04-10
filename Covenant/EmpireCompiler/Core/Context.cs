@@ -5,12 +5,10 @@
 using System;
 using System.Collections.Generic;
 
-using Covenant.Core;
 
-using Covenant.Models.Grunts;
-using Microsoft.EntityFrameworkCore.Migrations.Operations;
+using EmpireCompiler.Models.Grunts;
 
-namespace Covenant.Core.Empire
+namespace EmpireCompiler.Core.Empire
 {
     public class EmpireContext
     {

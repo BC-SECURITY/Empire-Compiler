@@ -9,10 +9,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 using Newtonsoft.Json;
 
-using Covenant.Core;
+using EmpireCompiler.Core;
 
 
-namespace Covenant.Models.Grunts
+namespace EmpireCompiler.Models.Grunts
 {
     public class CommandOutput
     {

@@ -7,27 +7,21 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Security.Claims;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Text.RegularExpressions;
 
 using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.CodeAnalysis;
 
 
-using Covenant.Models;
+using EmpireCompiler.Models;
 
-using Covenant.Models.Grunts;
+using EmpireCompiler.Models.Grunts;
 
-using Covenant.Core.Empire;
+using EmpireCompiler.Core.Empire;
 
-namespace Covenant.Core
+namespace EmpireCompiler.Core
 {
 
 

@@ -3,9 +3,9 @@
 // License: GNU GPLv3
 
 using System;
-using System.Collections.Generic;
 
-namespace Covenant.Core
+
+namespace EmpireCompiler.Core
 {
     public class CovenantException : Exception
     {

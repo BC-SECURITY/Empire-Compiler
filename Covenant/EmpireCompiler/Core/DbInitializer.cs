@@ -7,22 +7,15 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
-
-using Microsoft.AspNetCore.Identity;
 
 using YamlDotNet.Serialization;
 
-using Covenant.Models;
-using Covenant.Core.Empire;
+using EmpireCompiler.Core.Empire;
+using EmpireCompiler.Models.Grunts;
 
-using Covenant.Models.Grunts;
-using System.Runtime.Serialization;
-
-namespace Covenant.Core
+namespace EmpireCompiler.Core
 {
     public static class DbInitializer
     {

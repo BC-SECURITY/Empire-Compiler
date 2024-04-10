@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,9 +6,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Newtonsoft.Json;
 using YamlDotNet.Serialization;
 
-using Covenant.Core;
+using EmpireCompiler.Core;
 
-namespace Covenant.Models.Grunts
+namespace EmpireCompiler.Models.Grunts
 {
     public class ReferenceAssembly : ISerializable<ReferenceAssembly>
     {

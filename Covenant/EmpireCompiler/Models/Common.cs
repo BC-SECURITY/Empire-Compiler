@@ -3,9 +3,9 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-using Covenant.Core;
+using EmpireCompiler.Core;
 
-namespace Covenant.Models
+namespace EmpireCompiler.Models
 {
     public interface IYamlSerializable<T>
     {

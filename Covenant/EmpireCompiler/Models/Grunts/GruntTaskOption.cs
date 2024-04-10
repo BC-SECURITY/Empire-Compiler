@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Newtonsoft.Json;
 using YamlDotNet.Serialization;
 
-namespace Covenant.Models.Grunts
+namespace EmpireCompiler.Models.Grunts
 {
     public class GruntTaskOption : ISerializable<GruntTaskOption>
     {

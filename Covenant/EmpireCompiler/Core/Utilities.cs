@@ -17,7 +17,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
-namespace Covenant.Core
+namespace EmpireCompiler.Core
 {
     public static class Utilities
     {

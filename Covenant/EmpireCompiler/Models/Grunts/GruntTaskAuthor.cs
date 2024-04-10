@@ -10,9 +10,9 @@ using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 using YamlDotNet.Serialization;
 
-using Covenant.Core;
+using EmpireCompiler.Core;
 
-namespace Covenant.Models.Grunts
+namespace EmpireCompiler.Models.Grunts
 {
     public class GruntTaskAuthor : ISerializable<GruntTaskAuthor>
     {

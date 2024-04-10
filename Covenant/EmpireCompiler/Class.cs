@@ -1,27 +1,21 @@
-﻿// Author: Jake Krasnov (@_Hubbl3)
-// Project: Empire (https://github.com/BC-SECURITY/Empire)
-//
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-using Covenant.Core;
-using Covenant.Core.Empire;
-using Covenant.Models.Grunts;
+using EmpireCompiler.Core;
+using EmpireCompiler.Models.Grunts;
 
-namespace Covenant
+namespace EmpireCompiler
 {
     public class Start
     {
         public static void Main()
         {
-            EmpireService service2 = new EmpireService();
-            StartServer(service2);
+            EmpireService EmpireServer = new EmpireService();
+            StartServer(EmpireServer);
 
         }
         //Use this for starting the server

@@ -6,7 +6,6 @@ using System;
 using System.IO;
 using System.Text;
 using System.Linq;
-using System.Reflection;
 using System.IO.Compression;
 using System.Collections.Generic;
 
@@ -18,13 +17,13 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Confuser.Core;
 using Confuser.Core.Project;
 
-namespace Covenant.Core
+namespace EmpireCompiler.Core
 {
     public static class Compiler
     {
         public class CompilationRequest
         {
-            public Covenant.Models.Grunts.ImplantLanguage Language { get; set; } = Models.Grunts.ImplantLanguage.CSharp;
+            public EmpireCompiler.Models.Grunts.ImplantLanguage Language { get; set; } = Models.Grunts.ImplantLanguage.CSharp;
             public Platform Platform { get; set; } = Platform.AnyCpu;
         }
 
