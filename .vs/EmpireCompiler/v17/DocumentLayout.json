@@ -1,7 +1,16 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\",
-  "Documents": [],
+  "WorkspaceRootPath": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\Covenant\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{D5865774-CD82-4CCE-A3F1-7F2C4639301B}|EmpireCompiler\\EmpireCompiler.csproj|c:\\users\\dredg\\source\\repos\\empire-compiler\\covenant\\empirecompiler\\core\\service.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D5865774-CD82-4CCE-A3F1-7F2C4639301B}|EmpireCompiler\\EmpireCompiler.csproj|solutionrelative:empirecompiler\\core\\service.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D5865774-CD82-4CCE-A3F1-7F2C4639301B}|EmpireCompiler\\EmpireCompiler.csproj|c:\\users\\dredg\\source\\repos\\empire-compiler\\covenant\\empirecompiler\\class.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D5865774-CD82-4CCE-A3F1-7F2C4639301B}|EmpireCompiler\\EmpireCompiler.csproj|solutionrelative:empirecompiler\\class.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,11 +18,36 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Service.cs",
+              "DocumentMoniker": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\Covenant\\EmpireCompiler\\Core\\Service.cs",
+              "RelativeDocumentMoniker": "EmpireCompiler\\Core\\Service.cs",
+              "ToolTip": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\Covenant\\EmpireCompiler\\Core\\Service.cs",
+              "RelativeToolTip": "EmpireCompiler\\Core\\Service.cs",
+              "ViewState": "AQIAABYCAAAAAAAAAAAYwCECAAABAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-14T14:41:54.854Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Class.cs",
+              "DocumentMoniker": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\Covenant\\EmpireCompiler\\Class.cs",
+              "RelativeDocumentMoniker": "EmpireCompiler\\Class.cs",
+              "ToolTip": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\Covenant\\EmpireCompiler\\Class.cs",
+              "RelativeToolTip": "EmpireCompiler\\Class.cs",
+              "ViewState": "AQIAADcAAAAAAAAAAAAwwHoAAAAJAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-13T16:51:15.673Z"
             }
           ]
         }
