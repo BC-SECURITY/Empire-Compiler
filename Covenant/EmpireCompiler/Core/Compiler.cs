@@ -367,7 +367,7 @@ namespace EmpireCompiler.Core
         }
     }
 
-    public class CompilerException : Exception
+    public class CompilerException : System.Exception
     {
         public CompilerException()
         {

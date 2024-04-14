@@ -1,97 +1,125 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-
+using System.Threading.Tasks;
 using EmpireCompiler.Core;
-using EmpireCompiler.Models.Grunts;
 
 namespace EmpireCompiler
 {
-    public class Start
+    public class Program
     {
-        public static void Main()
+        static async Task Main()
         {
-            EmpireService EmpireServer = new EmpireService();
-            StartServer(EmpireServer);
-
+            var empireServer = new EmpireService();
+            var server = new EmpireServerHandler(empireServer);
+            await server.StartAsync();
         }
-        //Use this for starting the server
-        public static void StartServer(EmpireService service)
+    }
+
+    public class EmpireServerHandler
+    {
+        private readonly EmpireService _service;
+        private const string LocalAddress = "127.0.0.1";
+        private const int Port = 2012;
+        private const int BufferSize = 10000000; // Consider adjusting or using a MemoryStream if size varies
+
+        public EmpireServerHandler(EmpireService service)
         {
+            _service = service;
+        }
 
-            DbInitializer.Initialize(service);
-            List<GruntTask> tsks = service.GetEmpire().gruntTasks;
+        private string GenerateRandomizedName(string baseName)
+        {
+            var random = new Random();
+            var randomName = new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 5)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+            return $"{baseName}_{randomName}";
+        }
 
+        private string DecodeBase64(string encodedString)
+        {
+            var bytes = Convert.FromBase64String(encodedString);
+            return Encoding.UTF8.GetString(bytes);
+        }
+        private string[] DecodeMessage(byte[] buffer, int bytesReceived)
+        {
+            var data = Encoding.ASCII.GetString(buffer, 0, bytesReceived);
+            return data.Split(',');
+        }
 
-            //arbitrary buffer size. This may need to change in the future
-            byte[] buffer = new byte[10000000];
-            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2012);
-            Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        public async Task StartAsync()
+        {
+            DbInitializer.Initialize(_service);
+            var endpoint = new IPEndPoint(IPAddress.Parse(LocalAddress), Port);
+            var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-                listener.Bind(localEndPoint);
-                listener.Listen(100);
+            listener.Bind(endpoint);
+            listener.Listen(100);
 
-                while (true)
-                {
-                    Console.WriteLine("Compiler ready");
-                    Socket socket = listener.Accept();
-                    int bytesRec = socket.Receive(buffer);
-                    //interpret the message
-                    var data = Encoding.ASCII.GetString(buffer, 0, bytesRec);
-                    string[] recMessage = data.Split(",");
-                    //Data is sent with the TaskName first, then confuse bool and then yaml
-                    var bytesTaskName = Convert.FromBase64String(recMessage[0]);
-                    var bytesConfuse = Convert.FromBase64String(recMessage[1]);
-                    var bytesYAML = Convert.FromBase64String(recMessage[2]);
-                    string strTaskName = Encoding.UTF8.GetString(bytesTaskName);
-                    string strConfuse = Encoding.UTF8.GetString(bytesConfuse);
-                    string strYAML = Encoding.UTF8.GetString(bytesYAML);
-                    // Initialize the task from the passed YAML
-                    DbInitializer.IngestTask(service, strYAML);
-                    tsks = service.GetEmpire().gruntTasks;
+            await AcceptConnectionsAsync(listener);
+        }
 
-                    try
-                    {
-                        if (strTaskName != "close")
-                        {
-                            GruntTask tsk = tsks.First(tk => tk.Name == strTaskName);
-                            //randomize task name, this prevents collision of tasks when multiple users are compiling tasks
-                            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-                            var stringChars = new char[5];
-                            var random = new Random();
-                            for (int i = 0; i < stringChars.Length; i++)
-                            {
-                                stringChars[i] = chars[random.Next(chars.Length)];
-                            }
-                            var randNew = new String(stringChars);
-                            tsk.Name = tsk.Name + "_" + randNew;
-                            if (strConfuse == "true")
-                            {
-                                tsk.Confuse = true;
-                            }
-                            tsk.Compile();
-                            string message = "FileName:" + tsk.Name;
-                            var msgBytes = Encoding.ASCII.GetBytes(message);
-                            socket.Send(msgBytes);
-                        }
-                        else
-                        {
-                            socket.Close();
-                            break;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        string message = "Compile failed";
-                        var msgBytes = Encoding.ASCII.GetBytes(message);
-                        socket.Send(msgBytes);
-                        Console.WriteLine(e.ToString());
-                    }
-                }
+        private async Task AcceptConnectionsAsync(Socket listener)
+        {
+            while (true)
+            {
+                Console.WriteLine("Compiler ready");
+                var socket = await Task.Factory.FromAsync(
+                    listener.BeginAccept(null, null),
+                    listener.EndAccept);
 
+                if (!await HandleConnectionAsync(socket))
+                    break;
+            }
+        }
+
+        private async Task<bool> HandleConnectionAsync(Socket socket)
+        {
+            var buffer = new byte[BufferSize];
+            var bytesReceived = await Task<int>.Factory.FromAsync(
+                socket.BeginReceive(buffer, 0, BufferSize, SocketFlags.None, null, null),
+                socket.EndReceive);
+
+            string[] message = DecodeMessage(buffer, bytesReceived);
+            if (message[0] == "close")
+                return false;
+
+            await ProcessMessageAsync(socket, message);
+            return true;
+        }
+
+        private async Task ProcessMessageAsync(Socket socket, string[] message)
+        {
+            try
+            {
+                var tasks = _service.GetEmpire().gruntTasks;
+                var taskName = DecodeBase64(message[0]);
+                var confuse = DecodeBase64(message[1]) == "true";
+                var yaml = DecodeBase64(message[2]);
+
+                DbInitializer.IngestTask(_service, yaml);
+                var task = tasks.First(t => t.Name == taskName);
+                task.Name = GenerateRandomizedName(task.Name);
+                task.Confuse = confuse;
+                task.Compile();
+
+                await SendResponseAsync(socket, $"FileName:{task.Name}");
+            }
+            catch (System.Exception ex)
+            {
+                await SendResponseAsync(socket, "Compile failed");
+                Console.WriteLine(ex.ToString());
+            }
+        }
+
+        private async Task SendResponseAsync(Socket socket, string message)
+        {
+            var responseBytes = Encoding.ASCII.GetBytes(message);
+            await Task.Factory.FromAsync(
+                socket.BeginSend(responseBytes, 0, responseBytes.Length, SocketFlags.None, null, null),
+                socket.EndSend);
         }
     }
 }
