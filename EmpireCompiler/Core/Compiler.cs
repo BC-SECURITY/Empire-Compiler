@@ -1,12 +1,7 @@
-﻿// Author: Ryan Cobb (@cobbr_io)
-// Project: Covenant (https://github.com/cobbr/Covenant)
-// License: GNU GPLv3
-
-using System;
+﻿using System;
 using System.IO;
 using System.Text;
 using System.Linq;
-using System.IO.Compression;
 using System.Collections.Generic;
 
 using Microsoft.CodeAnalysis;

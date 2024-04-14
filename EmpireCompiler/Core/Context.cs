@@ -15,7 +15,6 @@ namespace EmpireCompiler.Core.Empire
         // Covenant builds a DB to handle this however Empire is using the compiler as semi stateless 
         // This is not persistent so will be lost on restart 
         public List<Object> gList { get; set; }
-
         public List<ReferenceAssembly> referenceAssemblies { get; set; }
         public List<EmbeddedResource> embeddedResources { get; set; }
         public List<ReferenceSourceLibrary> referenceSourceLibraries { get; set; }
@@ -45,25 +44,7 @@ namespace EmpireCompiler.Core.Empire
         {
             gList.Add(entity);
         }
-        public void Add(ReferenceAssembly entity)
-        {
-            referenceAssemblies.Add(entity);
-        }
 
-        public void Add(EmbeddedResource entity)
-        {
-            embeddedResources.Add(entity);
-        }
-
-        public void Add(ReferenceSourceLibrary entity)
-        {
-            referenceSourceLibraries.Add(entity);
-        }
-
-        public void Add(ReferenceSourceLibraryReferenceAssembly entity)
-        {
-            referenceSourceLibraryReferenceAssemblies.Add(entity);
-        }
         public void Add(GruntTask entity)
         {
             gruntTasks.Add(entity);
@@ -72,11 +53,6 @@ namespace EmpireCompiler.Core.Empire
         public void Add(TaskOption entity)
         {
             gruntTaskOptions.Add(entity);
-        }
-
-        public void Update(GruntTask entity)
-        {
-            gruntTasks[gruntTasks.FindIndex(ind => ind.Name == entity.Name)] = entity;
         }
 
         //generate the next task ID when a task is created
