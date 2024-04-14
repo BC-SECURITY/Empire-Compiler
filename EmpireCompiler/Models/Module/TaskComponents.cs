@@ -1,12 +1,10 @@
-﻿using System.Linq;
+﻿using EmpireCompiler.Core;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
-using Newtonsoft.Json;
+using System.Linq;
 using YamlDotNet.Serialization;
-
-using EmpireCompiler.Core;
 
 namespace EmpireCompiler.Models.Grunts
 {
@@ -25,13 +23,13 @@ namespace EmpireCompiler.Models.Grunts
         public List<ReferenceSourceLibrary> ReferenceSourceLibraries => ReferenceSourceLibraryReferenceAssemblies.Select(e => e.ReferenceSourceLibrary).ToList();
         [NotMapped, JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
         public List<GruntTask> GruntTasks => GruntTaskReferenceAssemblies.Select(e => e.GruntTask).ToList();
-        
+
         internal SerializedReferenceAssembly ToSerializedReferenceAssembly()
         {
             return new SerializedReferenceAssembly
             {
                 Name = this.Name,
-                Location = this.Location.Replace("\\","/"),
+                Location = this.Location.Replace("\\", "/"),
                 DotNetVersion = this.DotNetVersion
             };
         }
@@ -39,7 +37,7 @@ namespace EmpireCompiler.Models.Grunts
         internal ReferenceAssembly FromSerializedReferenceAssembly(SerializedReferenceAssembly assembly)
         {
             this.Name = assembly.Name;
-            this.Location = assembly.Location.Replace("\\","/");
+            this.Location = assembly.Location.Replace("\\", "/");
             this.DotNetVersion = assembly.DotNetVersion;
             return this;
         }
@@ -88,14 +86,14 @@ namespace EmpireCompiler.Models.Grunts
             return new SerializedEmbeddedResource
             {
                 Name = this.Name,
-                Location = this.Location.Replace("\\","/")
+                Location = this.Location.Replace("\\", "/")
             };
         }
 
         internal EmbeddedResource FromSerializedEmbeddedResource(SerializedEmbeddedResource resource)
         {
             this.Name = resource.Name;
-            this.Location = resource.Location.Replace("\\","/");
+            this.Location = resource.Location.Replace("\\", "/");
             return this;
         }
 
@@ -141,8 +139,10 @@ namespace EmpireCompiler.Models.Grunts
         {
             ReferenceSourceLibraryReferenceAssemblies.Add(new ReferenceSourceLibraryReferenceAssembly
             {
-                ReferenceSourceLibraryId = this.Id, ReferenceSourceLibrary = this,
-                ReferenceAssemblyId = assembly.Id, ReferenceAssembly = assembly
+                ReferenceSourceLibraryId = this.Id,
+                ReferenceSourceLibrary = this,
+                ReferenceAssemblyId = assembly.Id,
+                ReferenceAssembly = assembly
             });
         }
 
@@ -158,8 +158,10 @@ namespace EmpireCompiler.Models.Grunts
         {
             ReferenceSourceLibraryEmbeddedResources.Add(new ReferenceSourceLibraryEmbeddedResource
             {
-                ReferenceSourceLibraryId = this.Id, ReferenceSourceLibrary = this,
-                EmbeddedResourceId = resource.Id, EmbeddedResource = resource
+                ReferenceSourceLibraryId = this.Id,
+                ReferenceSourceLibrary = this,
+                EmbeddedResourceId = resource.Id,
+                EmbeddedResource = resource
             });
         }
 
@@ -184,7 +186,7 @@ namespace EmpireCompiler.Models.Grunts
             {
                 Name = this.Name,
                 Description = this.Description,
-                Location = this.Location.Replace("\\","/"),
+                Location = this.Location.Replace("\\", "/"),
                 Language = this.Language,
                 CompatibleDotNetVersions = this.CompatibleDotNetVersions,
                 ReferenceAssemblies = this.ReferenceAssemblies.Select(RA => RA.ToSerializedReferenceAssembly()).ToList(),
@@ -196,7 +198,7 @@ namespace EmpireCompiler.Models.Grunts
         {
             this.Name = library.Name;
             this.Description = library.Description;
-            this.Location = library.Location.Replace("\\","/");
+            this.Location = library.Location.Replace("\\", "/");
             this.Language = library.Language;
             this.CompatibleDotNetVersions = library.CompatibleDotNetVersions;
             library.ReferenceAssemblies.ForEach(A => this.Add(new ReferenceAssembly().FromSerializedReferenceAssembly(A)));

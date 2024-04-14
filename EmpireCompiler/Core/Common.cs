@@ -2,14 +2,14 @@
 // Project: Covenant (https://github.com/cobbr/Covenant)
 // License: GNU GPLv3
 
+using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Reflection;
-using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace EmpireCompiler.Core
 {

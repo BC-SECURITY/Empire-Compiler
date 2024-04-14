@@ -4,16 +4,14 @@
 //          Code originally from Covenant (https://github.com/cobbr/Covenant)
 // License: GNU GPLv3
 
+using EmpireCompiler.Core.Empire;
+using EmpireCompiler.Models.Grunts;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-
 using YamlDotNet.Serialization;
-
-using EmpireCompiler.Core.Empire;
-using EmpireCompiler.Models.Grunts;
 
 namespace EmpireCompiler.Core
 {
@@ -24,10 +22,10 @@ namespace EmpireCompiler.Core
         {
             await InitializeTasks2(service);
         }
-        
+
         public async static Task IngestTask(ICovenantService2 service, String recievedTask)
         {
-            
+
             IDeserializer deserializer = new DeserializerBuilder().Build();
             List<SerializedGruntTask> serialized = deserializer.Deserialize<List<SerializedGruntTask>>(recievedTask);
             List<GruntTask> tasks = serialized.Select(S => new GruntTask().FromSerializedGruntTask(S)).ToList();
@@ -266,7 +264,7 @@ namespace EmpireCompiler.Core
                 );
             }
             #endregion
-            
+
             if (!context.gruntTasks.Any())
             {
                 List<string> files = Directory.GetFiles(Common.CovenantTaskDirectory)
@@ -275,14 +273,14 @@ namespace EmpireCompiler.Core
                 IDeserializer deserializer = new DeserializerBuilder().Build();
                 foreach (string file in files)
                 {
-                    
+
                     string yaml = File.ReadAllText(file);
                     List<SerializedGruntTask> serialized = deserializer.Deserialize<List<SerializedGruntTask>>(yaml);
                     List<GruntTask> tasks = serialized.Select(S => new GruntTask().FromSerializedGruntTask(S)).ToList();
                     foreach (GruntTask task in tasks)
                     {
                         await service.CreateGruntTask(task);
-                        
+
                     }
                 }
             }

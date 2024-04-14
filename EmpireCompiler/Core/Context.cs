@@ -2,11 +2,9 @@
 // Project: Empire (https://github.com/BC-SECURITY/Empire)
 // License: GNU GPLv3
 
+using EmpireCompiler.Models.Grunts;
 using System;
 using System.Collections.Generic;
-
-
-using EmpireCompiler.Models.Grunts;
 
 namespace EmpireCompiler.Core.Empire
 {
@@ -24,7 +22,7 @@ namespace EmpireCompiler.Core.Empire
 
         public List<GruntTask> gruntTasks { get; set; }
 
-        private int nextTaskId; 
+        private int nextTaskId;
         public EmpireContext()
         {
             gList = new List<object>();

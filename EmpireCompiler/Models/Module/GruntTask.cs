@@ -1,22 +1,13 @@
-﻿// Author: Ryan Cobb (@cobbr_io)
-// Project: Empire (https://github.com/BC-SECURITY/Empire)
-//          code originally from Covenant (https://github.com/cobbr/Covenant)
-// Modified by: Hubbl3 (@_Hubbl3)
-// License: GNU GPLv3
-
+﻿using EmpireCompiler.Core;
+using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
 using System;
-using System.IO;
-using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
-using Microsoft.CodeAnalysis;
-
-using Newtonsoft.Json;
+using System.IO;
+using System.Linq;
 using YamlDotNet.Serialization;
-
-using EmpireCompiler.Core;
 
 namespace EmpireCompiler.Models.Grunts
 {
@@ -65,8 +56,10 @@ namespace EmpireCompiler.Models.Grunts
         {
             GruntTaskReferenceSourceLibraries.Add(new GruntTaskReferenceSourceLibrary
             {
-                GruntTaskId = this.Id, GruntTask = this,
-                ReferenceSourceLibraryId = library.Id, ReferenceSourceLibrary = library
+                GruntTaskId = this.Id,
+                GruntTask = this,
+                ReferenceSourceLibraryId = library.Id,
+                ReferenceSourceLibrary = library
             });
         }
 
@@ -82,8 +75,10 @@ namespace EmpireCompiler.Models.Grunts
         {
             GruntTaskReferenceAssemblies.Add(new GruntTaskReferenceAssembly
             {
-                GruntTaskId = this.Id, GruntTask = this,
-                ReferenceAssemblyId = assembly.Id, ReferenceAssembly = assembly
+                GruntTaskId = this.Id,
+                GruntTask = this,
+                ReferenceAssemblyId = assembly.Id,
+                ReferenceAssembly = assembly
             });
         }
 
@@ -99,8 +94,10 @@ namespace EmpireCompiler.Models.Grunts
         {
             GruntTaskEmbeddedResources.Add(new GruntTaskEmbeddedResource
             {
-                GruntTaskId = this.Id, GruntTask = this,
-                EmbeddedResourceId = resource.Id, EmbeddedResource = resource
+                GruntTaskId = this.Id,
+                GruntTask = this,
+                EmbeddedResourceId = resource.Id,
+                EmbeddedResource = resource
             });
         }
 

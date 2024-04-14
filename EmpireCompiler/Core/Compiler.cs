@@ -1,16 +1,14 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using System.Linq;
-using System.Collections.Generic;
-
+﻿using Confuser.Core;
+using Confuser.Core.Project;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-
-using Confuser.Core;
-using Confuser.Core.Project;
+using Microsoft.CodeAnalysis.Emit;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace EmpireCompiler.Core
 {

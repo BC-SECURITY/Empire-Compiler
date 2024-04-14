@@ -2,9 +2,6 @@
 // Project: Covenant (https://github.com/cobbr/Covenant)
 // License: GNU GPLv3
 
-using System;
-
-
 namespace EmpireCompiler.Core
 {
     public class Exception : System.Exception

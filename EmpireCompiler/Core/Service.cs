@@ -1,18 +1,13 @@
-﻿using System;
+﻿using EmpireCompiler.Core.Empire;
+using EmpireCompiler.Models;
+using EmpireCompiler.Models.Grunts;
+using Microsoft.CodeAnalysis;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-
-using Microsoft.Extensions.Configuration;
-using Microsoft.CodeAnalysis;
-
-
-using EmpireCompiler.Models;
-
-using EmpireCompiler.Models.Grunts;
-
-using EmpireCompiler.Core.Empire;
 
 namespace EmpireCompiler.Core
 {
@@ -74,14 +69,14 @@ namespace EmpireCompiler.Core
         Task<string> ParseParametersIntoTask(GruntTask task, List<ParsedParameter> parameters);
     }
 
-    public interface ICovenantService2 : IGruntTaskService 
+    public interface ICovenantService2 : IGruntTaskService
     {
         Task<IEnumerable<T>> CreateEntities<T>(params T[] entities);
         EmpireContext GetEmpire();
         void DisposeContext();
     }
 
-    public class EmpireService: ICovenantService2 
+    public class EmpireService : ICovenantService2
     {
         protected EmpireContext _context;
         public EmpireService()
@@ -129,7 +124,7 @@ namespace EmpireCompiler.Core
                 string dir = Common.CovenantDataDirectory + "Grunt" + Path.DirectorySeparatorChar + sanitizedName + Path.DirectorySeparatorChar;
                 string ResultName;
 
-                if(true)
+                if (true)
                 {
                     ResultName = sanitizedName;
                     dir += sanitizedName + Path.DirectorySeparatorChar;
@@ -170,14 +165,14 @@ namespace EmpireCompiler.Core
             }
             return entities;
         }
-           
+
         public async Task<string> ParseParametersIntoTask(GruntTask task, List<ParsedParameter> parameters)
         {
             return null;
         }
 
-            #region Core functions for Empire Service
-            public async Task<IEnumerable<EmbeddedResource>> CreateEmbeddedResources(params EmbeddedResource[] resources)
+        #region Core functions for Empire Service
+        public async Task<IEnumerable<EmbeddedResource>> CreateEmbeddedResources(params EmbeddedResource[] resources)
         {
             _context.embeddedResources = resources.OfType<EmbeddedResource>().ToList();
             return resources;
@@ -300,7 +295,7 @@ namespace EmpireCompiler.Core
 
         public async Task<EmbeddedResource> GetEmbeddedResource(int id)
         {
-            EmbeddedResource resource =  _context.embeddedResources.FirstOrDefault(ER => ER.Id == id);
+            EmbeddedResource resource = _context.embeddedResources.FirstOrDefault(ER => ER.Id == id);
             if (resource == null)
             {
                 throw new ControllerNotFoundException($"NotFound - EmbeddedResource with id: {id}");
@@ -338,7 +333,7 @@ namespace EmpireCompiler.Core
         public async Task DeleteEmbeddedResource(int id)
         {
             EmbeddedResource matchingResource = await this.GetEmbeddedResource(id);
-            _context.embeddedResources.Remove(matchingResource);  
+            _context.embeddedResources.Remove(matchingResource);
         }
         #endregion
 
@@ -357,7 +352,7 @@ namespace EmpireCompiler.Core
         public async Task<IEnumerable<TaskOption>> CreateGruntTaskOptions(params TaskOption[] options)
         {
             _context.gruntTaskOptions.AddRange(options);
-            
+
             return options;
         }
         #endregion
@@ -473,7 +468,7 @@ namespace EmpireCompiler.Core
         {
             ReferenceSourceLibrary referenceSourceLibrary = await this.GetReferenceSourceLibrary(id);
             _context.referenceSourceLibraries.Remove(referenceSourceLibrary);
-            
+
         }
         #endregion
         #region GruntTaskComponent ReferenceAssembly Actions
