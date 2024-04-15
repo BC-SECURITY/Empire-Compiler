@@ -21,7 +21,6 @@ namespace EmpireCompiler.Models.Grunts
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        public int AuthorId { get; set; }
         public TaskAuthor Author { get; set; } = new TaskAuthor();
 
         [Required]
@@ -109,19 +108,6 @@ namespace EmpireCompiler.Models.Grunts
             );
         }
 
-        public string GetVerboseCommand(bool includeNotForDisplay = false)
-        {
-            string command = this.Name;
-            for (int i = 0; i < this.Options.Count; i++)
-            {
-                if (this.Options[i].DisplayInCommand || includeNotForDisplay)
-                {
-                    command += " /" + this.Options[i].Name.ToLower() + ":\"" + this.Options[i].Value.Replace("\"", "\\\"") + "\"";
-                }
-            }
-            return command;
-        }
-
         internal SerializedGruntTask ToSerializedGruntTask()
         {
             return new SerializedGruntTask
@@ -189,21 +175,6 @@ namespace EmpireCompiler.Models.Grunts
         {
             SerializedGruntTask task = JsonConvert.DeserializeObject<SerializedGruntTask>(json);
             return this.FromSerializedGruntTask(task);
-        }
-
-        public byte[] GetCompressedILAssembly35()
-        {
-            return File.ReadAllBytes(Common.EmpireTaskCSharpCompiledNet35Directory + this.Name + ".compiled");
-        }
-
-        public byte[] GetCompressedILAssembly40()
-        {
-            return File.ReadAllBytes(Common.EmpireTaskCSharpCompiledNet40Directory + this.Name + ".compiled");
-        }
-
-        public byte[] GetCompressedILAssembly45()
-        {
-            return File.ReadAllBytes(Common.EmpireTaskCSharpCompiledNet45Directory + this.Name + ".compiled");
         }
 
         public void Compile(Compiler.RuntimeIdentifier runtimeIdentifier = Compiler.RuntimeIdentifier.win_x64)

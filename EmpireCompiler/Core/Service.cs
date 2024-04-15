@@ -89,72 +89,6 @@ namespace EmpireCompiler.Core
             return _context;
         }
 
-        #region Test Compiler Request
-        public byte[] CompileExe(GruntTask task, Common.DotNetVersion version, OutputKind outputKind, Boolean Compress)
-        {
-            byte[] ILBytes = null;
-            if (version == Common.DotNetVersion.Net35 || version == Common.DotNetVersion.Net40 || version == Common.DotNetVersion.Net45)
-            {
-                List<Compiler.Reference> references = null;
-                switch (version)
-                {
-                    case Common.DotNetVersion.Net35:
-                        references = Common.DefaultNet35References;
-                        break;
-                    case Common.DotNetVersion.Net40:
-                        references = Common.DefaultNet40References;
-                        break;
-                    case Common.DotNetVersion.Net45:
-                        references = Common.DefaultNet45References;
-                        break;
-                }
-                ILBytes = Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
-                {
-                    Language = task.Language,
-                    Source = task.Code,
-                    TargetDotNetVersion = version,
-                    OutputKind = outputKind,
-                    References = references
-                });
-            }
-            else if (version == Common.DotNetVersion.NetCore31)
-            {
-                string src = task.Code;
-                string sanitizedName = Utilities.GetSanitizedFilename(task.Name);
-                string dir = Common.EmpireDataDirectory + "Grunt" + Path.DirectorySeparatorChar + sanitizedName + Path.DirectorySeparatorChar;
-                string ResultName;
-
-                if (true)
-                {
-                    ResultName = sanitizedName;
-                    dir += sanitizedName + Path.DirectorySeparatorChar;
-                    string file = sanitizedName + Utilities.GetExtensionForLanguage(task.Language);
-                    File.WriteAllText(dir + file, src);
-                }
-                ILBytes = Compiler.Compile(new Compiler.CsharpCoreCompilationRequest
-                {
-                    ResultName = ResultName,
-                    Language = task.Language,
-                    TargetDotNetVersion = version,
-                    SourceDirectory = dir,
-                    OutputKind = outputKind,
-                    //update this to not be hardcoded 
-                    RuntimeIdentifier = Compiler.RuntimeIdentifier.win_x64,
-                    UseSubprocess = true
-                });
-            }
-            if (ILBytes == null || ILBytes.Length == 0)
-            {
-                throw new CovenantCompileGruntStagerFailedException("Compiling Grunt code failed");
-            }
-            if (Compress)
-            {
-                ILBytes = Utilities.Compress(ILBytes);
-            }
-            return ILBytes;
-        }
-        #endregion
-
         //Eventually this may access the Empire DB instead but for now just shove it in a list 
         //This actually might end up being handled on the python side anyways
         public async Task<IEnumerable<T>> CreateEntities<T>(params T[] entities)
@@ -389,28 +323,6 @@ namespace EmpireCompiler.Core
                 }
             }
             return await Task.FromResult(task);
-        }
-
-        private async Task<string> GetUsageForGruntTask(int id)
-        {
-            return await GetUsageForGruntTask(await this.GetGruntTask(id));
-        }
-
-        private async Task<string> GetUsageForGruntTask(GruntTask task)
-        {
-            string usage = "Usage: " + task.Name;
-            foreach (var option in task.Options)
-            {
-                if (option.Optional)
-                {
-                    usage += "[ <" + option.Name.ToLower() + "> ]";
-                }
-                else
-                {
-                    usage += " <" + option.Name.ToLower() + ">";
-                }
-            }
-            return await Task.FromResult(usage);
         }
 
         public async Task<IEnumerable<GruntTask>> CreateGruntTasks(params GruntTask[] tasks)
