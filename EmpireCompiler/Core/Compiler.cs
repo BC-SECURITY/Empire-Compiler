@@ -47,21 +47,6 @@ namespace EmpireCompiler.Core
             public RuntimeIdentifier RuntimeIdentifier { get; set; } = RuntimeIdentifier.win_x64;
         }
 
-        private static readonly Dictionary<RuntimeIdentifier, string> RuntimeIdentifiers = new Dictionary<RuntimeIdentifier, string>
-        {
-            { RuntimeIdentifier.win_x64, "win-x64" }, { RuntimeIdentifier.win_x86, "win-x86" },
-            { RuntimeIdentifier.win_arm, "win-arm" }, { RuntimeIdentifier.win_arm64, "win-arm64" },
-            { RuntimeIdentifier.win7_x64, "win7-x64" }, { RuntimeIdentifier.win7_x86, "win7-x86" },
-            { RuntimeIdentifier.win81_x64, "win81-x64" }, { RuntimeIdentifier.win81_x86, "win81-x86" }, { RuntimeIdentifier.win81_arm, "win81-arm" },
-            { RuntimeIdentifier.win10_x64, "win10-x64" }, { RuntimeIdentifier.win10_x86, "win10-x86" },
-            { RuntimeIdentifier.win10_arm, "win10-arm" }, { RuntimeIdentifier.win10_arm64, "win10-arm64" },
-            { RuntimeIdentifier.linux_x64, "linux-x64" }, { RuntimeIdentifier.linux_musl_x64, "linux-musl-x64" }, { RuntimeIdentifier.linux_arm, "linux-arm" }, { RuntimeIdentifier.linux_arm64, "linux-arm64" },
-            { RuntimeIdentifier.rhel_x64, "rhel-x64" }, { RuntimeIdentifier.rhel_6_x64, "rhel.6-x64" },
-            { RuntimeIdentifier.tizen, "tizen" }, { RuntimeIdentifier.tizen_4_0_0, "tizen.4.0.0" }, { RuntimeIdentifier.tizen_5_0_0, "tizen.5.0.0" },
-            { RuntimeIdentifier.osx_x64, "osx-x64" },{ RuntimeIdentifier.osx_10_10_x64, "osx.10.10-x64" }, { RuntimeIdentifier.osx_10_11_x64, "osx.10.11-x64" },
-            { RuntimeIdentifier.osx_10_12_x64, "osx.10.12-x64" }, { RuntimeIdentifier.osx_10_13_x64, "osx.10.13-x64" }, { RuntimeIdentifier.osx_10_14_x64, "osx.10.14-x64" }, { RuntimeIdentifier.osx_10_15_x64, "osx.10.15-x64" }
-        };
-
         public enum RuntimeIdentifier
         {
             win_x64, win_x86,
@@ -362,10 +347,6 @@ namespace EmpireCompiler.Core
 
     public class CompilerException : System.Exception
     {
-        public CompilerException()
-        {
-
-        }
 
         public CompilerException(string message) : base(message)
         {

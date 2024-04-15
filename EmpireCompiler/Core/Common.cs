@@ -13,7 +13,7 @@ namespace EmpireCompiler.Core
         public static CipherMode AesCipherMode = CipherMode.CBC;
         public static PaddingMode AesPaddingMode = PaddingMode.PKCS7;
 
-        public static string EmpireDirectory = Assembly.GetExecutingAssembly().Location.Split("bin")[0].Split("Covenant.dll")[0];
+        public static string EmpireDirectory = Assembly.GetExecutingAssembly().Location.Split("bin")[0].Split("EmpireCompiler.dll")[0];
         public static string EmpireDataDirectory = EmpireDirectory + "Data" + Path.DirectorySeparatorChar;
         public static string EmpireDatabaseFile = EmpireDataDirectory + "covenant.db";
         public static string EmpireTempDirectory = EmpireDataDirectory + "Temp" + Path.DirectorySeparatorChar;

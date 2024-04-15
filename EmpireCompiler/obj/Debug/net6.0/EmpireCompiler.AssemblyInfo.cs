@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EmpireCompiler")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+038a3303b104e6c7a81fd493abe464c5f46834a5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+63b1afff90b40102226a6b73276d7e040fd683a4")]
 [assembly: System.Reflection.AssemblyProductAttribute("EmpireCompiler")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EmpireCompiler")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

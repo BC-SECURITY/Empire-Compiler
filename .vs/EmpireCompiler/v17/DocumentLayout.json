@@ -3,8 +3,32 @@
   "WorkspaceRootPath": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{D5865774-CD82-4CCE-A3F1-7F2C4639301B}|EmpireCompiler\\EmpireCompiler.csproj|c:\\users\\dredg\\source\\repos\\empire-compiler\\empirecompiler\\core\\exception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D5865774-CD82-4CCE-A3F1-7F2C4639301B}|EmpireCompiler\\EmpireCompiler.csproj|solutionrelative:empirecompiler\\core\\exception.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D5865774-CD82-4CCE-A3F1-7F2C4639301B}|EmpireCompiler\\EmpireCompiler.csproj|c:\\users\\dredg\\source\\repos\\empire-compiler\\empirecompiler\\core\\dbinitializer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D5865774-CD82-4CCE-A3F1-7F2C4639301B}|EmpireCompiler\\EmpireCompiler.csproj|solutionrelative:empirecompiler\\core\\dbinitializer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D5865774-CD82-4CCE-A3F1-7F2C4639301B}|EmpireCompiler\\EmpireCompiler.csproj|c:\\users\\dredg\\source\\repos\\empire-compiler\\empirecompiler\\core\\context.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D5865774-CD82-4CCE-A3F1-7F2C4639301B}|EmpireCompiler\\EmpireCompiler.csproj|solutionrelative:empirecompiler\\core\\context.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D5865774-CD82-4CCE-A3F1-7F2C4639301B}|EmpireCompiler\\EmpireCompiler.csproj|c:\\users\\dredg\\source\\repos\\empire-compiler\\empirecompiler\\core\\compiler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D5865774-CD82-4CCE-A3F1-7F2C4639301B}|EmpireCompiler\\EmpireCompiler.csproj|solutionrelative:empirecompiler\\core\\compiler.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{D5865774-CD82-4CCE-A3F1-7F2C4639301B}|EmpireCompiler\\EmpireCompiler.csproj|c:\\users\\dredg\\source\\repos\\empire-compiler\\empirecompiler\\core\\common.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D5865774-CD82-4CCE-A3F1-7F2C4639301B}|EmpireCompiler\\EmpireCompiler.csproj|solutionrelative:empirecompiler\\core\\common.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D5865774-CD82-4CCE-A3F1-7F2C4639301B}|EmpireCompiler\\EmpireCompiler.csproj|c:\\users\\dredg\\source\\repos\\empire-compiler\\empirecompiler\\models\\common.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D5865774-CD82-4CCE-A3F1-7F2C4639301B}|EmpireCompiler\\EmpireCompiler.csproj|solutionrelative:empirecompiler\\models\\common.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D5865774-CD82-4CCE-A3F1-7F2C4639301B}|EmpireCompiler\\EmpireCompiler.csproj|c:\\users\\dredg\\source\\repos\\empire-compiler\\empirecompiler\\empirecompiler.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{D5865774-CD82-4CCE-A3F1-7F2C4639301B}|EmpireCompiler\\EmpireCompiler.csproj|solutionrelative:empirecompiler\\empirecompiler.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     },
     {
       "AbsoluteMoniker": "D:0:0:{D5865774-CD82-4CCE-A3F1-7F2C4639301B}|EmpireCompiler\\EmpireCompiler.csproj|c:\\users\\dredg\\source\\repos\\empire-compiler\\empirecompiler\\core\\service.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -27,19 +51,97 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "Exception.cs",
+              "DocumentMoniker": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\EmpireCompiler\\Core\\Exception.cs",
+              "RelativeDocumentMoniker": "EmpireCompiler\\Core\\Exception.cs",
+              "ToolTip": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\EmpireCompiler\\Core\\Exception.cs",
+              "RelativeToolTip": "EmpireCompiler\\Core\\Exception.cs",
+              "ViewState": "AQIAABEAAAAAAAAAAAAgwAwAAAAFAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-15T18:25:39.679Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "DbInitializer.cs",
+              "DocumentMoniker": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\EmpireCompiler\\Core\\DbInitializer.cs",
+              "RelativeDocumentMoniker": "EmpireCompiler\\Core\\DbInitializer.cs",
+              "ToolTip": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\EmpireCompiler\\Core\\DbInitializer.cs",
+              "RelativeToolTip": "EmpireCompiler\\Core\\DbInitializer.cs",
+              "ViewState": "AQIAABABAAAAAAAAAAAgwFgAAAArAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-15T18:25:13.457Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Context.cs",
+              "DocumentMoniker": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\EmpireCompiler\\Core\\Context.cs",
+              "RelativeDocumentMoniker": "EmpireCompiler\\Core\\Context.cs",
+              "ToolTip": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\EmpireCompiler\\Core\\Context.cs",
+              "RelativeToolTip": "EmpireCompiler\\Core\\Context.cs",
+              "ViewState": "AQIAACoAAAAAAAAAAAAIwAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-15T18:24:59.216Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Compiler.cs",
+              "DocumentMoniker": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\EmpireCompiler\\Core\\Compiler.cs",
+              "RelativeDocumentMoniker": "EmpireCompiler\\Core\\Compiler.cs",
+              "ToolTip": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\EmpireCompiler\\Core\\Compiler.cs",
+              "RelativeToolTip": "EmpireCompiler\\Core\\Compiler.cs",
+              "ViewState": "AQIAAFYBAAAAAAAAAAAiwGIBAAAFAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-15T18:23:08.573Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Common.cs",
+              "DocumentMoniker": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\EmpireCompiler\\Models\\Common.cs",
+              "RelativeDocumentMoniker": "EmpireCompiler\\Models\\Common.cs",
+              "ToolTip": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\EmpireCompiler\\Models\\Common.cs",
+              "RelativeToolTip": "EmpireCompiler\\Models\\Common.cs",
+              "ViewState": "AQIAAAIAAAAAAAAAAAAxwAoAAAAfAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-15T18:21:44.424Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "EmpireCompiler",
+              "DocumentMoniker": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\EmpireCompiler\\EmpireCompiler.csproj",
+              "RelativeDocumentMoniker": "EmpireCompiler\\EmpireCompiler.csproj",
+              "ToolTip": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\EmpireCompiler\\EmpireCompiler.csproj",
+              "RelativeToolTip": "EmpireCompiler\\EmpireCompiler.csproj",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA8AAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-04-15T18:21:12.316Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "Common.cs",
               "DocumentMoniker": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\EmpireCompiler\\Core\\Common.cs",
               "RelativeDocumentMoniker": "EmpireCompiler\\Core\\Common.cs",
-              "ToolTip": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\EmpireCompiler\\Core\\Common.cs*",
-              "RelativeToolTip": "EmpireCompiler\\Core\\Common.cs*",
-              "ViewState": "AQIAAAYAAAAAAAAAAAAAAAsAAAArAAAA",
+              "ToolTip": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\EmpireCompiler\\Core\\Common.cs",
+              "RelativeToolTip": "EmpireCompiler\\Core\\Common.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABEAAABWAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-04-15T18:02:18.079Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 7,
               "Title": "Service.cs",
               "DocumentMoniker": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\EmpireCompiler\\Core\\Service.cs",
               "RelativeDocumentMoniker": "EmpireCompiler\\Core\\Service.cs",
@@ -51,7 +153,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 8,
               "Title": "Class.cs",
               "DocumentMoniker": "C:\\Users\\dredg\\source\\repos\\Empire-Compiler\\EmpireCompiler\\Class.cs",
               "RelativeDocumentMoniker": "EmpireCompiler\\Class.cs",
