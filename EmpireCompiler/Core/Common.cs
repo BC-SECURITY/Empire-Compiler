@@ -15,31 +15,26 @@ namespace EmpireCompiler.Core
 {
     public static class Common
     {
-        public static Encoding CovenantEncoding = Encoding.UTF8;
+        public static Encoding EmpireEncoding = Encoding.UTF8;
         public static int AesIVLength = 16;
         public static CipherMode AesCipherMode = CipherMode.CBC;
         public static PaddingMode AesPaddingMode = PaddingMode.PKCS7;
 
-        public static string CovenantDirectory = Assembly.GetExecutingAssembly().Location.Split("bin")[0].Split("Covenant.dll")[0];
-        public static string CovenantDataDirectory = CovenantDirectory + "Data" + Path.DirectorySeparatorChar;
-        public static string CovenantDatabaseFile = CovenantDataDirectory + "covenant.db";
-        public static string CovenantTempDirectory = CovenantDataDirectory + "Temp" + Path.DirectorySeparatorChar;
+        public static string EmpireDirectory = Assembly.GetExecutingAssembly().Location.Split("bin")[0].Split("Covenant.dll")[0];
+        public static string EmpireDataDirectory = EmpireDirectory + "Data" + Path.DirectorySeparatorChar;
+        public static string EmpireDatabaseFile = EmpireDataDirectory + "covenant.db";
+        public static string EmpireTempDirectory = EmpireDataDirectory + "Temp" + Path.DirectorySeparatorChar;
 
-        public static string CovenantProfileDirectory = CovenantDataDirectory + "Profiles" + Path.DirectorySeparatorChar;
-        public static string CovenantDefaultHttpProfile = CovenantProfileDirectory + "DefaultHttpProfile.yaml";
+        public static string EmpireAssemblyReferenceDirectory = EmpireDataDirectory + "AssemblyReferences" + Path.DirectorySeparatorChar;
+        public static string EmpireAssemblyReferenceNet35Directory = EmpireAssemblyReferenceDirectory + "net35" + Path.DirectorySeparatorChar;
+        public static string EmpireAssemblyReferenceNet40Directory = EmpireAssemblyReferenceDirectory + "net40" + Path.DirectorySeparatorChar;
+        public static string EmpireAssemblyReferenceNet45Directory = EmpireAssemblyReferenceDirectory + "net45" + Path.DirectorySeparatorChar;
+        public static string EmpireEmbeddedResourcesDirectory = EmpireDataDirectory + "EmbeddedResources" + Path.DirectorySeparatorChar;
+        public static string EmpireReferenceSourceLibraries = EmpireDataDirectory + "ReferenceSourceLibraries" + Path.DirectorySeparatorChar;
+        public static string EmpireSharpSploitDirectory = EmpireReferenceSourceLibraries + "SharpSploit" + Path.DirectorySeparatorChar;
+        public static string EmpireRubeusDirectory = EmpireReferenceSourceLibraries + "Rubeus" + Path.DirectorySeparatorChar;
 
-        public static string CovenantDownloadDirectory = CovenantDataDirectory + "Downloads" + Path.DirectorySeparatorChar;
-
-        public static string CovenantAssemblyReferenceDirectory = CovenantDataDirectory + "AssemblyReferences" + Path.DirectorySeparatorChar;
-        public static string CovenantAssemblyReferenceNet35Directory = CovenantAssemblyReferenceDirectory + "net35" + Path.DirectorySeparatorChar;
-        public static string CovenantAssemblyReferenceNet40Directory = CovenantAssemblyReferenceDirectory + "net40" + Path.DirectorySeparatorChar;
-        public static string CovenantAssemblyReferenceNet45Directory = CovenantAssemblyReferenceDirectory + "net45" + Path.DirectorySeparatorChar;
-        public static string CovenantEmbeddedResourcesDirectory = CovenantDataDirectory + "EmbeddedResources" + Path.DirectorySeparatorChar;
-        public static string CovenantReferenceSourceLibraries = CovenantDataDirectory + "ReferenceSourceLibraries" + Path.DirectorySeparatorChar;
-        public static string CovenantSharpSploitDirectory = CovenantReferenceSourceLibraries + "SharpSploit" + Path.DirectorySeparatorChar;
-        public static string CovenantRubeusDirectory = CovenantReferenceSourceLibraries + "Rubeus" + Path.DirectorySeparatorChar;
-
-        public static string CovenantTaskDirectory = CovenantDataDirectory + "Tasks" + Path.DirectorySeparatorChar;
+        public static string CovenantTaskDirectory = EmpireDataDirectory + "Tasks" + Path.DirectorySeparatorChar;
         public static string CovenantTaskCSharpDirectory = CovenantTaskDirectory + "CSharp" + Path.DirectorySeparatorChar;
         public static string CovenantTaskCSharpNetCoreApp30Directory = CovenantTaskCSharpDirectory + "netcoreapp3.0" + Path.DirectorySeparatorChar;
         public static string CovenantTaskCSharpCompiledDirectory = CovenantTaskCSharpDirectory + "Compiled" + Path.DirectorySeparatorChar;
@@ -48,48 +43,41 @@ namespace EmpireCompiler.Core
         public static string CovenantTaskCSharpCompiledNet45Directory = CovenantTaskCSharpCompiledDirectory + "net45" + Path.DirectorySeparatorChar;
         public static string CovenantTaskCSharpCompiledNetCoreApp30Directory = CovenantTaskCSharpCompiledDirectory + "netcoreapp3.0" + Path.DirectorySeparatorChar;
 
-        public static string CovenantLogDirectory = CovenantDataDirectory + "Logs" + Path.DirectorySeparatorChar;
+        public static string CovenantLogDirectory = EmpireDataDirectory + "Logs" + Path.DirectorySeparatorChar;
         public static string CovenantLogFile = CovenantLogDirectory + "covenant.log";
-        public static string CovenantPrivateCertFile = CovenantDataDirectory + "covenant-dev-private.pfx";
-        public static string CovenantPublicCertFile = CovenantDataDirectory + "covenant-dev-public.cer";
-        public static string CovenantListenersDirectory = CovenantDataDirectory + "Listeners" + Path.DirectorySeparatorChar;
-        public static string CovenantLauncherDirectory = CovenantDataDirectory + "Launchers" + Path.DirectorySeparatorChar;
-
-        public static string CovenantAppSettingsFile = CovenantDataDirectory + "appsettings.json";
-        public static string CovenantJwtKeyReplaceMessage = "[KEY USED TO SIGN/VERIFY JWT TOKENS, ALWAYS REPLACE THIS VALUE]";
 
         public static List<Compiler.Reference> DefaultNet35References = new List<Compiler.Reference>
         {
-            new Compiler.Reference { File = CovenantAssemblyReferenceNet35Directory + "mscorlib.dll", Framework = DotNetVersion.Net35, Enabled = true },
-            new Compiler.Reference { File = CovenantAssemblyReferenceNet35Directory + "System.dll", Framework = DotNetVersion.Net35, Enabled = true },
-            new Compiler.Reference { File = CovenantAssemblyReferenceNet35Directory + "System.Core.dll", Framework = DotNetVersion.Net35, Enabled = true },
+            new Compiler.Reference { File = EmpireAssemblyReferenceNet35Directory + "mscorlib.dll", Framework = DotNetVersion.Net35, Enabled = true },
+            new Compiler.Reference { File = EmpireAssemblyReferenceNet35Directory + "System.dll", Framework = DotNetVersion.Net35, Enabled = true },
+            new Compiler.Reference { File = EmpireAssemblyReferenceNet35Directory + "System.Core.dll", Framework = DotNetVersion.Net35, Enabled = true },
         };
 
         public static List<Compiler.Reference> DefaultNet40References = new List<Compiler.Reference>
         {
-            new Compiler.Reference { File = CovenantAssemblyReferenceNet40Directory + "mscorlib.dll", Framework = DotNetVersion.Net40, Enabled = true },
-            new Compiler.Reference { File = CovenantAssemblyReferenceNet40Directory + "System.dll", Framework = DotNetVersion.Net40, Enabled = true },
-            new Compiler.Reference { File = CovenantAssemblyReferenceNet40Directory + "System.Core.dll", Framework = DotNetVersion.Net40, Enabled = true }
+            new Compiler.Reference { File = EmpireAssemblyReferenceNet40Directory + "mscorlib.dll", Framework = DotNetVersion.Net40, Enabled = true },
+            new Compiler.Reference { File = EmpireAssemblyReferenceNet40Directory + "System.dll", Framework = DotNetVersion.Net40, Enabled = true },
+            new Compiler.Reference { File = EmpireAssemblyReferenceNet40Directory + "System.Core.dll", Framework = DotNetVersion.Net40, Enabled = true }
         };
 
         public static List<Compiler.Reference> DefaultNet45References = new List<Compiler.Reference>
         {
-            new Compiler.Reference { File = CovenantAssemblyReferenceNet45Directory + "mscorlib.dll", Framework = DotNetVersion.Net45, Enabled = true },
-            new Compiler.Reference { File = CovenantAssemblyReferenceNet45Directory + "System.dll", Framework = DotNetVersion.Net45, Enabled = true },
-            new Compiler.Reference { File = CovenantAssemblyReferenceNet45Directory + "System.Core.dll", Framework = DotNetVersion.Net45, Enabled = true }
+            new Compiler.Reference { File = EmpireAssemblyReferenceNet45Directory + "mscorlib.dll", Framework = DotNetVersion.Net45, Enabled = true },
+            new Compiler.Reference { File = EmpireAssemblyReferenceNet45Directory + "System.dll", Framework = DotNetVersion.Net45, Enabled = true },
+            new Compiler.Reference { File = EmpireAssemblyReferenceNet45Directory + "System.Core.dll", Framework = DotNetVersion.Net45, Enabled = true }
         };
 
         public static List<Compiler.Reference> DefaultNetFrameworkReferences = new List<Compiler.Reference>
         {
-            new Compiler.Reference { File = CovenantAssemblyReferenceNet35Directory + "mscorlib.dll", Framework = DotNetVersion.Net35, Enabled = true },
-            new Compiler.Reference { File = CovenantAssemblyReferenceNet40Directory + "mscorlib.dll", Framework = DotNetVersion.Net40, Enabled = true },
-            new Compiler.Reference { File = CovenantAssemblyReferenceNet45Directory + "mscorlib.dll", Framework = DotNetVersion.Net45, Enabled = true },
-            new Compiler.Reference { File = CovenantAssemblyReferenceNet35Directory + "System.dll", Framework = DotNetVersion.Net35, Enabled = true },
-            new Compiler.Reference { File = CovenantAssemblyReferenceNet40Directory + "System.dll", Framework = DotNetVersion.Net40, Enabled = true },
-            new Compiler.Reference { File = CovenantAssemblyReferenceNet45Directory + "System.dll", Framework = DotNetVersion.Net45, Enabled = true },
-            new Compiler.Reference { File = CovenantAssemblyReferenceNet35Directory + "System.Core.dll", Framework = DotNetVersion.Net35, Enabled = true },
-            new Compiler.Reference { File = CovenantAssemblyReferenceNet40Directory + "System.Core.dll", Framework = DotNetVersion.Net40, Enabled = true },
-            new Compiler.Reference { File = CovenantAssemblyReferenceNet45Directory + "System.Core.dll", Framework = DotNetVersion.Net45, Enabled = true }
+            new Compiler.Reference { File = EmpireAssemblyReferenceNet35Directory + "mscorlib.dll", Framework = DotNetVersion.Net35, Enabled = true },
+            new Compiler.Reference { File = EmpireAssemblyReferenceNet40Directory + "mscorlib.dll", Framework = DotNetVersion.Net40, Enabled = true },
+            new Compiler.Reference { File = EmpireAssemblyReferenceNet45Directory + "mscorlib.dll", Framework = DotNetVersion.Net45, Enabled = true },
+            new Compiler.Reference { File = EmpireAssemblyReferenceNet35Directory + "System.dll", Framework = DotNetVersion.Net35, Enabled = true },
+            new Compiler.Reference { File = EmpireAssemblyReferenceNet40Directory + "System.dll", Framework = DotNetVersion.Net40, Enabled = true },
+            new Compiler.Reference { File = EmpireAssemblyReferenceNet45Directory + "System.dll", Framework = DotNetVersion.Net45, Enabled = true },
+            new Compiler.Reference { File = EmpireAssemblyReferenceNet35Directory + "System.Core.dll", Framework = DotNetVersion.Net35, Enabled = true },
+            new Compiler.Reference { File = EmpireAssemblyReferenceNet40Directory + "System.Core.dll", Framework = DotNetVersion.Net40, Enabled = true },
+            new Compiler.Reference { File = EmpireAssemblyReferenceNet45Directory + "System.Core.dll", Framework = DotNetVersion.Net45, Enabled = true }
         };
 
         public static List<Compiler.Reference> DefaultReferencesNetCore { get; set; } = new List<Compiler.Reference>

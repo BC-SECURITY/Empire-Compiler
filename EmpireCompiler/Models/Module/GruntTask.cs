@@ -239,7 +239,7 @@ namespace EmpireCompiler.Models.Grunts
                 return new Compiler.EmbeddedResource
                 {
                     Name = ER.Name,
-                    File = Common.CovenantEmbeddedResourcesDirectory + ER.Location,
+                    File = Common.EmpireEmbeddedResourcesDirectory + ER.Location,
                     Platform = Platform.X64,
                     Enabled = true
                 };
@@ -252,7 +252,7 @@ namespace EmpireCompiler.Models.Grunts
                         return new Compiler.EmbeddedResource
                         {
                             Name = ER.Name,
-                            File = Common.CovenantEmbeddedResourcesDirectory + ER.Location,
+                            File = Common.EmpireEmbeddedResourcesDirectory + ER.Location,
                             Platform = Platform.X64,
                             Enabled = true
                         };
@@ -265,14 +265,14 @@ namespace EmpireCompiler.Models.Grunts
                 references35.AddRange(
                     RSL.ReferenceAssemblies.Where(RA => RA.DotNetVersion == Common.DotNetVersion.Net35).Select(RA =>
                     {
-                        return new Compiler.Reference { File = Common.CovenantAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net35, Enabled = true };
+                        return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net35, Enabled = true };
                     })
                 );
             });
             references35.AddRange(
                 this.ReferenceAssemblies.Where(RA => RA.DotNetVersion == Common.DotNetVersion.Net35).Select(RA =>
                 {
-                    return new Compiler.Reference { File = Common.CovenantAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net35, Enabled = true };
+                    return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net35, Enabled = true };
                 })
             );
             #region testOutFile
@@ -283,7 +283,7 @@ namespace EmpireCompiler.Models.Grunts
                     {
                         Language = this.Language,
                         Source = this.Code,
-                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.CovenantReferenceSourceLibraries + RSL.Location).ToList(),
+                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
                         TargetDotNetVersion = Common.DotNetVersion.Net35,
                         References = references35,
                         EmbeddedResources = resources,
@@ -305,7 +305,7 @@ namespace EmpireCompiler.Models.Grunts
                     {
                         Language = this.Language,
                         Source = this.Code,
-                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.CovenantReferenceSourceLibraries + RSL.Location).ToList(),
+                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
                         TargetDotNetVersion = Common.DotNetVersion.Net35,
                         References = references35,
                         EmbeddedResources = resources,
@@ -325,7 +325,7 @@ namespace EmpireCompiler.Models.Grunts
                 return new Compiler.EmbeddedResource
                 {
                     Name = ER.Name,
-                    File = Common.CovenantEmbeddedResourcesDirectory + ER.Location,
+                    File = Common.EmpireEmbeddedResourcesDirectory + ER.Location,
                     Platform = Platform.X64,
                     Enabled = true
                 };
@@ -338,7 +338,7 @@ namespace EmpireCompiler.Models.Grunts
                         return new Compiler.EmbeddedResource
                         {
                             Name = ER.Name,
-                            File = Common.CovenantEmbeddedResourcesDirectory + ER.Location,
+                            File = Common.EmpireEmbeddedResourcesDirectory + ER.Location,
                             Platform = Platform.X64,
                             Enabled = true
                         };
@@ -351,14 +351,14 @@ namespace EmpireCompiler.Models.Grunts
                 references40.AddRange(
                     RSL.ReferenceAssemblies.Where(RA => RA.DotNetVersion == Common.DotNetVersion.Net40).Select(RA =>
                     {
-                        return new Compiler.Reference { File = Common.CovenantAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net40, Enabled = true };
+                        return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net40, Enabled = true };
                     })
                 );
             });
             references40.AddRange(
                 this.ReferenceAssemblies.Where(RA => RA.DotNetVersion == Common.DotNetVersion.Net40).Select(RA =>
                 {
-                    return new Compiler.Reference { File = Common.CovenantAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net40, Enabled = true };
+                    return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net40, Enabled = true };
                 })
             );
             #region testOutFile
@@ -369,7 +369,7 @@ namespace EmpireCompiler.Models.Grunts
                     {
                         Language = this.Language,
                         Source = this.Code,
-                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.CovenantReferenceSourceLibraries + RSL.Location).ToList(),
+                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
                         TargetDotNetVersion = Common.DotNetVersion.Net40,
                         References = references40,
                         EmbeddedResources = resources,
@@ -391,7 +391,7 @@ namespace EmpireCompiler.Models.Grunts
                     {
                         Language = this.Language,
                         Source = this.Code,
-                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.CovenantReferenceSourceLibraries + RSL.Location).ToList(),
+                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
                         TargetDotNetVersion = Common.DotNetVersion.Net40,
                         References = references40,
                         EmbeddedResources = resources,
@@ -411,7 +411,7 @@ namespace EmpireCompiler.Models.Grunts
                 return new Compiler.EmbeddedResource
                 {
                     Name = ER.Name,
-                    File = Common.CovenantEmbeddedResourcesDirectory + ER.Location,
+                    File = Common.EmpireEmbeddedResourcesDirectory + ER.Location,
                     Platform = Platform.X64,
                     Enabled = true
                 };
@@ -424,7 +424,7 @@ namespace EmpireCompiler.Models.Grunts
                         return new Compiler.EmbeddedResource
                         {
                             Name = ER.Name,
-                            File = Common.CovenantEmbeddedResourcesDirectory + ER.Location,
+                            File = Common.EmpireEmbeddedResourcesDirectory + ER.Location,
                             Platform = Platform.X64,
                             Enabled = true
                         };
@@ -437,14 +437,14 @@ namespace EmpireCompiler.Models.Grunts
                 references45.AddRange(
                     RSL.ReferenceAssemblies.Where(RA => RA.DotNetVersion == Common.DotNetVersion.Net45).Select(RA =>
                     {
-                        return new Compiler.Reference { File = Common.CovenantAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net45, Enabled = true };
+                        return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net45, Enabled = true };
                     })
                 );
             });
             references45.AddRange(
                 this.ReferenceAssemblies.Where(RA => RA.DotNetVersion == Common.DotNetVersion.Net45).Select(RA =>
                 {
-                    return new Compiler.Reference { File = Common.CovenantAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net45, Enabled = true };
+                    return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net45, Enabled = true };
                 })
             );
             #region testOutFile
@@ -455,7 +455,7 @@ namespace EmpireCompiler.Models.Grunts
                     {
                         Language = this.Language,
                         Source = this.Code,
-                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.CovenantReferenceSourceLibraries + RSL.Location).ToList(),
+                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
                         TargetDotNetVersion = Common.DotNetVersion.Net45,
                         References = references45,
                         EmbeddedResources = resources,
@@ -477,7 +477,7 @@ namespace EmpireCompiler.Models.Grunts
                     {
                         Language = this.Language,
                         Source = this.Code,
-                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.CovenantReferenceSourceLibraries + RSL.Location).ToList(),
+                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
                         TargetDotNetVersion = Common.DotNetVersion.Net45,
                         References = references45,
                         EmbeddedResources = resources,
@@ -519,7 +519,7 @@ namespace EmpireCompiler.Models.Grunts
             });
             string csproj = string.Format(cspprojformat, string.Format(referencegroupformat, string.Join(Environment.NewLine + "    ", references)));
             string sanitizedName = Utilities.GetSanitizedFilename(this.Name);
-            string dir = Common.CovenantDataDirectory + "Grunt" + Path.DirectorySeparatorChar + sanitizedName + Path.DirectorySeparatorChar + "Task" + Path.DirectorySeparatorChar;
+            string dir = Common.EmpireDataDirectory + "Grunt" + Path.DirectorySeparatorChar + sanitizedName + Path.DirectorySeparatorChar + "Task" + Path.DirectorySeparatorChar;
             string file = "Task" + Utilities.GetExtensionForLanguage(this.Language);
             File.WriteAllText(dir + "Task" + ".csproj", csproj);
             File.WriteAllText(dir + file, this.Code);

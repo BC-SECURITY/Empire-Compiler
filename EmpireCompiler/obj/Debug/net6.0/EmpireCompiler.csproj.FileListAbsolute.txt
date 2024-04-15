@@ -120,7 +120,6 @@ C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\bin\Debug\net6.0\Empi
 C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\bin\Debug\net6.0\EmpireCompiler.deps.json
 C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\bin\Debug\net6.0\EmpireCompiler.runtimeconfig.json
 C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\bin\Debug\net6.0\EmpireCompiler.dll
-C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\bin\Debug\net6.0\ref\EmpireCompiler.dll
 C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\bin\Debug\net6.0\EmpireCompiler.pdb
 C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\bin\Debug\net6.0\Microsoft.CodeAnalysis.dll
 C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\bin\Debug\net6.0\Microsoft.CodeAnalysis.CSharp.dll
@@ -170,8 +169,15 @@ C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\obj\Debug\net6.0\Empi
 C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\obj\Debug\net6.0\staticwebassets.build.json
 C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\obj\Debug\net6.0\staticwebassets.development.json
 C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\obj\Debug\net6.0\scopedcss\bundle\EmpireCompiler.styles.css
-C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\obj\Debug\net6.0\EmpireCompiler.csproj.CopyComplete
 C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\obj\Debug\net6.0\EmpireCompiler.dll
 C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\obj\Debug\net6.0\ref\EmpireCompiler.dll
 C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\obj\Debug\net6.0\EmpireCompiler.pdb
 C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\obj\Debug\net6.0\EmpireCompiler.genruntimeconfig.cache
+C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\obj\Debug\net6.0\EmpireCompiler.sourcelink.json
+C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\obj\Debug\net6.0\staticwebassets\msbuild.EmpireCompiler.Microsoft.AspNetCore.StaticWebAssets.props
+C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\obj\Debug\net6.0\staticwebassets\msbuild.build.EmpireCompiler.props
+C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\obj\Debug\net6.0\staticwebassets\msbuild.buildMultiTargeting.EmpireCompiler.props
+C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\obj\Debug\net6.0\staticwebassets\msbuild.buildTransitive.EmpireCompiler.props
+C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\obj\Debug\net6.0\staticwebassets.pack.json
+C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\obj\Debug\net6.0\EmpireCo.A6B058A8.Up2Date
+C:\Users\dredg\source\repos\Empire-Compiler\EmpireCompiler\obj\Debug\net6.0\refint\EmpireCompiler.dll

@@ -228,24 +228,24 @@ namespace EmpireCompiler.Core
         {
             ConfuserProject project = new ConfuserProject();
             System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
-            File.WriteAllBytes(Common.CovenantTempDirectory + "confused", ILBytes);
+            File.WriteAllBytes(Common.EmpireTempDirectory + "confused", ILBytes);
             string ProjectFile = String.Format(
                 ConfuserExOptions,
-                Common.CovenantTempDirectory,
-                Common.CovenantTempDirectory,
+                Common.EmpireTempDirectory,
+                Common.EmpireTempDirectory,
                 "confused"
             );
             doc.Load(new StringReader(ProjectFile));
             project.Load(doc);
-            project.ProbePaths.Add(Common.CovenantAssemblyReferenceNet35Directory);
-            project.ProbePaths.Add(Common.CovenantAssemblyReferenceNet40Directory);
-            project.ProbePaths.Add(Common.CovenantAssemblyReferenceNet45Directory);
+            project.ProbePaths.Add(Common.EmpireAssemblyReferenceNet35Directory);
+            project.ProbePaths.Add(Common.EmpireAssemblyReferenceNet40Directory);
+            project.ProbePaths.Add(Common.EmpireAssemblyReferenceNet45Directory);
 
             ConfuserParameters parameters = new ConfuserParameters();
             parameters.Project = project;
             parameters.Logger = default;
             ConfuserEngine.Run(parameters).Wait();
-            return File.ReadAllBytes(Common.CovenantTempDirectory + "confused");
+            return File.ReadAllBytes(Common.EmpireTempDirectory + "confused");
         }
 
         private static string ConfuserExOptions { get; set; } = @"

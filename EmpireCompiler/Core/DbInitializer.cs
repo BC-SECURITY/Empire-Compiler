@@ -41,35 +41,35 @@ namespace EmpireCompiler.Core
             EmpireContext context = service.GetEmpire();
             if (!context.referenceAssemblies.Any())
             {
-                List<ReferenceAssembly> ReferenceAssemblies = Directory.GetFiles(Common.CovenantAssemblyReferenceNet35Directory).Select(R =>
+                List<ReferenceAssembly> ReferenceAssemblies = Directory.GetFiles(Common.EmpireAssemblyReferenceNet35Directory).Select(R =>
                 {
                     FileInfo info = new FileInfo(R);
                     return new ReferenceAssembly
                     {
                         Name = info.Name,
-                        Location = info.FullName.Replace(Common.CovenantAssemblyReferenceDirectory, ""),
+                        Location = info.FullName.Replace(Common.EmpireAssemblyReferenceDirectory, ""),
                         DotNetVersion = Common.DotNetVersion.Net35
                     };
                 }).ToList();
 
-                Directory.GetFiles(Common.CovenantAssemblyReferenceNet40Directory).ToList().ForEach(R =>
+                Directory.GetFiles(Common.EmpireAssemblyReferenceNet40Directory).ToList().ForEach(R =>
                 {
                     FileInfo info = new FileInfo(R);
                     ReferenceAssemblies.Add(new ReferenceAssembly
                     {
                         Name = info.Name,
-                        Location = info.FullName.Replace(Common.CovenantAssemblyReferenceDirectory, ""),
+                        Location = info.FullName.Replace(Common.EmpireAssemblyReferenceDirectory, ""),
                         DotNetVersion = Common.DotNetVersion.Net40
                     });
                 });
 
-                Directory.GetFiles(Common.CovenantAssemblyReferenceNet45Directory).ToList().ForEach(R =>
+                Directory.GetFiles(Common.EmpireAssemblyReferenceNet45Directory).ToList().ForEach(R =>
                 {
                     FileInfo info = new FileInfo(R);
                     ReferenceAssemblies.Add(new ReferenceAssembly
                     {
                         Name = info.Name,
-                        Location = info.FullName.Replace(Common.CovenantAssemblyReferenceDirectory, ""),
+                        Location = info.FullName.Replace(Common.EmpireAssemblyReferenceDirectory, ""),
                         DotNetVersion = Common.DotNetVersion.Net45
                     });
                 });
@@ -77,13 +77,13 @@ namespace EmpireCompiler.Core
             }
             if (!context.embeddedResources.Any())
             {
-                EmbeddedResource[] EmbeddedResources = Directory.GetFiles(Common.CovenantEmbeddedResourcesDirectory).Select(R =>
+                EmbeddedResource[] EmbeddedResources = Directory.GetFiles(Common.EmpireEmbeddedResourcesDirectory).Select(R =>
                 {
                     FileInfo info = new FileInfo(R);
                     return new EmbeddedResource
                     {
                         Name = info.Name,
-                        Location = info.FullName.Replace(Common.CovenantEmbeddedResourcesDirectory, "")
+                        Location = info.FullName.Replace(Common.EmpireEmbeddedResourcesDirectory, "")
                     };
                 }).ToArray();
                 await service.CreateEmbeddedResources(EmbeddedResources);

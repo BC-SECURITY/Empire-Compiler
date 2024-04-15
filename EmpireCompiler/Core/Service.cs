@@ -121,7 +121,7 @@ namespace EmpireCompiler.Core
             {
                 string src = task.Code;
                 string sanitizedName = Utilities.GetSanitizedFilename(task.Name);
-                string dir = Common.CovenantDataDirectory + "Grunt" + Path.DirectorySeparatorChar + sanitizedName + Path.DirectorySeparatorChar;
+                string dir = Common.EmpireDataDirectory + "Grunt" + Path.DirectorySeparatorChar + sanitizedName + Path.DirectorySeparatorChar;
                 string ResultName;
 
                 if (true)
