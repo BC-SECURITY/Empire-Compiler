@@ -267,7 +267,7 @@ namespace EmpireCompiler.Core
 
             if (!context.gruntTasks.Any())
             {
-                List<string> files = Directory.GetFiles(Common.CovenantTaskDirectory)
+                List<string> files = Directory.GetFiles(Common.EmpireTaskDirectory)
                     .Where(F => F.EndsWith(".yaml", StringComparison.CurrentCultureIgnoreCase))
                     .ToList();
                 IDeserializer deserializer = new DeserializerBuilder().Build();

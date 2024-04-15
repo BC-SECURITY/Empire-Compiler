@@ -193,17 +193,17 @@ namespace EmpireCompiler.Models.Grunts
 
         public byte[] GetCompressedILAssembly35()
         {
-            return File.ReadAllBytes(Common.CovenantTaskCSharpCompiledNet35Directory + this.Name + ".compiled");
+            return File.ReadAllBytes(Common.EmpireTaskCSharpCompiledNet35Directory + this.Name + ".compiled");
         }
 
         public byte[] GetCompressedILAssembly40()
         {
-            return File.ReadAllBytes(Common.CovenantTaskCSharpCompiledNet40Directory + this.Name + ".compiled");
+            return File.ReadAllBytes(Common.EmpireTaskCSharpCompiledNet40Directory + this.Name + ".compiled");
         }
 
         public byte[] GetCompressedILAssembly45()
         {
-            return File.ReadAllBytes(Common.CovenantTaskCSharpCompiledNet45Directory + this.Name + ".compiled");
+            return File.ReadAllBytes(Common.EmpireTaskCSharpCompiledNet45Directory + this.Name + ".compiled");
         }
 
         public void Compile(Compiler.RuntimeIdentifier runtimeIdentifier = Compiler.RuntimeIdentifier.win_x64)
@@ -278,7 +278,7 @@ namespace EmpireCompiler.Models.Grunts
             #region testOutFile
             if (this.Name.StartsWith("Sharpire") || this.Name.StartsWith("CSharpPS") || this.Name.StartsWith("CSharpPy"))
             {
-                File.WriteAllBytes(Common.CovenantTaskCSharpCompiledNet35Directory + this.Name + ".exe",
+                File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet35Directory + this.Name + ".exe",
                     Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
                     {
                         Language = this.Language,
@@ -300,7 +300,7 @@ namespace EmpireCompiler.Models.Grunts
             else
             {
                 #endregion
-                File.WriteAllBytes(Common.CovenantTaskCSharpCompiledNet35Directory + this.Name + ".compiled",
+                File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet35Directory + this.Name + ".compiled",
                     Utilities.Compress(Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
                     {
                         Language = this.Language,
@@ -364,7 +364,7 @@ namespace EmpireCompiler.Models.Grunts
             #region testOutFile
             if (this.Name.StartsWith("Sharpire") || this.Name.StartsWith("CSharpPS") || this.Name.StartsWith("CSharpPy"))
             {
-                File.WriteAllBytes(Common.CovenantTaskCSharpCompiledNet40Directory + this.Name + ".exe",
+                File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet40Directory + this.Name + ".exe",
                     Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
                     {
                         Language = this.Language,
@@ -386,7 +386,7 @@ namespace EmpireCompiler.Models.Grunts
             else
             {
                 #endregion
-                File.WriteAllBytes(Common.CovenantTaskCSharpCompiledNet40Directory + this.Name + ".compiled",
+                File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet40Directory + this.Name + ".compiled",
                     Utilities.Compress(Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
                     {
                         Language = this.Language,
@@ -450,7 +450,7 @@ namespace EmpireCompiler.Models.Grunts
             #region testOutFile
             if (this.Name.StartsWith("Sharpire") || this.Name.StartsWith("CSharpPS") || this.Name.StartsWith("CSharpPy"))
             {
-                File.WriteAllBytes(Common.CovenantTaskCSharpCompiledNet45Directory + this.Name + ".exe",
+                File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet45Directory + this.Name + ".exe",
                     Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
                     {
                         Language = this.Language,
@@ -472,7 +472,7 @@ namespace EmpireCompiler.Models.Grunts
             else
             {
                 #endregion
-                File.WriteAllBytes(Common.CovenantTaskCSharpCompiledNet45Directory + this.Name + ".compiled",
+                File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet45Directory + this.Name + ".compiled",
                     Utilities.Compress(Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
                     {
                         Language = this.Language,
@@ -523,7 +523,7 @@ namespace EmpireCompiler.Models.Grunts
             string file = "Task" + Utilities.GetExtensionForLanguage(this.Language);
             File.WriteAllText(dir + "Task" + ".csproj", csproj);
             File.WriteAllText(dir + file, this.Code);
-            File.WriteAllBytes(Common.CovenantTaskCSharpCompiledNetCoreApp30Directory + this.Name + ".compiled",
+            File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNetCoreApp30Directory + this.Name + ".compiled",
                 Utilities.Compress(Compiler.Compile(new Compiler.CsharpCoreCompilationRequest
                 {
                     ResultName = "Task",
