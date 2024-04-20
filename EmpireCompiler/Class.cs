@@ -108,7 +108,7 @@ namespace EmpireCompiler
         }
 
 
-        private string[] DecodeMessage(byte[] data)
+        private static string[] DecodeMessage(byte[] data)
         {
             var messageData = Encoding.ASCII.GetString(data);
             return messageData.Split(',');
@@ -140,7 +140,7 @@ namespace EmpireCompiler
             }
         }
 
-        private async Task SendResponseAsync(Socket socket, string message)
+        private static async Task SendResponseAsync(Socket socket, string message)
         {
             var responseBytes = Encoding.ASCII.GetBytes(message);
             await Task.Factory.FromAsync(
@@ -149,7 +149,7 @@ namespace EmpireCompiler
             Console.WriteLine("Response sent to client: {0}", message);
         }
 
-        private string GenerateRandomizedName(string baseName)
+        private static string GenerateRandomizedName(string baseName)
         {
             var random = new Random();
             var randomName = new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 5)
@@ -157,7 +157,7 @@ namespace EmpireCompiler
             return $"{baseName}_{randomName}";
         }
 
-        private string DecodeBase64(string encodedString)
+        private static string DecodeBase64(string encodedString)
         {
             var bytes = Convert.FromBase64String(encodedString);
             return Encoding.UTF8.GetString(bytes);
