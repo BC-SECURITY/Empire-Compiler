@@ -19,6 +19,7 @@
     <Compile Remove="Components\**" />
     <Compile Remove="Controllers\**" />
     <Compile Remove="Data\Grunt\**" />
+    <Compile Remove="Data\ReferencedSourceLibraries\**" />
     <Compile Remove="Data\Tasks\**" />
     <Compile Remove="Data\ReferenceSourceLibraries\**" />
     <Compile Remove="Data\Downloads\**" />
@@ -31,6 +32,7 @@
     <Content Remove="API\**" />
     <Content Remove="Components\**" />
     <Content Remove="Controllers\**" />
+    <Content Remove="Data\ReferencedSourceLibraries\**" />
     <Content Remove="Hubs\**" />
     <Content Remove="Models\Covenant\**" />
     <Content Remove="Models\Indicators\**" />
@@ -40,6 +42,7 @@
     <EmbeddedResource Remove="API\**" />
     <EmbeddedResource Remove="Components\**" />
     <EmbeddedResource Remove="Controllers\**" />
+    <EmbeddedResource Remove="Data\ReferencedSourceLibraries\**" />
     <EmbeddedResource Remove="Hubs\**" />
     <EmbeddedResource Remove="Models\Covenant\**" />
     <EmbeddedResource Remove="Models\Indicators\**" />
@@ -53,6 +56,7 @@
     <None Remove="Components\**" />
     <None Remove="Controllers\**" />
     <None Remove="Data\Grunt\**" />
+    <None Remove="Data\ReferencedSourceLibraries\**" />
     <None Remove="Data\Tasks\CSharp\**" />
     <None Remove="Data\Downloads\**" />
     <None Remove="Data\Temp\**" />
@@ -80,7 +84,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Moq" Version="4.20.70" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="NUnit" Version="3.13.3" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageReference Include="YamlDotNet" Version="8.1.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.5.0" />
   </ItemGroup>

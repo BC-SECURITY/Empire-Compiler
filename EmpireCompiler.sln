@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29519.161
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmpireCompiler", "EmpireCompiler\EmpireCompiler.csproj", "{D5865774-CD82-4CCE-A3F1-7F2C4639301B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmpireCompiler.Tests", "Empire-Compiler-Test\EmpireCompiler.Tests.csproj", "{615BE518-2921-4952-BEF2-4ACBE5D6414B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{D5865774-CD82-4CCE-A3F1-7F2C4639301B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5865774-CD82-4CCE-A3F1-7F2C4639301B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5865774-CD82-4CCE-A3F1-7F2C4639301B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{615BE518-2921-4952-BEF2-4ACBE5D6414B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{615BE518-2921-4952-BEF2-4ACBE5D6414B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{615BE518-2921-4952-BEF2-4ACBE5D6414B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{615BE518-2921-4952-BEF2-4ACBE5D6414B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

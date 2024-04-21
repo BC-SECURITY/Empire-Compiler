@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EmpireCompiler
@@ -14,7 +15,7 @@ namespace EmpireCompiler
         static async Task Main()
         {
             var empireServer = new EmpireService();
-            var server = new EmpireServerHandler(empireServer);
+            var server = new EmpireServerHandler(empireServer, new SocketAdapter(new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)));
             Console.WriteLine("Starting EmpireServer...");
             await server.StartAsync();
         }
@@ -23,43 +24,46 @@ namespace EmpireCompiler
     public class EmpireServerHandler
     {
         private readonly EmpireService _service;
+        private readonly ISocketAdapter _socketAdapter;
         private const string LocalAddress = "127.0.0.1";
         private const int Port = 2012;
+        private CancellationTokenSource _cts = new CancellationTokenSource();
 
-        public EmpireServerHandler(EmpireService service)
+
+        public EmpireServerHandler(EmpireService service, ISocketAdapter socketAdapter)
         {
             _service = service;
+            _socketAdapter = socketAdapter;
         }
 
         public async Task StartAsync()
         {
             _ = DbInitializer.Initialize(_service);
             var endpoint = new IPEndPoint(IPAddress.Parse(LocalAddress), Port);
-            var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-            listener.Bind(endpoint);
-            listener.Listen(100);
+            _socketAdapter.Bind(endpoint);
+            _socketAdapter.Listen(100);
 
             Console.WriteLine("Listening on {0}:{1}", LocalAddress, Port);
-            await AcceptConnectionsAsync(listener);
+            await AcceptConnectionsAsync(_cts.Token);
         }
 
-        private async Task AcceptConnectionsAsync(Socket listener)
+        private async Task AcceptConnectionsAsync(CancellationToken cancellationToken)
         {
-            while (true)
+            while (!cancellationToken.IsCancellationRequested)
             {
                 Console.WriteLine("Ready to accept a connection...");
-                var socket = await Task.Factory.FromAsync(
-                    listener.BeginAccept(null, null),
-                    listener.EndAccept);
-
-                Console.WriteLine("Connection accepted from {0}", socket.RemoteEndPoint.ToString());
-                if (!await HandleConnectionAsync(socket))
+                var socket = await _socketAdapter.AcceptAsync();
+                if (socket == null || cancellationToken.IsCancellationRequested)
                     break;
             }
         }
 
-        private async Task<bool> HandleConnectionAsync(Socket socket)
+        public void StopServer()
+        {
+            _cts.Cancel();
+        }
+
+        public async Task<bool> HandleConnectionAsync(Socket socket)
         {
             using var memoryStream = new MemoryStream();
             var buffer = new byte[4096];
@@ -106,7 +110,6 @@ namespace EmpireCompiler
             await ProcessMessageAsync(socket, message);
             return true;
         }
-
 
         private static string[] DecodeMessage(byte[] data)
         {
@@ -161,6 +164,47 @@ namespace EmpireCompiler
         {
             var bytes = Convert.FromBase64String(encodedString);
             return Encoding.UTF8.GetString(bytes);
+        }
+    }
+    public interface ISocketAdapter
+    {
+        Task<Socket> AcceptAsync();
+        Task<int> ReceiveAsync(Socket socket, ArraySegment<byte> buffer, SocketFlags socketFlags);
+        void Bind(EndPoint localEP);
+        void Listen(int backlog);
+    }
+
+    public class SocketAdapter : ISocketAdapter
+    {
+        private readonly Socket _socket;
+
+        public SocketAdapter(Socket socket)
+        {
+            _socket = socket;
+        }
+
+        public Task<Socket> AcceptAsync()
+        {
+            return Task.Factory.FromAsync(
+                _socket.BeginAccept(null, null),
+                _socket.EndAccept);
+        }
+
+        public Task<int> ReceiveAsync(Socket socket, ArraySegment<byte> buffer, SocketFlags socketFlags)
+        {
+            return Task<int>.Factory.FromAsync(
+                socket.BeginReceive(buffer.Array, buffer.Offset, buffer.Count, socketFlags, null, null),
+                socket.EndReceive);
+        }
+
+        public void Bind(EndPoint localEP)
+        {
+            _socket.Bind(localEP);
+        }
+
+        public void Listen(int backlog)
+        {
+            _socket.Listen(backlog);
         }
     }
 }
