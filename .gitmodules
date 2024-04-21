@@ -1,0 +1,45 @@
+[submodule "EmpireCompiler/Data/ReferencedSourceLibraries/Certify"]
+	path = EmpireCompiler/Data/ReferencedSourceLibraries/Certify
+	url = https://github.com/GhostPack/Certify.git
+[submodule "EmpireCompiler/Data/ReferencedSourceLibraries/Seatbelt"]
+	path = EmpireCompiler/Data/ReferencedSourceLibraries/Seatbelt
+	url = https://github.com/GhostPack/Seatbelt
+[submodule "EmpireCompiler/Data/ReferencedSourceLibraries/SharpDPAPI"]
+	path = EmpireCompiler/Data/ReferencedSourceLibraries/SharpDPAPI
+	url = https://github.com/GhostPack/SharpDPAPI
+[submodule "EmpireCompiler/Data/ReferencedSourceLibraries/SharpDump"]
+	path = EmpireCompiler/Data/ReferencedSourceLibraries/SharpDump
+	url = https://github.com/GhostPack/SharpDump
+[submodule "EmpireCompiler/Data/ReferencedSourceLibraries/SharpSC"]
+	path = EmpireCompiler/Data/ReferencedSourceLibraries/SharpSC
+	url = https://github.com/djhohnstein/SharpSC
+[submodule "EmpireCompiler/Data/ReferencedSourceLibraries/SharpWMI"]
+	path = EmpireCompiler/Data/ReferencedSourceLibraries/SharpWMI
+	url = https://github.com/GhostPack/SharpWMI
+[submodule "EmpireCompiler/Data/ReferencedSourceLibraries/SharpUp"]
+	path = EmpireCompiler/Data/ReferencedSourceLibraries/SharpUp
+	url = https://github.com/GhostPack/SharpUp
+[submodule "EmpireCompiler/Data/ReferencedSourceLibraries/Rubeus"]
+	path = EmpireCompiler/Data/ReferencedSourceLibraries/Rubeus
+	url = https://github.com/GhostPack/Rubeus
+[submodule "EmpireCompiler/Data/ReferencedSourceLibraries/SharpSploit"]
+	path = EmpireCompiler/Data/ReferencedSourceLibraries/SharpSploit
+	url = https://github.com/cobbr/SharpSploit/
+[submodule "EmpireCompiler/Data/ReferencedSourceLibraries/NVNC"]
+	path = EmpireCompiler/Data/ReferencedSourceLibraries/NVNC
+	url = https://github.com/BC-SECURITY/NVNC.git
+[submodule "EmpireCompiler/Data/ReferencedSourceLibraries/Sharpire"]
+	path = EmpireCompiler/Data/ReferencedSourceLibraries/Sharpire
+	url = https://github.com/BC-SECURITY/Sharpire.git
+[submodule "EmpireCompiler/Data/ReferencedSourceLibraries/ProcessInjection"]
+	path = EmpireCompiler/Data/ReferencedSourceLibraries/ProcessInjection
+	url = https://github.com/3xpl01tc0d3r/ProcessInjection.git
+[submodule "EmpireCompiler/Data/ReferencedSourceLibraries/DotNetStratumMiner"]
+	path = EmpireCompiler/Data/ReferencedSourceLibraries/DotNetStratumMiner
+	url = https://github.com/BC-SECURITY/DotNetStratumMiner.git
+[submodule "EmpireCompiler/Data/ReferencedSourceLibraries/RunOF"]
+	path = EmpireCompiler/Data/ReferencedSourceLibraries/RunOF
+	url = https://github.com/BC-SECURITY/RunOF.git
+[submodule "EmpireCompiler/Data/ReferencedSourceLibraries/Moriarty"]
+	path = EmpireCompiler/Data/ReferencedSourceLibraries/Moriarty
+	url = https://github.com/BC-SECURITY/Moriarty.git
