@@ -78,8 +78,6 @@ namespace EmpireCompiler
                     Console.WriteLine("Received {0} bytes", bytesReceived);
                 }
 
-                // Exit the loop if the received bytes are less than the buffer size,
-                // indicating that all data has likely been sent and received.
                 if (bytesReceived < buffer.Length)
                 {
                     break;
@@ -90,7 +88,7 @@ namespace EmpireCompiler
             if (memoryStream.Length == 0)
             {
                 Console.WriteLine("No data received. Connection might have been closed by client.");
-                return false; // Connection was closed
+                return false;
             }
 
             memoryStream.Seek(0, SeekOrigin.Begin);
