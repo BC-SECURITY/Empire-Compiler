@@ -20,9 +20,9 @@
     <Compile Remove="Controllers\**" />
     <Compile Remove="Data\Grunt\**" />
     <Compile Remove="Data\Tasks\**" />
-    <Compile Remove="Data\ReferenceSourceLibraries\**" />
     <Compile Remove="Data\Downloads\**" />
-    <Compile Remove="Hubs\**" />
+	<Compile Remove="Data\ReferenceSourceLibraries\**" />
+	<Compile Remove="Hubs\**" />
     <Compile Remove="Models\Covenant\**" />
     <Compile Remove="Models\Indicators\**" />
     <Compile Remove="Models\Launchers\**" />
@@ -56,7 +56,8 @@
     <None Remove="Data\Tasks\CSharp\**" />
     <None Remove="Data\Downloads\**" />
     <None Remove="Data\Temp\**" />
-    <None Remove="Hubs\**" />
+	<None Remove="Data\ReferenceSourceLibraries\**" />
+	<None Remove="Hubs\**" />
     <None Remove="Models\Covenant\**" />
     <None Remove="Models\Indicators\**" />
     <None Remove="Models\Launchers\**" />

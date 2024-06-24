@@ -17,7 +17,7 @@ namespace EmpireCompiler.Core
         public class CompilationRequest
         {
             public EmpireCompiler.Models.Grunts.ImplantLanguage Language { get; set; } = Models.Grunts.ImplantLanguage.CSharp;
-            public Platform Platform { get; set; } = Platform.AnyCpu;
+            public Platform Platform { get; set; } = Platform.X64;
         }
 
         public class CsharpCompilationRequest : CompilationRequest

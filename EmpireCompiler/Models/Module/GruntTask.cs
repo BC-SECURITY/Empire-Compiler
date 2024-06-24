@@ -347,7 +347,7 @@ namespace EmpireCompiler.Models.Grunts
                         UnsafeCompile = this.UnsafeCompile,
                         // TODO: Add debug option
                         // OutputKind = OutputKind.ConsoleApplication,
-                        OutputKind = OutputKind.WindowsApplication,
+                        OutputKind = OutputKind.ConsoleApplication,
                         Confuse = this.Confuse,
                         // TODO: Fix optimization to work with GhostPack. It also doesn't work with Sharpire. Not sure if this actuall works with anything...
                         Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
