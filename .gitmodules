@@ -1,0 +1,45 @@
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/Certify"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/Certify
+	url = https://github.com/GhostPack/Certify.git
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/DotNetStratumMiner"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/DotNetStratumMiner
+	url = https://github.com/BC-SECURITY/DotNetStratumMiner.git
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/Moriarty"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/Moriarty
+	url = https://github.com/BC-SECURITY/Moriarty.git
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/NVNC"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/NVNC
+	url = https://github.com/BC-SECURITY/NVNC.git
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/ProcessInjection"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/ProcessInjection
+	url = https://github.com/3xpl01tc0d3r/ProcessInjection.git
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/Rubeus"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/Rubeus
+	url = https://github.com/GhostPack/Rubeus.git
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/RunOF"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/RunOF
+	url = https://github.com/BC-SECURITY/RunOF.git
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/Seatbelt"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/Seatbelt
+	url = https://github.com/GhostPack/Seatbelt.git
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/SharpDPAPI"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/SharpDPAPI
+	url = https://github.com/GhostPack/SharpDPAPI.git
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/SharpDump"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/SharpDump
+	url = https://github.com/GhostPack/SharpDump.git
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/SharpSC"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/SharpSC
+	url = https://github.com/djhohnstein/SharpSC.git
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/SharpSploit"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/SharpSploit
+	url = https://github.com/cobbr/SharpSploit.git
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/SharpUp"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/SharpUp
+	url = https://github.com/GhostPack/SharpUp.git
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/SharpWMI"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/SharpWMI
+	url = https://github.com/GhostPack/SharpWMI.git
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/Sharpire"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/Sharpire
+	url = https://github.com/BC-SECURITY/Sharpire.git
