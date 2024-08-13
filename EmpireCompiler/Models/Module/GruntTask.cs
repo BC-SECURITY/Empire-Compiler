@@ -20,6 +20,7 @@ namespace EmpireCompiler.Models.Grunts
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
+        public string OutputPath { get; set; }
 
         public TaskAuthor Author { get; set; } = new TaskAuthor();
 
