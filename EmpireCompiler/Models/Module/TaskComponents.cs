@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using YamlDotNet.Serialization;
 
-namespace EmpireCompiler.Models.Grunts
+namespace EmpireCompiler.Models.Agents
 {
     public class ReferenceAssembly : ISerializable<ReferenceAssembly>
     {
@@ -17,12 +17,12 @@ namespace EmpireCompiler.Models.Grunts
         public Common.DotNetVersion DotNetVersion { get; set; }
 
         private List<ReferenceSourceLibraryReferenceAssembly> ReferenceSourceLibraryReferenceAssemblies { get; set; } = new List<ReferenceSourceLibraryReferenceAssembly>();
-        private List<GruntTaskReferenceAssembly> GruntTaskReferenceAssemblies { get; set; } = new List<GruntTaskReferenceAssembly>();
+        private List<AgentTaskReferenceAssembly> GruntTaskReferenceAssemblies { get; set; } = new List<AgentTaskReferenceAssembly>();
 
         [NotMapped, JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
         public List<ReferenceSourceLibrary> ReferenceSourceLibraries => ReferenceSourceLibraryReferenceAssemblies.Select(e => e.ReferenceSourceLibrary).ToList();
         [NotMapped, JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
-        public List<GruntTask> GruntTasks => GruntTaskReferenceAssemblies.Select(e => e.GruntTask).ToList();
+        public List<AgentTask> GruntTasks => GruntTaskReferenceAssemblies.Select(e => e.AgentTask).ToList();
 
         internal SerializedReferenceAssembly ToSerializedReferenceAssembly()
         {
@@ -74,12 +74,12 @@ namespace EmpireCompiler.Models.Grunts
         public string Location { get; set; }
 
         private List<ReferenceSourceLibraryEmbeddedResource> ReferenceSourceLibraryEmbeddedResources { get; set; } = new List<ReferenceSourceLibraryEmbeddedResource>();
-        private List<GruntTaskEmbeddedResource> GruntTaskEmbeddedResources { get; set; } = new List<GruntTaskEmbeddedResource>();
+        private List<AgentTaskEmbeddedResource> GruntTaskEmbeddedResources { get; set; } = new List<AgentTaskEmbeddedResource>();
 
         [NotMapped, JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
         public List<ReferenceSourceLibrary> ReferenceSourceLibraries => ReferenceSourceLibraryEmbeddedResources.Select(e => e.ReferenceSourceLibrary).ToList();
         [NotMapped, JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
-        public List<GruntTask> GruntTasks => GruntTaskEmbeddedResources.Select(e => e.GruntTask).ToList();
+        public List<AgentTask> GruntTasks => GruntTaskEmbeddedResources.Select(e => e.AgentTask).ToList();
 
         internal SerializedEmbeddedResource ToSerializedEmbeddedResource()
         {
@@ -133,7 +133,7 @@ namespace EmpireCompiler.Models.Grunts
 
         private List<ReferenceSourceLibraryReferenceAssembly> ReferenceSourceLibraryReferenceAssemblies { get; set; } = new List<ReferenceSourceLibraryReferenceAssembly>();
         private List<ReferenceSourceLibraryEmbeddedResource> ReferenceSourceLibraryEmbeddedResources { get; set; } = new List<ReferenceSourceLibraryEmbeddedResource>();
-        private List<GruntTaskReferenceSourceLibrary> GruntTaskReferenceSourceLibraries { get; set; } = new List<GruntTaskReferenceSourceLibrary>();
+        private List<AgentTaskReferenceSourceLibrary> GruntTaskReferenceSourceLibraries { get; set; } = new List<AgentTaskReferenceSourceLibrary>();
 
         public void Add(ReferenceAssembly assembly)
         {
@@ -178,7 +178,7 @@ namespace EmpireCompiler.Models.Grunts
         [NotMapped]
         public List<EmbeddedResource> EmbeddedResources => ReferenceSourceLibraryEmbeddedResources.Select(e => e.EmbeddedResource).ToList();
         [NotMapped, JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
-        public List<GruntTask> GruntTasks => GruntTaskReferenceSourceLibraries.Select(e => e.GruntTask).ToList();
+        public List<AgentTask> GruntTasks => GruntTaskReferenceSourceLibraries.Select(e => e.AgentTask).ToList();
 
         internal SerializedReferenceSourceLibrary ToSerializedReferenceSourceLibrary()
         {
@@ -249,28 +249,28 @@ namespace EmpireCompiler.Models.Grunts
         public EmbeddedResource EmbeddedResource { get; set; }
     }
 
-    public class GruntTaskReferenceSourceLibrary
+    public class AgentTaskReferenceSourceLibrary
     {
         public int GruntTaskId { get; set; }
-        public GruntTask GruntTask { get; set; }
+        public AgentTask AgentTask { get; set; }
 
         public int ReferenceSourceLibraryId { get; set; }
         public ReferenceSourceLibrary ReferenceSourceLibrary { get; set; }
     }
 
-    public class GruntTaskReferenceAssembly
+    public class AgentTaskReferenceAssembly
     {
         public int GruntTaskId { get; set; }
-        public GruntTask GruntTask { get; set; }
+        public AgentTask AgentTask { get; set; }
 
         public int ReferenceAssemblyId { get; set; }
         public ReferenceAssembly ReferenceAssembly { get; set; }
     }
 
-    public class GruntTaskEmbeddedResource
+    public class AgentTaskEmbeddedResource
     {
         public int GruntTaskId { get; set; }
-        public GruntTask GruntTask { get; set; }
+        public AgentTask AgentTask { get; set; }
 
         public int EmbeddedResourceId { get; set; }
         public EmbeddedResource EmbeddedResource { get; set; }

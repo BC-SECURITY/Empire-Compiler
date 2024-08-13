@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using YamlDotNet.Serialization;
 
 
-namespace EmpireCompiler.Models.Grunts
+namespace EmpireCompiler.Models.Agents
 {
     public class TaskAuthor : ISerializable<TaskAuthor>
     {
@@ -15,7 +15,7 @@ namespace EmpireCompiler.Models.Grunts
         public string Handle { get; set; } = "";
         public string Link { get; set; } = "";
 
-        public List<GruntTask> GruntTasks { get; set; }
+        public List<AgentTask> GruntTasks { get; set; }
 
         internal SerializedGruntTaskAuthor ToSerializedGruntTaskAuthor()
         {

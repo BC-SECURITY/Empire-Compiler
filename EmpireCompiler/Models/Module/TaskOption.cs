@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using YamlDotNet.Serialization;
 
-namespace EmpireCompiler.Models.Grunts
+namespace EmpireCompiler.Models.Agents
 {
     public class TaskOption : ISerializable<TaskOption>
     {
@@ -21,7 +21,7 @@ namespace EmpireCompiler.Models.Grunts
 
         public int GruntTaskId { get; set; }
         [JsonIgnore, System.Text.Json.Serialization.JsonIgnore]
-        public GruntTask Task { get; set; }
+        public AgentTask Task { get; set; }
 
         internal SerializedGruntTaskOption ToSerializedGruntTaskOption()
         {

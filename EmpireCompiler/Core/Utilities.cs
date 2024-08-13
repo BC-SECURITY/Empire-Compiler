@@ -38,11 +38,11 @@ namespace EmpireCompiler.Core
             return filename;
         }
 
-        public static string GetExtensionForLanguage(Models.Grunts.ImplantLanguage language)
+        public static string GetExtensionForLanguage(Models.Agents.ImplantLanguage language)
         {
             switch (language)
             {
-                case Models.Grunts.ImplantLanguage.CSharp:
+                case Models.Agents.ImplantLanguage.CSharp:
                     return ".cs";
                 default:
                     return ".cs";

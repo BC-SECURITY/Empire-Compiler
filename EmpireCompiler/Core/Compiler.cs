@@ -16,7 +16,7 @@ namespace EmpireCompiler.Core
     {
         public class CompilationRequest
         {
-            public EmpireCompiler.Models.Grunts.ImplantLanguage Language { get; set; } = Models.Grunts.ImplantLanguage.CSharp;
+            public EmpireCompiler.Models.Agents.ImplantLanguage Language { get; set; } = Models.Agents.ImplantLanguage.CSharp;
             public Platform Platform { get; set; } = Platform.X64;
         }
 
@@ -86,7 +86,7 @@ namespace EmpireCompiler.Core
 
         public static byte[] Compile(CompilationRequest request)
         {
-            if (request.Language == Models.Grunts.ImplantLanguage.CSharp)
+            if (request.Language == Models.Agents.ImplantLanguage.CSharp)
             {
                 return CompileCSharp((CsharpCompilationRequest)request);
             }
