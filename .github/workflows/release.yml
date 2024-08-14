@@ -38,10 +38,17 @@ jobs:
       - name: Build and publish self-contained assembly
         run: dotnet publish -c Release -r ${{ matrix.runtime }} --self-contained -p:PublishSingleFile=true -o ./publish/${{ matrix.runtime }}
 
-      - name: Create and upload release
-        uses: softprops/action-gh-release@v2.0.8
-        with:
-          files: ./publish/${{ matrix.runtime }}/**/*
+      - name: Create Git tag
+        run: |
+          git tag ${{ github.event.inputs.release_version }}
+          git push origin ${{ github.event.inputs.release_version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: ${{ matrix.runtime == 'linux-x64' }}
+
+      - name: Create and upload release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./publish/${{ matrix.runtime }}/**/*
+          tag_name: ${{ github.event.inputs.release_version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
