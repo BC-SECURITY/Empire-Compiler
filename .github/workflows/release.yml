@@ -37,7 +37,7 @@ jobs:
 
       - name: Build and publish self-contained assembly
         run: |
-          dotnet publish path/to/your/project.csproj -c Release -r ${{ matrix.runtime }} --self-contained -p:PublishSingleFile=true -o ./publish/${{ matrix.runtime }}
+          dotnet publish -c Release -r ${{ matrix.runtime }} --self-contained -p:PublishSingleFile=true -o ./publish/${{ matrix.runtime }}
         shell: bash
 
       - name: Create Git tag
