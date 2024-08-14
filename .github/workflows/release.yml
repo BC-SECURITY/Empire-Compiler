@@ -38,6 +38,7 @@ jobs:
       - name: Build and publish self-contained assembly
         run: |
           dotnet publish -c Release -r ${{ matrix.runtime }} --self-contained -p:PublishSingleFile=true -o ./publish/${{ matrix.runtime }}
+          mv ./publish/${{ matrix.runtime }}/EmpireCompiler ./publish/${{ matrix.runtime }}/EmpireCompiler-${{ matrix.runtime }}
         shell: bash
 
       - name: Create Git tag
@@ -50,7 +51,7 @@ jobs:
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
         with:
-          files: ./publish/${{ matrix.runtime }}/EmpireCompiler
+          files: ./publish/${{ matrix.runtime }}/EmpireCompiler-${{ matrix.runtime }}
           tag_name: ${{ github.event.inputs.release_version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
