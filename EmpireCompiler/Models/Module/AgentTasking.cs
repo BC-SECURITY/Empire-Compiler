@@ -10,7 +10,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 
-namespace EmpireCompiler.Models.Grunts
+namespace EmpireCompiler.Models.Agents
 {
     public class CommandOutput
     {
@@ -39,7 +39,7 @@ namespace EmpireCompiler.Models.Grunts
 
 
         public int? GruntTaskingId { get; set; } = null;
-        public GruntTasking GruntTasking { get; set; }
+        public AgentTasking AgentTasking { get; set; }
 
         public int GruntId { get; set; }
 
@@ -68,7 +68,7 @@ namespace EmpireCompiler.Models.Grunts
         TaskKill
     }
 
-    public class GruntTasking
+    public class AgentTasking
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
@@ -79,7 +79,7 @@ namespace EmpireCompiler.Models.Grunts
 
         [Required]
         public int GruntTaskId { get; set; }
-        public GruntTask GruntTask { get; set; }
+        public AgentTask AgentTask { get; set; }
 
         public GruntTaskingType Type { get; set; } = GruntTaskingType.Assembly;
         public List<string> Parameters { get; set; } = new List<string>();

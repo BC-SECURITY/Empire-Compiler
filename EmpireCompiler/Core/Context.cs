@@ -2,7 +2,7 @@
 // Project: Empire (https://github.com/BC-SECURITY/Empire)
 // License: GNU GPLv3
 
-using EmpireCompiler.Models.Grunts;
+using EmpireCompiler.Models.Agents;
 using System;
 using System.Collections.Generic;
 
@@ -20,7 +20,7 @@ namespace EmpireCompiler.Core.Empire
 
         public List<TaskOption> gruntTaskOptions { get; set; }
 
-        public List<GruntTask> gruntTasks { get; set; }
+        public List<AgentTask> gruntTasks { get; set; }
 
         private int nextTaskId;
         public EmpireContext()
@@ -31,7 +31,7 @@ namespace EmpireCompiler.Core.Empire
             referenceSourceLibraries = new List<ReferenceSourceLibrary>();
             referenceSourceLibraryReferenceAssemblies = new List<ReferenceSourceLibraryReferenceAssembly>();
             gruntTaskOptions = new List<TaskOption>();
-            gruntTasks = new List<GruntTask>();
+            gruntTasks = new List<AgentTask>();
             nextTaskId = 0;
 
         }
@@ -43,7 +43,7 @@ namespace EmpireCompiler.Core.Empire
             gList.Add(entity);
         }
 
-        public void Add(GruntTask entity)
+        public void Add(AgentTask entity)
         {
             gruntTasks.Add(entity);
         }

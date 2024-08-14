@@ -5,7 +5,7 @@
 // License: GNU GPLv3
 
 using EmpireCompiler.Core.Empire;
-using EmpireCompiler.Models.Grunts;
+using EmpireCompiler.Models.Agents;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,8 +28,8 @@ namespace EmpireCompiler.Core
 
             IDeserializer deserializer = new DeserializerBuilder().Build();
             List<SerializedGruntTask> serialized = deserializer.Deserialize<List<SerializedGruntTask>>(recievedTask);
-            List<GruntTask> tasks = serialized.Select(S => new GruntTask().FromSerializedGruntTask(S)).ToList();
-            foreach (GruntTask task in tasks)
+            List<AgentTask> tasks = serialized.Select(S => new AgentTask().FromSerializedGruntTask(S)).ToList();
+            foreach (AgentTask task in tasks)
             {
                 await service.CreateGruntTask(task);
             }
@@ -276,8 +276,8 @@ namespace EmpireCompiler.Core
 
                     string yaml = File.ReadAllText(file);
                     List<SerializedGruntTask> serialized = deserializer.Deserialize<List<SerializedGruntTask>>(yaml);
-                    List<GruntTask> tasks = serialized.Select(S => new GruntTask().FromSerializedGruntTask(S)).ToList();
-                    foreach (GruntTask task in tasks)
+                    List<AgentTask> tasks = serialized.Select(S => new AgentTask().FromSerializedGruntTask(S)).ToList();
+                    foreach (AgentTask task in tasks)
                     {
                         await service.CreateGruntTask(task);
 

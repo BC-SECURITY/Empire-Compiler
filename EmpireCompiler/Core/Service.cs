@@ -1,6 +1,6 @@
 ﻿using EmpireCompiler.Core.Empire;
 using EmpireCompiler.Models;
-using EmpireCompiler.Models.Grunts;
+using EmpireCompiler.Models.Agents;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -57,15 +57,15 @@ namespace EmpireCompiler.Core
     public interface IGruntTaskService : IReferenceAssemblyService, IEmbeddedResourceService, IReferenceSourceLibraryService,
         IGruntTaskOptionService
     {
-        Task<IEnumerable<GruntTask>> GetGruntTasks();
-        Task<IEnumerable<GruntTask>> GetGruntTasksForGrunt(int gruntId);
-        Task<GruntTask> GetGruntTask(int id);
-        Task<GruntTask> GetGruntTaskByName(string name, Common.DotNetVersion version = Common.DotNetVersion.Net35);
-        Task<GruntTask> CreateGruntTask(GruntTask task);
-        Task<IEnumerable<GruntTask>> CreateGruntTasks(params GruntTask[] tasks);
-        Task<GruntTask> EditGruntTask(GruntTask task);
+        Task<IEnumerable<AgentTask>> GetGruntTasks();
+        Task<IEnumerable<AgentTask>> GetGruntTasksForGrunt(int gruntId);
+        Task<AgentTask> GetGruntTask(int id);
+        Task<AgentTask> GetGruntTaskByName(string name, Common.DotNetVersion version = Common.DotNetVersion.Net35);
+        Task<AgentTask> CreateGruntTask(AgentTask task);
+        Task<IEnumerable<AgentTask>> CreateGruntTasks(params AgentTask[] tasks);
+        Task<AgentTask> EditGruntTask(AgentTask task);
         Task DeleteGruntTask(int taskId);
-        Task<string> ParseParametersIntoTask(GruntTask task, List<ParsedParameter> parameters);
+        Task<string> ParseParametersIntoTask(AgentTask task, List<ParsedParameter> parameters);
     }
 
     public interface ICovenantService2 : IGruntTaskService
@@ -99,7 +99,7 @@ namespace EmpireCompiler.Core
             return entities;
         }
 
-        public async Task<string> ParseParametersIntoTask(GruntTask task, List<ParsedParameter> parameters)
+        public async Task<string> ParseParametersIntoTask(AgentTask task, List<ParsedParameter> parameters)
         {
             return null;
         }
@@ -143,9 +143,9 @@ namespace EmpireCompiler.Core
         }
 
         //Grunt Task Methods
-        public async Task<GruntTask> GetGruntTask(int id)
+        public async Task<AgentTask> GetGruntTask(int id)
         {
-            GruntTask task = _context.gruntTasks.FirstOrDefault(tsk => tsk.Id == id);
+            AgentTask task = _context.gruntTasks.FirstOrDefault(tsk => tsk.Id == id);
             if (task == null)
             {
                 Console.WriteLine($"NotFound - GruntTask with id: {id}");
@@ -153,7 +153,7 @@ namespace EmpireCompiler.Core
             return task;
         }
 
-        public async Task<GruntTask> CreateGruntTask(GruntTask task)
+        public async Task<AgentTask> CreateGruntTask(AgentTask task)
         {
             //Need to consider restructuring this method and the context class 
             //The way it is currently done is built around interacting with a sqllite db. 
@@ -179,10 +179,10 @@ namespace EmpireCompiler.Core
             foreach (EmbeddedResource resource in resources)
             {
                 await this.CreateEntities(
-                    new GruntTaskEmbeddedResource
+                    new AgentTaskEmbeddedResource
                     {
                         EmbeddedResource = await this.GetEmbeddedResourceByName(resource.Name),
-                        GruntTask = task
+                        AgentTask = task
                     }
                 );
                 task.Add(resource);
@@ -191,10 +191,10 @@ namespace EmpireCompiler.Core
             {
                 //This is all Database schema based so doesn't work without the databasse
                 await this.CreateEntities(
-                    new GruntTaskReferenceAssembly
+                    new AgentTaskReferenceAssembly
                     {
                         ReferenceAssembly = await this.GetReferenceAssemblyByName(assembly.Name, assembly.DotNetVersion),
-                        GruntTask = task
+                        AgentTask = task
                     }
                 );
                 //instead do this
@@ -209,7 +209,7 @@ namespace EmpireCompiler.Core
             return await this.GetGruntTask(task.Id);
         }
 
-        public async Task<IEnumerable<GruntTask>> GetGruntTasks()
+        public async Task<IEnumerable<AgentTask>> GetGruntTasks()
         {
             return _context.gruntTasks;
         }
@@ -292,18 +292,18 @@ namespace EmpireCompiler.Core
 
         #region GruntTask Actions
 
-        public async Task<IEnumerable<GruntTask>> GetGruntTasksForGrunt(int gruntId)
+        public async Task<IEnumerable<AgentTask>> GetGruntTasksForGrunt(int gruntId)
         {
             return _context.gruntTasks
                 .AsEnumerable()
                 .Where(T => T.CompatibleDotNetVersions.Contains(Common.DotNetVersion.Net35));
         }
 
-        public async Task<GruntTask> GetGruntTaskByName(string name, Common.DotNetVersion version = Common.DotNetVersion.Net35)
+        public async Task<AgentTask> GetGruntTaskByName(string name, Common.DotNetVersion version = Common.DotNetVersion.Net35)
         {
             string lower = name.ToLower();
 
-            GruntTask task = _context.gruntTasks
+            AgentTask task = _context.gruntTasks
                 .Where(T => T.Name.ToLower() == lower)
                 .AsEnumerable()
                 .Where(T => T.CompatibleDotNetVersions.Contains(version))
@@ -324,17 +324,17 @@ namespace EmpireCompiler.Core
             return await Task.FromResult(task);
         }
 
-        public async Task<IEnumerable<GruntTask>> CreateGruntTasks(params GruntTask[] tasks)
+        public async Task<IEnumerable<AgentTask>> CreateGruntTasks(params AgentTask[] tasks)
         {
-            List<GruntTask> createdTasks = new List<GruntTask>();
-            foreach (GruntTask t in tasks)
+            List<AgentTask> createdTasks = new List<AgentTask>();
+            foreach (AgentTask t in tasks)
             {
                 createdTasks.Add(await this.CreateGruntTask(t));
             }
             return createdTasks;
         }
 
-        public async Task<GruntTask> EditGruntTask(GruntTask task)
+        public async Task<AgentTask> EditGruntTask(AgentTask task)
         {
             return null;
         }

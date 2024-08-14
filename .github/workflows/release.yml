@@ -1,0 +1,48 @@
+name: Build and Publish Self-Contained Assemblies
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build and release'
+        required: true
+        default: 'main'
+      release_version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        runtime:
+          - linux-x64
+          - linux-x86
+          - linux-arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4.0.1
+        with:
+          dotnet-version: '6.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build and publish self-contained assembly
+        run: dotnet publish -c Release -r ${{ matrix.runtime }} --self-contained -p:PublishSingleFile=true -o ./publish/${{ matrix.runtime }}
+
+      - name: Create and upload release
+        uses: softprops/action-gh-release@v2.0.8
+        with:
+          files: ./publish/${{ matrix.runtime }}/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: ${{ matrix.runtime == 'linux-x64' }}

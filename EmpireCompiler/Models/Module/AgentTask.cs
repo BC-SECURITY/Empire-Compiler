@@ -9,17 +9,18 @@ using System.IO;
 using System.Linq;
 using YamlDotNet.Serialization;
 
-namespace EmpireCompiler.Models.Grunts
+namespace EmpireCompiler.Models.Agents
 {
     public enum ImplantLanguage
     {
         CSharp
     }
 
-    public class GruntTask : ISerializable<GruntTask>
+    public class AgentTask : ISerializable<AgentTask>
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
+        public string OutputPath { get; set; }
 
         public TaskAuthor Author { get; set; } = new TaskAuthor();
 
@@ -36,9 +37,9 @@ namespace EmpireCompiler.Models.Grunts
         public bool Confuse { get; set; } = false;
         public GruntTaskingType TaskingType { get; set; } = GruntTaskingType.Assembly;
 
-        private List<GruntTaskReferenceSourceLibrary> GruntTaskReferenceSourceLibraries { get; set; } = new List<GruntTaskReferenceSourceLibrary>();
-        private List<GruntTaskReferenceAssembly> GruntTaskReferenceAssemblies { get; set; } = new List<GruntTaskReferenceAssembly>();
-        private List<GruntTaskEmbeddedResource> GruntTaskEmbeddedResources { get; set; } = new List<GruntTaskEmbeddedResource>();
+        private List<AgentTaskReferenceSourceLibrary> GruntTaskReferenceSourceLibraries { get; set; } = new List<AgentTaskReferenceSourceLibrary>();
+        private List<AgentTaskReferenceAssembly> GruntTaskReferenceAssemblies { get; set; } = new List<AgentTaskReferenceAssembly>();
+        private List<AgentTaskEmbeddedResource> GruntTaskEmbeddedResources { get; set; } = new List<AgentTaskEmbeddedResource>();
         [NotMapped]
         public List<ReferenceSourceLibrary> ReferenceSourceLibraries => GruntTaskReferenceSourceLibraries.Select(e => e.ReferenceSourceLibrary).ToList();
         [NotMapped]
@@ -53,10 +54,10 @@ namespace EmpireCompiler.Models.Grunts
 
         public void Add(ReferenceSourceLibrary library)
         {
-            GruntTaskReferenceSourceLibraries.Add(new GruntTaskReferenceSourceLibrary
+            GruntTaskReferenceSourceLibraries.Add(new AgentTaskReferenceSourceLibrary
             {
                 GruntTaskId = this.Id,
-                GruntTask = this,
+                AgentTask = this,
                 ReferenceSourceLibraryId = library.Id,
                 ReferenceSourceLibrary = library
             });
@@ -72,10 +73,10 @@ namespace EmpireCompiler.Models.Grunts
 
         public void Add(ReferenceAssembly assembly)
         {
-            GruntTaskReferenceAssemblies.Add(new GruntTaskReferenceAssembly
+            GruntTaskReferenceAssemblies.Add(new AgentTaskReferenceAssembly
             {
                 GruntTaskId = this.Id,
-                GruntTask = this,
+                AgentTask = this,
                 ReferenceAssemblyId = assembly.Id,
                 ReferenceAssembly = assembly
             });
@@ -91,10 +92,10 @@ namespace EmpireCompiler.Models.Grunts
 
         public void Add(EmbeddedResource resource)
         {
-            GruntTaskEmbeddedResources.Add(new GruntTaskEmbeddedResource
+            GruntTaskEmbeddedResources.Add(new AgentTaskEmbeddedResource
             {
                 GruntTaskId = this.Id,
-                GruntTask = this,
+                AgentTask = this,
                 EmbeddedResourceId = resource.Id,
                 EmbeddedResource = resource
             });
@@ -130,7 +131,7 @@ namespace EmpireCompiler.Models.Grunts
             };
         }
 
-        internal GruntTask FromSerializedGruntTask(SerializedGruntTask task)
+        internal AgentTask FromSerializedGruntTask(SerializedGruntTask task)
         {
             this.Name = task.Name;
             this.Author = new TaskAuthor().FromSerializedGruntTaskAuthor(task.Author);
@@ -159,7 +160,7 @@ namespace EmpireCompiler.Models.Grunts
             return serializer.Serialize(new List<SerializedGruntTask> { this.ToSerializedGruntTask() });
         }
 
-        public GruntTask FromYaml(string yaml)
+        public AgentTask FromYaml(string yaml)
         {
             IDeserializer deserializer = new DeserializerBuilder().Build();
             SerializedGruntTask task = deserializer.Deserialize<SerializedGruntTask>(yaml);
@@ -171,7 +172,7 @@ namespace EmpireCompiler.Models.Grunts
             return JsonConvert.SerializeObject(this.ToSerializedGruntTask());
         }
 
-        public GruntTask FromJson(string json)
+        public AgentTask FromJson(string json)
         {
             SerializedGruntTask task = JsonConvert.DeserializeObject<SerializedGruntTask>(json);
             return this.FromSerializedGruntTask(task);
