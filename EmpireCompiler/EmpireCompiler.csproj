@@ -121,4 +121,11 @@
       <HintPath>refs\Donut.dll</HintPath>
     </Reference>
   </ItemGroup>
+  
+  <ItemGroup>
+    <None Remove="Data/ReferenceSourceLibraries\**" />
+    <Compile Remove="Data/ReferenceSourceLibraries\**" />
+    <Content Remove="Data/ReferenceSourceLibraries\**" />
+    <EmbeddedResource Remove="Data/ReferenceSourceLibraries\**" />
+  </ItemGroup>
 </Project>
