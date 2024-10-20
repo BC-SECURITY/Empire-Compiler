@@ -1,4 +1,6 @@
-﻿using Confuser.Core;
+﻿#nullable disable
+
+using Confuser.Core;
 using Confuser.Core.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -184,7 +186,8 @@ namespace EmpireCompiler.Core
                     }).Where(ER => ER.Enabled).Select(ER =>
                     {
                         return new ResourceDescription(ER.Name, () => File.OpenRead(ER.File), true);
-                    }).ToList()
+                    }).ToList(),
+                    cancellationToken: default
                 );
                 if (emitResult.Success)
                 {

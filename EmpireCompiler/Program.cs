@@ -1,11 +1,13 @@
-﻿using EmpireCompiler.Core;
+﻿using EmpireCompiler.Models.Agents;
 using EmpireCompiler.Utility;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YamlDotNet.Serialization;
 
 namespace EmpireCompiler
 {
@@ -48,7 +50,6 @@ namespace EmpireCompiler
                 var confuse = context.ParseResult.GetValueForOption(confuseOption);
                 var debug = context.ParseResult.GetValueForOption(debugOption);
 
-                // Set the debug flag in the DebugUtility
                 DebugUtility.IsDebugEnabled = debug;
 
                 DebugUtility.DebugPrint("Debug mode enabled.");
@@ -64,17 +65,11 @@ namespace EmpireCompiler
                         return;
                     }
 
-                    var empireService = new EmpireService();
-                    _ = DbInitializer.Initialize(empireService);
-
-                    // Decode YAML and ingest the task
                     var decodedYaml = DecodeBase64(yaml);
-                    DbInitializer.IngestTask(empireService, decodedYaml);
+                    var deserializer = new DeserializerBuilder().Build();
+                    var serializedTasks = deserializer.Deserialize<List<SerializedGruntTask>>(decodedYaml);
 
-                    // Fetch the list of tasks after ingestion
-                    var tasks = empireService.GetEmpire().gruntTasks;
-
-                    var foundTask = tasks.FirstOrDefault(t => t.Name == task);
+                    var foundTask = serializedTasks.FirstOrDefault(t => t.Name == task);
                     if (foundTask == null)
                     {
                         Console.WriteLine("Task not found: " + task);
@@ -85,11 +80,11 @@ namespace EmpireCompiler
                     foundTask.Confuse = confuse;
 
                     DebugUtility.DebugPrint("Compiling task...");
-                    foundTask.Compile();
+                    var agentTask = new AgentTask().FromSerializedGruntTask(foundTask);
+                    agentTask.Compile();
 
-                    // Return the final task name
-                    DebugUtility.DebugPrint($"Final Task Name: {foundTask.Name}");
-                    Console.WriteLine($"Final Task Name: {foundTask.Name}");
+                    DebugUtility.DebugPrint($"Final Task Name: {agentTask.Name}");
+                    Console.WriteLine($"Final Task Name: {agentTask.Name}");
                 }
                 catch (System.Exception ex)
                 {
