@@ -188,14 +188,14 @@ namespace EmpireCompiler.Models.Agents
                     {
                         this.CompileDotNet35();
                     }
-                    // else if (version == Common.DotNetVersion.Net40)
-                    // {
-                    //     this.CompileDotNet40();
-                    // }
-                    // else if (version == Common.DotNetVersion.Net45)
-                    // {
-                    //     this.CompileDotNet45();
-                    // }
+                    else if (version == Common.DotNetVersion.Net40)
+                    {
+                        this.CompileDotNet40();
+                    }
+                    else if (version == Common.DotNetVersion.Net45)
+                    {
+                        this.CompileDotNet45();
+                    }
                     // else if (version == Common.DotNetVersion.NetCore31)
                     // {
                     //     this.CompileDotNetCore(runtimeIdentifier);
@@ -309,47 +309,22 @@ namespace EmpireCompiler.Models.Agents
                     return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net40, Enabled = true };
                 })
             );
-            #region testOutFile
-            if (this.Name.StartsWith("Sharpire") || this.Name.StartsWith("CSharpPS") || this.Name.StartsWith("CSharpPy"))
-            {
-                File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet40Directory + this.Name + ".exe",
-                    Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
-                    {
-                        Language = this.Language,
-                        Source = this.Code,
-                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
-                        TargetDotNetVersion = Common.DotNetVersion.Net40,
-                        References = references40,
-                        EmbeddedResources = resources,
-                        UnsafeCompile = this.UnsafeCompile,
-                        // TODO: Add debug option
-                        // OutputKind = OutputKind.ConsoleApplication,
-                        OutputKind = OutputKind.ConsoleApplication,
-                        Confuse = this.Confuse,
-                        // TODO: Fix optimization to work with GhostPack. It also doesn't work with Sharpire. Not sure if this actuall works with anything...
-                        Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
-                    })
-                );
-            }
-            else
-            {
-                #endregion
-                File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet40Directory + this.Name + ".compiled",
-                    Utilities.Compress(Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
-                    {
-                        Language = this.Language,
-                        Source = this.Code,
-                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
-                        TargetDotNetVersion = Common.DotNetVersion.Net40,
-                        References = references40,
-                        EmbeddedResources = resources,
-                        UnsafeCompile = this.UnsafeCompile,
-                        Confuse = this.Confuse,
-                        // TODO: Fix optimization to work with GhostPack
-                        Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
-                    }))
-                );
-            }
+            File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet40Directory + this.Name + ".exe",
+                Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
+                {
+                    Language = this.Language,
+                    Source = this.Code,
+                    SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
+                    TargetDotNetVersion = Common.DotNetVersion.Net40,
+                    References = references40,
+                    EmbeddedResources = resources,
+                    UnsafeCompile = this.UnsafeCompile,
+                    OutputKind = OutputKind.ConsoleApplication,
+                    // OutputKind = OutputKind.WindowsApplication,
+                    Confuse = this.Confuse,
+                    Optimize = false
+                })
+            );
         }
 
         private void CompileDotNet45()
@@ -395,47 +370,22 @@ namespace EmpireCompiler.Models.Agents
                     return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net45, Enabled = true };
                 })
             );
-            #region testOutFile
-            if (this.Name.StartsWith("Sharpire") || this.Name.StartsWith("CSharpPS") || this.Name.StartsWith("CSharpPy"))
-            {
-                File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet45Directory + this.Name + ".exe",
-                    Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
-                    {
-                        Language = this.Language,
-                        Source = this.Code,
-                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
-                        TargetDotNetVersion = Common.DotNetVersion.Net45,
-                        References = references45,
-                        EmbeddedResources = resources,
-                        UnsafeCompile = this.UnsafeCompile,
-                        // TODO: Add debug option
-                        // OutputKind = OutputKind.ConsoleApplication,
-                        OutputKind = OutputKind.WindowsApplication,
-                        Confuse = this.Confuse,
-                        // TODO: Fix optimization to work with GhostPack. It also doesn't work with Sharpire. Not sure if this actuall works with anything...
-                        Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
-                    })
-                );
-            }
-            else
-            {
-                #endregion
-                File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet45Directory + this.Name + ".compiled",
-                    Utilities.Compress(Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
-                    {
-                        Language = this.Language,
-                        Source = this.Code,
-                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
-                        TargetDotNetVersion = Common.DotNetVersion.Net45,
-                        References = references45,
-                        EmbeddedResources = resources,
-                        UnsafeCompile = this.UnsafeCompile,
-                        Confuse = this.Confuse,
-                        // TODO: Fix optimization to work with GhostPack
-                        Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
-                    }))
-                );
-            }
+            File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet45Directory + this.Name + ".exe",
+                Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
+                {
+                    Language = this.Language,
+                    Source = this.Code,
+                    SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
+                    TargetDotNetVersion = Common.DotNetVersion.Net45,
+                    References = references45,
+                    EmbeddedResources = resources,
+                    UnsafeCompile = this.UnsafeCompile,
+                    OutputKind = OutputKind.ConsoleApplication,
+                    // OutputKind = OutputKind.WindowsApplication,
+                    Confuse = this.Confuse,
+                    Optimize = false
+                })
+            );
         }
 
         private void CompileDotNetCore(Compiler.RuntimeIdentifier runtimeIdentifier)
