@@ -259,9 +259,9 @@ namespace EmpireCompiler.Models.Agents
                     EmbeddedResources = resources,
                     UnsafeCompile = this.UnsafeCompile,
                     OutputKind = OutputKind.ConsoleApplication,
-                    // OutputKind = OutputKind.WindowsApplication,
+                    //OutputKind = OutputKind.WindowsApplication,
                     Confuse = this.Confuse,
-                    Optimize = false
+                    Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
                 })
             );
         }
@@ -320,9 +320,9 @@ namespace EmpireCompiler.Models.Agents
                     EmbeddedResources = resources,
                     UnsafeCompile = this.UnsafeCompile,
                     OutputKind = OutputKind.ConsoleApplication,
-                    // OutputKind = OutputKind.WindowsApplication,
+                    //OutputKind = OutputKind.WindowsApplication,
                     Confuse = this.Confuse,
-                    Optimize = false
+                    Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
                 })
             );
         }
@@ -381,9 +381,9 @@ namespace EmpireCompiler.Models.Agents
                     EmbeddedResources = resources,
                     UnsafeCompile = this.UnsafeCompile,
                     OutputKind = OutputKind.ConsoleApplication,
-                    // OutputKind = OutputKind.WindowsApplication,
+                    //OutputKind = OutputKind.WindowsApplication,
                     Confuse = this.Confuse,
-                    Optimize = false
+                    Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
                 })
             );
         }

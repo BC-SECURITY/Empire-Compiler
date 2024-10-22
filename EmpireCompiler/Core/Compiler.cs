@@ -1,6 +1,4 @@
-﻿#nullable disable
-
-using Confuser.Core;
+﻿using Confuser.Core;
 using Confuser.Core.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

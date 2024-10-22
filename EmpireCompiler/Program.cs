@@ -69,18 +69,8 @@ namespace EmpireCompiler
                     var deserializer = new DeserializerBuilder().Build();
                     var serializedTasks = deserializer.Deserialize<List<SerializedGruntTask>>(decodedYaml);
 
-                    var foundTask = serializedTasks.FirstOrDefault(t => t.Name == task);
-                    if (foundTask == null)
-                    {
-                        Console.WriteLine("Task not found: " + task);
-                        return;
-                    }
-
-                    foundTask.Name = GenerateRandomizedName(foundTask.Name);
-                    foundTask.Confuse = confuse;
-
                     DebugUtility.DebugPrint("Compiling task...");
-                    var agentTask = new AgentTask().FromSerializedGruntTask(foundTask);
+                    var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
                     agentTask.Compile();
 
                     DebugUtility.DebugPrint($"Final Task Name: {agentTask.Name}");
