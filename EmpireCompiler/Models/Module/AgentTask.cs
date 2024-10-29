@@ -47,9 +47,7 @@ namespace EmpireCompiler.Models.Agents
 
         public bool UnsafeCompile { get; set; } = false;
         public bool TokenTask { get; set; } = false;
-
-        public List<TaskOption> Options { get; set; } = new List<TaskOption>();
-
+        
         public void Add(ReferenceSourceLibrary library)
         {
             GruntTaskReferenceSourceLibraries.Add(new AgentTaskReferenceSourceLibrary
@@ -97,7 +95,6 @@ namespace EmpireCompiler.Models.Agents
                 TaskingType = this.TaskingType,
                 UnsafeCompile = this.UnsafeCompile,
                 TokenTask = this.TokenTask,
-                Options = this.Options.OrderBy(O => O.Id).Select(O => O.ToSerializedGruntTaskOption()).ToList(),
                 ReferenceSourceLibraries = this.ReferenceSourceLibraries.Select(RSL => RSL.ToSerializedReferenceSourceLibrary()).ToList(),
                 ReferenceAssemblies = this.ReferenceAssemblies.Select(RA => RA.ToSerializedReferenceAssembly()).ToList(),
                 EmbeddedResources = this.EmbeddedResources.Select(ER => ER.ToSerializedEmbeddedResource()).ToList()
@@ -118,8 +115,6 @@ namespace EmpireCompiler.Models.Agents
             this.TaskingType = task.TaskingType;
             this.UnsafeCompile = task.UnsafeCompile;
             this.TokenTask = task.TokenTask;
-            this.Options = task.Options.Select(O => new TaskOption().FromSerializedGruntTaskOption(O)).ToList();
-            this.Options.ForEach(O => O.GruntTaskId = this.Id);
             task.ReferenceSourceLibraries.ForEach(RSL => this.Add(new ReferenceSourceLibrary().FromSerializedReferenceSourceLibrary(RSL)));
             task.ReferenceAssemblies.ForEach(RA => this.Add(new ReferenceAssembly().FromSerializedReferenceAssembly(RA)));
             task.EmbeddedResources.ForEach(ER => this.Add(new EmbeddedResource().FromSerializedEmbeddedResource(ER)));
@@ -422,7 +417,6 @@ namespace EmpireCompiler.Models.Agents
         public AgentTaskingType TaskingType { get; set; } = AgentTaskingType.Assembly;
         public bool UnsafeCompile { get; set; } = false;
         public bool TokenTask { get; set; } = false;
-        public List<SerializedGruntTaskOption> Options { get; set; } = new List<SerializedGruntTaskOption>();
         public List<SerializedReferenceSourceLibrary> ReferenceSourceLibraries { get; set; } = new List<SerializedReferenceSourceLibrary>();
         public List<SerializedReferenceAssembly> ReferenceAssemblies { get; set; } = new List<SerializedReferenceAssembly>();
         public List<SerializedEmbeddedResource> EmbeddedResources { get; set; } = new List<SerializedEmbeddedResource>();
