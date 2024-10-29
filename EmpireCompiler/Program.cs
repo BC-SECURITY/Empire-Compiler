@@ -70,6 +70,7 @@ namespace EmpireCompiler
 
                     DebugUtility.DebugPrint("Compiling task...");
                     var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
+                    agentTask.Name = task;
                     agentTask.Compile();
 
                     DebugUtility.DebugPrint($"Final Task Name: {task}");
