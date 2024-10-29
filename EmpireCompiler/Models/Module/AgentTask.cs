@@ -21,9 +21,7 @@ namespace EmpireCompiler.Models.Agents
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string OutputPath { get; set; }
-
-        public TaskAuthor Author { get; set; } = new TaskAuthor();
-
+        
         [Required]
         public string Name { get; set; } = "GenericTask";
         public List<string> Aliases { get; set; } = new List<string>();
@@ -35,7 +33,7 @@ namespace EmpireCompiler.Models.Agents
         public string Code { get; set; } = "";
         public bool Compiled { get; set; } = false;
         public bool Confuse { get; set; } = false;
-        public GruntTaskingType TaskingType { get; set; } = GruntTaskingType.Assembly;
+        public AgentTaskingType TaskingType { get; set; } = AgentTaskingType.Assembly;
 
         private List<AgentTaskReferenceSourceLibrary> GruntTaskReferenceSourceLibraries { get; set; } = new List<AgentTaskReferenceSourceLibrary>();
         private List<AgentTaskReferenceAssembly> GruntTaskReferenceAssemblies { get; set; } = new List<AgentTaskReferenceAssembly>();
@@ -63,14 +61,6 @@ namespace EmpireCompiler.Models.Agents
             });
         }
 
-        public void Remove(ReferenceSourceLibrary library)
-        {
-            GruntTaskReferenceSourceLibraries.Remove(
-                GruntTaskReferenceSourceLibraries
-                    .FirstOrDefault(GTRSL => GTRSL.GruntTaskId == this.Id && GTRSL.ReferenceSourceLibraryId == library.Id)
-            );
-        }
-
         public void Add(ReferenceAssembly assembly)
         {
             GruntTaskReferenceAssemblies.Add(new AgentTaskReferenceAssembly
@@ -80,14 +70,6 @@ namespace EmpireCompiler.Models.Agents
                 ReferenceAssemblyId = assembly.Id,
                 ReferenceAssembly = assembly
             });
-        }
-
-        public void Remove(ReferenceAssembly assembly)
-        {
-            GruntTaskReferenceAssemblies.Remove(
-                GruntTaskReferenceAssemblies
-                    .FirstOrDefault(GTRA => GTRA.GruntTaskId == this.Id && GTRA.ReferenceAssemblyId == assembly.Id)
-            );
         }
 
         public void Add(EmbeddedResource resource)
@@ -101,21 +83,12 @@ namespace EmpireCompiler.Models.Agents
             });
         }
 
-        public void Remove(EmbeddedResource resource)
-        {
-            GruntTaskEmbeddedResources.Remove(
-                GruntTaskEmbeddedResources
-                    .FirstOrDefault(GTER => GTER.GruntTaskId == this.Id && GTER.EmbeddedResourceId == resource.Id)
-            );
-        }
-
         internal SerializedGruntTask ToSerializedGruntTask()
         {
             return new SerializedGruntTask
             {
                 Name = this.Name,
                 Aliases = this.Aliases,
-                Author = this.Author.ToSerializedGruntTaskAuthor(),
                 Description = this.Description,
                 Help = this.Help,
                 Language = this.Language,
@@ -134,7 +107,6 @@ namespace EmpireCompiler.Models.Agents
         internal AgentTask FromSerializedGruntTask(SerializedGruntTask task)
         {
             this.Name = task.Name;
-            this.Author = new TaskAuthor().FromSerializedGruntTaskAuthor(task.Author);
             this.Aliases = task.Aliases;
             this.Description = task.Description;
             this.Help = task.Help;
@@ -441,14 +413,13 @@ namespace EmpireCompiler.Models.Agents
         public string Name { get; set; } = "";
         public bool Confuse { get; set; } 
         public List<string> Aliases { get; set; } = new List<string>();
-        public SerializedGruntTaskAuthor Author { get; set; }
 
         public string Description { get; set; } = "";
         public string Help { get; set; } = "";
         public ImplantLanguage Language { get; set; }
         public IList<Common.DotNetVersion> CompatibleDotNetVersions { get; set; } = new List<Common.DotNetVersion>();
         public string Code { get; set; } = "";
-        public GruntTaskingType TaskingType { get; set; } = GruntTaskingType.Assembly;
+        public AgentTaskingType TaskingType { get; set; } = AgentTaskingType.Assembly;
         public bool UnsafeCompile { get; set; } = false;
         public bool TokenTask { get; set; } = false;
         public List<SerializedGruntTaskOption> Options { get; set; } = new List<SerializedGruntTaskOption>();

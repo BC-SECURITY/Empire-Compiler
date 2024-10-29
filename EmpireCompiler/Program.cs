@@ -66,7 +66,7 @@ namespace EmpireCompiler
                     }
 
                     var decodedYaml = DecodeBase64(yaml);
-                    var deserializer = new DeserializerBuilder().Build();
+                    var deserializer = new DeserializerBuilder() .IgnoreUnmatchedProperties().Build();
                     var serializedTasks = deserializer.Deserialize<List<SerializedGruntTask>>(decodedYaml);
 
                     DebugUtility.DebugPrint("Compiling task...");
