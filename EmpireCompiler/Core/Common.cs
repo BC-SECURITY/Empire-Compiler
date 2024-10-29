@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
+
 
 namespace EmpireCompiler.Core
 {

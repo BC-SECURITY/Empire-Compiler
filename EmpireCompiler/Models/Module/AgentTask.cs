@@ -33,8 +33,6 @@ namespace EmpireCompiler.Models.Agents
         public string Code { get; set; } = "";
         public bool Compiled { get; set; } = false;
         public bool Confuse { get; set; } = false;
-        public AgentTaskingType TaskingType { get; set; } = AgentTaskingType.Assembly;
-
         private List<AgentTaskReferenceSourceLibrary> GruntTaskReferenceSourceLibraries { get; set; } = new List<AgentTaskReferenceSourceLibrary>();
         private List<AgentTaskReferenceAssembly> GruntTaskReferenceAssemblies { get; set; } = new List<AgentTaskReferenceAssembly>();
         private List<AgentTaskEmbeddedResource> GruntTaskEmbeddedResources { get; set; } = new List<AgentTaskEmbeddedResource>();
@@ -86,13 +84,9 @@ namespace EmpireCompiler.Models.Agents
             return new SerializedGruntTask
             {
                 Name = this.Name,
-                Aliases = this.Aliases,
-                Description = this.Description,
-                Help = this.Help,
                 Language = this.Language,
                 CompatibleDotNetVersions = this.CompatibleDotNetVersions,
                 Code = this.Code,
-                TaskingType = this.TaskingType,
                 UnsafeCompile = this.UnsafeCompile,
                 TokenTask = this.TokenTask,
                 ReferenceSourceLibraries = this.ReferenceSourceLibraries.Select(RSL => RSL.ToSerializedReferenceSourceLibrary()).ToList(),
@@ -104,15 +98,10 @@ namespace EmpireCompiler.Models.Agents
         internal AgentTask FromSerializedGruntTask(SerializedGruntTask task)
         {
             this.Name = task.Name;
-            this.Aliases = task.Aliases;
-            this.Description = task.Description;
-            this.Help = task.Help;
             this.Language = task.Language;
             this.CompatibleDotNetVersions = task.CompatibleDotNetVersions;
             this.Code = task.Code;
             this.Compiled = false;
-
-            this.TaskingType = task.TaskingType;
             this.UnsafeCompile = task.UnsafeCompile;
             this.TokenTask = task.TokenTask;
             task.ReferenceSourceLibraries.ForEach(RSL => this.Add(new ReferenceSourceLibrary().FromSerializedReferenceSourceLibrary(RSL)));
@@ -406,15 +395,9 @@ namespace EmpireCompiler.Models.Agents
     internal class SerializedGruntTask
     {
         public string Name { get; set; } = "";
-        public bool Confuse { get; set; } 
-        public List<string> Aliases { get; set; } = new List<string>();
-
-        public string Description { get; set; } = "";
-        public string Help { get; set; } = "";
         public ImplantLanguage Language { get; set; }
         public IList<Common.DotNetVersion> CompatibleDotNetVersions { get; set; } = new List<Common.DotNetVersion>();
         public string Code { get; set; } = "";
-        public AgentTaskingType TaskingType { get; set; } = AgentTaskingType.Assembly;
         public bool UnsafeCompile { get; set; } = false;
         public bool TokenTask { get; set; } = false;
         public List<SerializedReferenceSourceLibrary> ReferenceSourceLibraries { get; set; } = new List<SerializedReferenceSourceLibrary>();
