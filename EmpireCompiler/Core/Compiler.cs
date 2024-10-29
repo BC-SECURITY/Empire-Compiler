@@ -125,9 +125,17 @@ namespace EmpireCompiler.Core
                 .Select(R => MetadataReference.CreateFromFile(R.File))
                 .ToList();
 
+            string entryPointClass = "Program";
+            
             // Use specified OutputKind and Platform
-            CSharpCompilationOptions options = new CSharpCompilationOptions(outputKind: request.OutputKind, optimizationLevel: OptimizationLevel.Release, platform: request.Platform, allowUnsafe: request.UnsafeCompile);
-            // Compile to obtain SemanticModel
+            CSharpCompilationOptions options = new CSharpCompilationOptions(
+                outputKind: request.OutputKind,
+                optimizationLevel: OptimizationLevel.Release,
+                platform: request.Platform,
+                allowUnsafe: request.UnsafeCompile,
+                mainTypeName: entryPointClass
+            );
+            
             CSharpCompilation compilation = CSharpCompilation.Create(
                 request.AssemblyName == null ? Path.GetRandomFileName() : request.AssemblyName,
                 compilationTrees,
@@ -171,7 +179,6 @@ namespace EmpireCompiler.Core
                 );
             }
 
-            // Emit compilation
             EmitResult emitResult;
             byte[] ILbytes = null;
             using (var ms = new MemoryStream())
@@ -184,7 +191,8 @@ namespace EmpireCompiler.Core
                     }).Where(ER => ER.Enabled).Select(ER =>
                     {
                         return new ResourceDescription(ER.Name, () => File.OpenRead(ER.File), true);
-                    }).ToList()
+                    }).ToList(),
+                    cancellationToken: default
                 );
                 if (emitResult.Success)
                 {

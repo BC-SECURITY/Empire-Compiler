@@ -21,9 +21,7 @@ namespace EmpireCompiler.Models.Agents
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string OutputPath { get; set; }
-
-        public TaskAuthor Author { get; set; } = new TaskAuthor();
-
+        
         [Required]
         public string Name { get; set; } = "GenericTask";
         public List<string> Aliases { get; set; } = new List<string>();
@@ -35,8 +33,6 @@ namespace EmpireCompiler.Models.Agents
         public string Code { get; set; } = "";
         public bool Compiled { get; set; } = false;
         public bool Confuse { get; set; } = false;
-        public GruntTaskingType TaskingType { get; set; } = GruntTaskingType.Assembly;
-
         private List<AgentTaskReferenceSourceLibrary> GruntTaskReferenceSourceLibraries { get; set; } = new List<AgentTaskReferenceSourceLibrary>();
         private List<AgentTaskReferenceAssembly> GruntTaskReferenceAssemblies { get; set; } = new List<AgentTaskReferenceAssembly>();
         private List<AgentTaskEmbeddedResource> GruntTaskEmbeddedResources { get; set; } = new List<AgentTaskEmbeddedResource>();
@@ -49,9 +45,7 @@ namespace EmpireCompiler.Models.Agents
 
         public bool UnsafeCompile { get; set; } = false;
         public bool TokenTask { get; set; } = false;
-
-        public List<TaskOption> Options { get; set; } = new List<TaskOption>();
-
+        
         public void Add(ReferenceSourceLibrary library)
         {
             GruntTaskReferenceSourceLibraries.Add(new AgentTaskReferenceSourceLibrary
@@ -61,14 +55,6 @@ namespace EmpireCompiler.Models.Agents
                 ReferenceSourceLibraryId = library.Id,
                 ReferenceSourceLibrary = library
             });
-        }
-
-        public void Remove(ReferenceSourceLibrary library)
-        {
-            GruntTaskReferenceSourceLibraries.Remove(
-                GruntTaskReferenceSourceLibraries
-                    .FirstOrDefault(GTRSL => GTRSL.GruntTaskId == this.Id && GTRSL.ReferenceSourceLibraryId == library.Id)
-            );
         }
 
         public void Add(ReferenceAssembly assembly)
@@ -82,14 +68,6 @@ namespace EmpireCompiler.Models.Agents
             });
         }
 
-        public void Remove(ReferenceAssembly assembly)
-        {
-            GruntTaskReferenceAssemblies.Remove(
-                GruntTaskReferenceAssemblies
-                    .FirstOrDefault(GTRA => GTRA.GruntTaskId == this.Id && GTRA.ReferenceAssemblyId == assembly.Id)
-            );
-        }
-
         public void Add(EmbeddedResource resource)
         {
             GruntTaskEmbeddedResources.Add(new AgentTaskEmbeddedResource
@@ -101,30 +79,16 @@ namespace EmpireCompiler.Models.Agents
             });
         }
 
-        public void Remove(EmbeddedResource resource)
-        {
-            GruntTaskEmbeddedResources.Remove(
-                GruntTaskEmbeddedResources
-                    .FirstOrDefault(GTER => GTER.GruntTaskId == this.Id && GTER.EmbeddedResourceId == resource.Id)
-            );
-        }
-
         internal SerializedGruntTask ToSerializedGruntTask()
         {
             return new SerializedGruntTask
             {
                 Name = this.Name,
-                Aliases = this.Aliases,
-                Author = this.Author.ToSerializedGruntTaskAuthor(),
-                Description = this.Description,
-                Help = this.Help,
                 Language = this.Language,
                 CompatibleDotNetVersions = this.CompatibleDotNetVersions,
                 Code = this.Code,
-                TaskingType = this.TaskingType,
                 UnsafeCompile = this.UnsafeCompile,
                 TokenTask = this.TokenTask,
-                Options = this.Options.OrderBy(O => O.Id).Select(O => O.ToSerializedGruntTaskOption()).ToList(),
                 ReferenceSourceLibraries = this.ReferenceSourceLibraries.Select(RSL => RSL.ToSerializedReferenceSourceLibrary()).ToList(),
                 ReferenceAssemblies = this.ReferenceAssemblies.Select(RA => RA.ToSerializedReferenceAssembly()).ToList(),
                 EmbeddedResources = this.EmbeddedResources.Select(ER => ER.ToSerializedEmbeddedResource()).ToList()
@@ -134,20 +98,12 @@ namespace EmpireCompiler.Models.Agents
         internal AgentTask FromSerializedGruntTask(SerializedGruntTask task)
         {
             this.Name = task.Name;
-            this.Author = new TaskAuthor().FromSerializedGruntTaskAuthor(task.Author);
-            this.Aliases = task.Aliases;
-            this.Description = task.Description;
-            this.Help = task.Help;
             this.Language = task.Language;
             this.CompatibleDotNetVersions = task.CompatibleDotNetVersions;
             this.Code = task.Code;
             this.Compiled = false;
-
-            this.TaskingType = task.TaskingType;
             this.UnsafeCompile = task.UnsafeCompile;
             this.TokenTask = task.TokenTask;
-            this.Options = task.Options.Select(O => new TaskOption().FromSerializedGruntTaskOption(O)).ToList();
-            this.Options.ForEach(O => O.GruntTaskId = this.Id);
             task.ReferenceSourceLibraries.ForEach(RSL => this.Add(new ReferenceSourceLibrary().FromSerializedReferenceSourceLibrary(RSL)));
             task.ReferenceAssemblies.ForEach(RA => this.Add(new ReferenceAssembly().FromSerializedReferenceAssembly(RA)));
             task.EmbeddedResources.ForEach(ER => this.Add(new EmbeddedResource().FromSerializedEmbeddedResource(ER)));
@@ -196,10 +152,10 @@ namespace EmpireCompiler.Models.Agents
                     {
                         this.CompileDotNet45();
                     }
-                    else if (version == Common.DotNetVersion.NetCore31)
-                    {
-                        this.CompileDotNetCore(runtimeIdentifier);
-                    }
+                    // else if (version == Common.DotNetVersion.NetCore31)
+                    // {
+                    //     this.CompileDotNetCore(runtimeIdentifier);
+                    // }
                 }
             }
         }
@@ -247,47 +203,23 @@ namespace EmpireCompiler.Models.Agents
                     return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net35, Enabled = true };
                 })
             );
-            #region testOutFile
-            if (this.Name.StartsWith("Sharpire") || this.Name.StartsWith("CSharpPS") || this.Name.StartsWith("CSharpPy"))
-            {
-                File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet35Directory + this.Name + ".exe",
-                    Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
-                    {
-                        Language = this.Language,
-                        Source = this.Code,
-                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
-                        TargetDotNetVersion = Common.DotNetVersion.Net35,
-                        References = references35,
-                        EmbeddedResources = resources,
-                        UnsafeCompile = this.UnsafeCompile,
-                        // TODO: Add debug option
-                        // OutputKind = OutputKind.ConsoleApplication,
-                        OutputKind = OutputKind.WindowsApplication,
-                        Confuse = this.Confuse,
-                        // TODO: Fix optimization to work with GhostPack
-                        Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
-                    })
-                );
-            }
-            else
-            {
-                #endregion
-                File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet35Directory + this.Name + ".compiled",
-                    Utilities.Compress(Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
-                    {
-                        Language = this.Language,
-                        Source = this.Code,
-                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
-                        TargetDotNetVersion = Common.DotNetVersion.Net35,
-                        References = references35,
-                        EmbeddedResources = resources,
-                        UnsafeCompile = this.UnsafeCompile,
-                        Confuse = this.Confuse,
-                        // TODO: Fix optimization to work with GhostPack
-                        Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
-                    }))
-                );
-            }
+
+            File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet35Directory + this.Name + ".exe",
+                Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
+                {
+                    Language = this.Language,
+                    Source = this.Code,
+                    SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
+                    TargetDotNetVersion = Common.DotNetVersion.Net35,
+                    References = references35,
+                    EmbeddedResources = resources,
+                    UnsafeCompile = this.UnsafeCompile,
+                    OutputKind = OutputKind.ConsoleApplication,
+                    //OutputKind = OutputKind.WindowsApplication,
+                    Confuse = this.Confuse,
+                    Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
+                })
+            );
         }
 
         private void CompileDotNet40()
@@ -333,47 +265,22 @@ namespace EmpireCompiler.Models.Agents
                     return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net40, Enabled = true };
                 })
             );
-            #region testOutFile
-            if (this.Name.StartsWith("Sharpire") || this.Name.StartsWith("CSharpPS") || this.Name.StartsWith("CSharpPy"))
-            {
-                File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet40Directory + this.Name + ".exe",
-                    Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
-                    {
-                        Language = this.Language,
-                        Source = this.Code,
-                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
-                        TargetDotNetVersion = Common.DotNetVersion.Net40,
-                        References = references40,
-                        EmbeddedResources = resources,
-                        UnsafeCompile = this.UnsafeCompile,
-                        // TODO: Add debug option
-                        // OutputKind = OutputKind.ConsoleApplication,
-                        OutputKind = OutputKind.ConsoleApplication,
-                        Confuse = this.Confuse,
-                        // TODO: Fix optimization to work with GhostPack. It also doesn't work with Sharpire. Not sure if this actuall works with anything...
-                        Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
-                    })
-                );
-            }
-            else
-            {
-                #endregion
-                File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet40Directory + this.Name + ".compiled",
-                    Utilities.Compress(Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
-                    {
-                        Language = this.Language,
-                        Source = this.Code,
-                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
-                        TargetDotNetVersion = Common.DotNetVersion.Net40,
-                        References = references40,
-                        EmbeddedResources = resources,
-                        UnsafeCompile = this.UnsafeCompile,
-                        Confuse = this.Confuse,
-                        // TODO: Fix optimization to work with GhostPack
-                        Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
-                    }))
-                );
-            }
+            File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet40Directory + this.Name + ".exe",
+                Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
+                {
+                    Language = this.Language,
+                    Source = this.Code,
+                    SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
+                    TargetDotNetVersion = Common.DotNetVersion.Net40,
+                    References = references40,
+                    EmbeddedResources = resources,
+                    UnsafeCompile = this.UnsafeCompile,
+                    OutputKind = OutputKind.ConsoleApplication,
+                    //OutputKind = OutputKind.WindowsApplication,
+                    Confuse = this.Confuse,
+                    Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
+                })
+            );
         }
 
         private void CompileDotNet45()
@@ -419,47 +326,22 @@ namespace EmpireCompiler.Models.Agents
                     return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net45, Enabled = true };
                 })
             );
-            #region testOutFile
-            if (this.Name.StartsWith("Sharpire") || this.Name.StartsWith("CSharpPS") || this.Name.StartsWith("CSharpPy"))
-            {
-                File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet45Directory + this.Name + ".exe",
-                    Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
-                    {
-                        Language = this.Language,
-                        Source = this.Code,
-                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
-                        TargetDotNetVersion = Common.DotNetVersion.Net45,
-                        References = references45,
-                        EmbeddedResources = resources,
-                        UnsafeCompile = this.UnsafeCompile,
-                        // TODO: Add debug option
-                        // OutputKind = OutputKind.ConsoleApplication,
-                        OutputKind = OutputKind.WindowsApplication,
-                        Confuse = this.Confuse,
-                        // TODO: Fix optimization to work with GhostPack. It also doesn't work with Sharpire. Not sure if this actuall works with anything...
-                        Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
-                    })
-                );
-            }
-            else
-            {
-                #endregion
-                File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet45Directory + this.Name + ".compiled",
-                    Utilities.Compress(Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
-                    {
-                        Language = this.Language,
-                        Source = this.Code,
-                        SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
-                        TargetDotNetVersion = Common.DotNetVersion.Net45,
-                        References = references45,
-                        EmbeddedResources = resources,
-                        UnsafeCompile = this.UnsafeCompile,
-                        Confuse = this.Confuse,
-                        // TODO: Fix optimization to work with GhostPack
-                        Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
-                    }))
-                );
-            }
+            File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet45Directory + this.Name + ".exe",
+                Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
+                {
+                    Language = this.Language,
+                    Source = this.Code,
+                    SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
+                    TargetDotNetVersion = Common.DotNetVersion.Net45,
+                    References = references45,
+                    EmbeddedResources = resources,
+                    UnsafeCompile = this.UnsafeCompile,
+                    OutputKind = OutputKind.ConsoleApplication,
+                    //OutputKind = OutputKind.WindowsApplication,
+                    Confuse = this.Confuse,
+                    Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
+                })
+            );
         }
 
         private void CompileDotNetCore(Compiler.RuntimeIdentifier runtimeIdentifier)
@@ -513,18 +395,11 @@ namespace EmpireCompiler.Models.Agents
     internal class SerializedGruntTask
     {
         public string Name { get; set; } = "";
-        public List<string> Aliases { get; set; } = new List<string>();
-        public SerializedGruntTaskAuthor Author { get; set; }
-
-        public string Description { get; set; } = "";
-        public string Help { get; set; } = "";
         public ImplantLanguage Language { get; set; }
         public IList<Common.DotNetVersion> CompatibleDotNetVersions { get; set; } = new List<Common.DotNetVersion>();
         public string Code { get; set; } = "";
-        public GruntTaskingType TaskingType { get; set; } = GruntTaskingType.Assembly;
         public bool UnsafeCompile { get; set; } = false;
         public bool TokenTask { get; set; } = false;
-        public List<SerializedGruntTaskOption> Options { get; set; } = new List<SerializedGruntTaskOption>();
         public List<SerializedReferenceSourceLibrary> ReferenceSourceLibraries { get; set; } = new List<SerializedReferenceSourceLibrary>();
         public List<SerializedReferenceAssembly> ReferenceAssemblies { get; set; } = new List<SerializedReferenceAssembly>();
         public List<SerializedEmbeddedResource> EmbeddedResources { get; set; } = new List<SerializedEmbeddedResource>();

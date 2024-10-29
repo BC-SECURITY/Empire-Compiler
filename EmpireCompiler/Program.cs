@@ -1,11 +1,12 @@
-﻿using EmpireCompiler.Core;
+﻿using EmpireCompiler.Models.Agents;
 using EmpireCompiler.Utility;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Text;
 using System.Threading.Tasks;
+using YamlDotNet.Serialization;
 
 namespace EmpireCompiler
 {
@@ -48,7 +49,6 @@ namespace EmpireCompiler
                 var confuse = context.ParseResult.GetValueForOption(confuseOption);
                 var debug = context.ParseResult.GetValueForOption(debugOption);
 
-                // Set the debug flag in the DebugUtility
                 DebugUtility.IsDebugEnabled = debug;
 
                 DebugUtility.DebugPrint("Debug mode enabled.");
@@ -64,32 +64,17 @@ namespace EmpireCompiler
                         return;
                     }
 
-                    var empireService = new EmpireService();
-                    _ = DbInitializer.Initialize(empireService);
-
-                    // Decode YAML and ingest the task
                     var decodedYaml = DecodeBase64(yaml);
-                    DbInitializer.IngestTask(empireService, decodedYaml);
-
-                    // Fetch the list of tasks after ingestion
-                    var tasks = empireService.GetEmpire().gruntTasks;
-
-                    var foundTask = tasks.FirstOrDefault(t => t.Name == task);
-                    if (foundTask == null)
-                    {
-                        Console.WriteLine("Task not found: " + task);
-                        return;
-                    }
-
-                    foundTask.Name = GenerateRandomizedName(foundTask.Name);
-                    foundTask.Confuse = confuse;
+                    var deserializer = new DeserializerBuilder() .IgnoreUnmatchedProperties().Build();
+                    var serializedTasks = deserializer.Deserialize<List<SerializedGruntTask>>(decodedYaml);
 
                     DebugUtility.DebugPrint("Compiling task...");
-                    foundTask.Compile();
+                    var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
+                    agentTask.Name = task;
+                    agentTask.Compile();
 
-                    // Return the final task name
-                    DebugUtility.DebugPrint($"Final Task Name: {foundTask.Name}");
-                    Console.WriteLine($"Final Task Name: {foundTask.Name}");
+                    DebugUtility.DebugPrint($"Final Task Name: {task}");
+                    Console.WriteLine($"Final Task Name: {task}");
                 }
                 catch (System.Exception ex)
                 {
@@ -99,14 +84,6 @@ namespace EmpireCompiler
             });
 
             await rootCommand.InvokeAsync(args);
-        }
-
-        private static string GenerateRandomizedName(string baseName)
-        {
-            var random = new Random();
-            var randomName = new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 5)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
-            return $"{baseName}_{randomName}";
         }
 
         private static string DecodeBase64(string encodedString)

@@ -1,21 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
+
 
 namespace EmpireCompiler.Core
 {
     public static class Common
     {
-        public static Encoding EmpireEncoding = Encoding.UTF8;
-        public static int AesIVLength = 16;
-        public static CipherMode AesCipherMode = CipherMode.CBC;
-        public static PaddingMode AesPaddingMode = PaddingMode.PKCS7;
-
         public static string EmpireDirectory = Assembly.GetExecutingAssembly().Location.Split("bin")[0].Split("EmpireCompiler.dll")[0];
         public static string EmpireDataDirectory = EmpireDirectory + "Data" + Path.DirectorySeparatorChar;
-        public static string EmpireDatabaseFile = EmpireDataDirectory + "covenant.db";
         public static string EmpireTempDirectory = EmpireDataDirectory + "Temp" + Path.DirectorySeparatorChar;
 
         public static string EmpireAssemblyReferenceDirectory = EmpireDataDirectory + "AssemblyReferences" + Path.DirectorySeparatorChar;
@@ -24,12 +17,10 @@ namespace EmpireCompiler.Core
         public static string EmpireAssemblyReferenceNet45Directory = EmpireAssemblyReferenceDirectory + "net45" + Path.DirectorySeparatorChar;
         public static string EmpireEmbeddedResourcesDirectory = EmpireDataDirectory + "EmbeddedResources" + Path.DirectorySeparatorChar;
         public static string EmpireReferenceSourceLibraries = EmpireDataDirectory + "ReferenceSourceLibraries" + Path.DirectorySeparatorChar;
-        public static string EmpireSharpSploitDirectory = EmpireReferenceSourceLibraries + "SharpSploit" + Path.DirectorySeparatorChar;
-        public static string EmpireRubeusDirectory = EmpireReferenceSourceLibraries + "Rubeus" + Path.DirectorySeparatorChar;
 
         public static string EmpireTaskDirectory = EmpireDataDirectory + "Tasks" + Path.DirectorySeparatorChar;
         public static string EmpireTaskCSharpDirectory = EmpireTaskDirectory + "CSharp" + Path.DirectorySeparatorChar;
-        public static string EmpireTaskCSharpNetCoreApp30Directory = EmpireTaskCSharpDirectory + "netcoreapp3.0" + Path.DirectorySeparatorChar;
+        // public static string EmpireTaskCSharpNetCoreApp30Directory = EmpireTaskCSharpDirectory + "netcoreapp3.0" + Path.DirectorySeparatorChar;
         public static string EmpireTaskCSharpCompiledDirectory = EmpireTaskCSharpDirectory + "Compiled" + Path.DirectorySeparatorChar;
         public static string EmpireTaskCSharpCompiledNet35Directory = EmpireTaskCSharpCompiledDirectory + "net35" + Path.DirectorySeparatorChar;
         public static string EmpireTaskCSharpCompiledNet40Directory = EmpireTaskCSharpCompiledDirectory + "net40" + Path.DirectorySeparatorChar;

@@ -2,7 +2,6 @@
 // Project: Covenant (https://github.com/cobbr/Covenant)
 // License: GNU GPLv3
 
-using System;
 using System.IO;
 using System.IO.Compression;
 
@@ -22,11 +21,6 @@ namespace EmpireCompiler.Core
                 compressedBytes = memoryStream.ToArray();
             }
             return compressedBytes;
-        }
-
-        public static string CreateShortGuid()
-        {
-            return Guid.NewGuid().ToString().Replace("-", "").Substring(0, 10);
         }
 
         public static string GetSanitizedFilename(string filename)
