@@ -179,7 +179,6 @@ namespace EmpireCompiler.Core
                 );
             }
 
-            // Emit compilation
             EmitResult emitResult;
             byte[] ILbytes = null;
             using (var ms = new MemoryStream())

@@ -73,8 +73,8 @@ namespace EmpireCompiler
                     var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
                     agentTask.Compile();
 
-                    DebugUtility.DebugPrint($"Final Task Name: {agentTask.Name}");
-                    Console.WriteLine($"Final Task Name: {agentTask.Name}");
+                    DebugUtility.DebugPrint($"Final Task Name: {task}");
+                    Console.WriteLine($"Final Task Name: {task}");
                 }
                 catch (System.Exception ex)
                 {
@@ -84,14 +84,6 @@ namespace EmpireCompiler
             });
 
             await rootCommand.InvokeAsync(args);
-        }
-
-        private static string GenerateRandomizedName(string baseName)
-        {
-            var random = new Random();
-            var randomName = new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 5)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
-            return $"{baseName}_{randomName}";
         }
 
         private static string DecodeBase64(string encodedString)

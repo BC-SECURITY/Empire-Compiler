@@ -11,20 +11,4 @@ namespace EmpireCompiler.Core
 
         }
     }
-
-    public class ControllerNotFoundException : System.Exception
-    {
-        public ControllerNotFoundException(string message) : base(message)
-        {
-
-        }
-    }
-
-    public class CovenantCompileGruntStagerFailedException : Exception
-    {
-        public CovenantCompileGruntStagerFailedException(string message) : base(message)
-        {
-
-        }
-    }
 }
