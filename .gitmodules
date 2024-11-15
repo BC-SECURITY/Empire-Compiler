@@ -46,3 +46,6 @@
 [submodule "EmpireCompiler/Data/ReferenceSourceLibraries/ThreadlessInject"]
 	path = EmpireCompiler/Data/ReferenceSourceLibraries/ThreadlessInject
 	url = https://github.com/CCob/ThreadlessInject.git
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/SharpRDP"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/SharpRDP
+	url = https://github.com/0xthirteen/SharpRDP.git
