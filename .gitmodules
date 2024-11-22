@@ -49,3 +49,6 @@
 [submodule "EmpireCompiler/Data/ReferenceSourceLibraries/SharpRDP"]
 	path = EmpireCompiler/Data/ReferenceSourceLibraries/SharpRDP
 	url = https://github.com/0xthirteen/SharpRDP.git
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/CS_COFFLoader"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/CS_COFFLoader
+	url = https://github.com/BC-SECURITY/CS_COFFLoader.git
