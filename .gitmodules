@@ -16,9 +16,6 @@
 [submodule "EmpireCompiler/Data/ReferenceSourceLibraries/Rubeus"]
 	path = EmpireCompiler/Data/ReferenceSourceLibraries/Rubeus
 	url = https://github.com/GhostPack/Rubeus.git
-[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/RunOF"]
-	path = EmpireCompiler/Data/ReferenceSourceLibraries/RunOF
-	url = https://github.com/BC-SECURITY/RunOF.git
 [submodule "EmpireCompiler/Data/ReferenceSourceLibraries/Seatbelt"]
 	path = EmpireCompiler/Data/ReferenceSourceLibraries/Seatbelt
 	url = https://github.com/GhostPack/Seatbelt.git
@@ -49,3 +46,6 @@
 [submodule "EmpireCompiler/Data/ReferenceSourceLibraries/SharpRDP"]
 	path = EmpireCompiler/Data/ReferenceSourceLibraries/SharpRDP
 	url = https://github.com/0xthirteen/SharpRDP.git
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/CS_COFFLoader"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/CS_COFFLoader
+	url = https://github.com/BC-SECURITY/CS_COFFLoader.git
