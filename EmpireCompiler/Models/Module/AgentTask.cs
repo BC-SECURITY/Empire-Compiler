@@ -204,7 +204,8 @@ namespace EmpireCompiler.Models.Agents
                 })
             );
 
-            File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet35Directory + this.Name + ".exe",
+            var output = this.OutputPath ?? Common.EmpireTaskCSharpCompiledNet35Directory + this.Name + ".exe";
+            File.WriteAllBytes(output,
                 Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
                 {
                     Language = this.Language,
@@ -265,7 +266,8 @@ namespace EmpireCompiler.Models.Agents
                     return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net40, Enabled = true };
                 })
             );
-            File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet40Directory + this.Name + ".exe",
+            var output = this.OutputPath ?? Common.EmpireTaskCSharpCompiledNet40Directory + this.Name + ".exe";
+            File.WriteAllBytes(output,
                 Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
                 {
                     Language = this.Language,
@@ -326,7 +328,8 @@ namespace EmpireCompiler.Models.Agents
                     return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net45, Enabled = true };
                 })
             );
-            File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNet45Directory + this.Name + ".exe",
+            var output = this.OutputPath ?? Common.EmpireTaskCSharpCompiledNet45Directory + this.Name + ".exe";
+            File.WriteAllBytes(output,
                 Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
                 {
                     Language = this.Language,

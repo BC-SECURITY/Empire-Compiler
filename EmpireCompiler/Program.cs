@@ -32,12 +32,18 @@ namespace EmpireCompiler
                 getDefaultValue: () => false,
                 description: "Run in debug mode");
 
+            var outputPathOption = new Option<string>(
+                "--output",
+                getDefaultValue: () => null,
+                description: "The output path for the compiled task.");
+
             var rootCommand = new RootCommand
             {
                 taskOption,
                 yamlOption,
                 confuseOption,
-                debugOption
+                debugOption,
+                outputPathOption
             };
 
             rootCommand.Description = "Empire Compiler";
@@ -48,6 +54,7 @@ namespace EmpireCompiler
                 var yaml = context.ParseResult.GetValueForOption(yamlOption);
                 var confuse = context.ParseResult.GetValueForOption(confuseOption);
                 var debug = context.ParseResult.GetValueForOption(debugOption);
+                var outputPath = context.ParseResult.GetValueForOption(outputPathOption);
 
                 DebugUtility.IsDebugEnabled = debug;
 
@@ -55,6 +62,7 @@ namespace EmpireCompiler
                 DebugUtility.DebugPrint($"Task: {task}");
                 DebugUtility.DebugPrint($"YAML: {yaml}");
                 DebugUtility.DebugPrint($"Confuse: {confuse}");
+                DebugUtility.DebugPrint($"Output Path: {outputPath}");
 
                 try
                 {
@@ -71,6 +79,7 @@ namespace EmpireCompiler
                     DebugUtility.DebugPrint("Compiling task...");
                     var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
                     agentTask.Name = task;
+                    agentTask.OutputPath = outputPath;
                     agentTask.Compile();
 
                     DebugUtility.DebugPrint($"Final Task Name: {task}");
