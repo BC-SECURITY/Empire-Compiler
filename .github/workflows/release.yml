@@ -1,6 +1,7 @@
 name: Build and Publish Self-Contained Assemblies
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       branch:
@@ -20,6 +21,8 @@ jobs:
         runtime:
           - linux-x64
           - linux-arm64
+          - osx-x64
+          - osx-arm64
 
     steps:
       - name: Checkout code
@@ -42,6 +45,7 @@ jobs:
         shell: bash
 
       - name: Create Git tag
+        if: github.event_name == 'workflow_dispatch'
         run: |
           git tag ${{ github.event.inputs.release_version }}
           git push origin ${{ github.event.inputs.release_version }}
@@ -49,6 +53,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload release assets
+        if: github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
           files: ./publish/${{ matrix.runtime }}/EmpireCompiler-${{ matrix.runtime }}
