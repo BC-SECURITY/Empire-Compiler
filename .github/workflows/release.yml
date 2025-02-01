@@ -65,16 +65,16 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Git Archive All
-        run: |
-          python scripts/git_archive_all.py publish/source-all-${{ github.event.inputs.release_version }}.tgz
-        shell: bash
-
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           path: ./publish
           merge_multiple: true
+
+      - name: Git Archive All
+        run: |
+          python scripts/git_archive_all.py publish/source-all-${{ github.event.inputs.release_version }}.tgz
+        shell: bash
 
       - name: Create Git tag
         run: |
