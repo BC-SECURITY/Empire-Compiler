@@ -69,7 +69,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ./publish
-          merge_multiple: true
+          merge-multiple: true
 
       - name: Git Archive All
         run: |
