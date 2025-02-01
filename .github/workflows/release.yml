@@ -49,6 +49,7 @@ jobs:
         with:
           name: EmpireCompiler-${{ matrix.runtime }}
           path: ./publish/EmpireCompiler-${{ matrix.runtime }}
+          if-no-files-found: error
 
   release:
     runs-on: ubuntu-latest
