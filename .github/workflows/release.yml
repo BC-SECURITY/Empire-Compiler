@@ -41,6 +41,7 @@ jobs:
       - name: Build self-contained assembly
         run: |
           dotnet publish -c Release -r ${{ matrix.runtime }} --self-contained -p:PublishSingleFile=true -o ./publish/${{ matrix.runtime }}
+          mkdir -p ./bin
           mv ./publish/${{ matrix.runtime }}/EmpireCompiler ./bin/EmpireCompiler
         shell: bash
 
