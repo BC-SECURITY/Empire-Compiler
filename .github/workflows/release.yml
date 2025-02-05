@@ -14,17 +14,29 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: {{ matrix.os}}
 
     strategy:
       matrix:
-        runtime:
-          - linux-x64
-          - linux-arm64
-          - osx-x64
-          - osx-arm64
+        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-13, macos-15]
 
     steps:
+      - name: Set runtime env var
+        run: |
+          case ${{ matrix.os }} in
+            ubuntu-24.04)
+            echo "runtime=linux-x64" >> $GITHUB_ENV
+            ;;
+            ubuntu-24.04-arm)
+            echo "runtime=linux-arm64" >> $GITHUB_ENV
+            ;;
+            macos-13)
+            echo "runtime=osx-x64" >> $GITHUB_ENV
+            ;;
+            macos-15)
+            echo "runtime=osx-arm64" >> $GITHUB_ENV
+            ;;
+          esac
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -40,23 +52,23 @@ jobs:
 
       - name: Build self-contained assembly
         run: |
-          dotnet publish -c Release -r ${{ matrix.runtime }} --self-contained -p:PublishSingleFile=true -o ./publish/${{ matrix.runtime }}
+          dotnet publish -c Release -r ${{ env.runtime }} --self-contained -p:PublishSingleFile=true -o ./publish/${{ env.runtime }}
           mkdir -p ./bin
-          mv ./publish/${{ matrix.runtime }}/EmpireCompiler ./bin/EmpireCompiler
+          mv ./publish/${{ env.runtime }}/EmpireCompiler ./bin/EmpireCompiler
         shell: bash
 
       - name: Git Archive All
         run: |
           python scripts/git_archive_all.py \
             --include "bin/EmpireCompiler" \
-            publish/EmpireCompiler-${{ matrix.runtime }}-${{ github.event.inputs.release_version }}.tgz
+            publish/EmpireCompiler-${{ env.runtime }}-${{ github.event.inputs.release_version }}.tgz
         shell: bash
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: EmpireCompiler-${{ matrix.runtime }}
-          path: ./publish/EmpireCompiler-${{ matrix.runtime }}-${{ github.event.inputs.release_version }}.tgz
+          name: EmpireCompiler-${{ env.runtime }}
+          path: ./publish/EmpireCompiler-${{ env.runtime }}-${{ github.event.inputs.release_version }}.tgz
           if-no-files-found: error
 
   release:
