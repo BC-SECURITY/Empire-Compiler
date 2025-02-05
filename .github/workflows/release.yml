@@ -53,14 +53,13 @@ jobs:
       - name: Build self-contained assembly
         run: |
           dotnet publish -c Release -r ${{ env.runtime }} --self-contained -p:PublishSingleFile=true -o ./publish/${{ env.runtime }}
-          mkdir -p ./bin
-          mv ./publish/${{ env.runtime }}/EmpireCompiler ./bin/EmpireCompiler
+          mv ./publish/${{ env.runtime }}/EmpireCompiler ./EmpireCompiler/EmpireCompiler
         shell: bash
 
       - name: Git Archive All
         run: |
           python scripts/git_archive_all.py \
-            --include "bin/EmpireCompiler" \
+            --include "EmpireCompiler/EmpireCompiler" \
             publish/EmpireCompiler-${{ env.runtime }}-${{ github.event.inputs.release_version }}.tgz
         shell: bash
 
