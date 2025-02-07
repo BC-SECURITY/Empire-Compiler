@@ -14,9 +14,9 @@ namespace EmpireCompiler
     {
         static async Task Main(string[] args)
         {
-            var outputPathOption = new Option<string>(
-                "--output",
-                description: "The output path for the compiled task.");
+            var taskOption = new Option<string>(
+                "--task",
+                description: "The name of the task to execute");
 
             var yamlOption = new Option<string>(
                 "--yaml",
@@ -34,7 +34,7 @@ namespace EmpireCompiler
 
             var rootCommand = new RootCommand
             {
-                outputPathOption,
+                taskOption,
                 yamlOption,
                 confuseOption,
                 debugOption
@@ -44,7 +44,7 @@ namespace EmpireCompiler
 
             rootCommand.SetHandler(async (InvocationContext context) =>
             {
-                var outputPath = context.ParseResult.GetValueForOption(outputPathOption);
+                var task = context.ParseResult.GetValueForOption(taskOption);
                 var yaml = context.ParseResult.GetValueForOption(yamlOption);
                 var confuse = context.ParseResult.GetValueForOption(confuseOption);
                 var debug = context.ParseResult.GetValueForOption(debugOption);
@@ -52,15 +52,15 @@ namespace EmpireCompiler
                 DebugUtility.IsDebugEnabled = debug;
 
                 DebugUtility.DebugPrint("Debug mode enabled.");
-                DebugUtility.DebugPrint($"Output Path: {outputPath}");
+                DebugUtility.DebugPrint($"Task: {task}");
                 DebugUtility.DebugPrint($"YAML: {yaml}");
                 DebugUtility.DebugPrint($"Confuse: {confuse}");
 
                 try
                 {
-                    if (string.IsNullOrEmpty(outputPath) || string.IsNullOrEmpty(yaml))
+                    if (string.IsNullOrEmpty(task) || string.IsNullOrEmpty(yaml))
                     {
-                        Console.WriteLine("Output and YAML are required.");
+                        Console.WriteLine("Task name and YAML are required.");
                         return;
                     }
 
@@ -70,11 +70,11 @@ namespace EmpireCompiler
 
                     DebugUtility.DebugPrint("Compiling task...");
                     var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
-                    agentTask.OutputPath = outputPath;
+                    agentTask.Name = task;
                     agentTask.Compile();
 
-                    DebugUtility.DebugPrint($"Final Task Path: {outputPath}");
-                    Console.WriteLine($"Final Task Path: {outputPath}");
+                    DebugUtility.DebugPrint($"Final Task Name: {task}");
+                    Console.WriteLine($"Final Task Name: {task}");
                 }
                 catch (System.Exception ex)
                 {
