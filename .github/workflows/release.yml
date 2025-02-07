@@ -14,21 +14,35 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        runtime:
-          - linux-x64
-          - linux-arm64
-          - osx-x64
-          - osx-arm64
+        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-13, macos-15]
 
     steps:
+      - name: Set runtime env var
+        run: |
+          case ${{ matrix.os }} in
+            ubuntu-24.04)
+            echo "runtime=linux-x64" >> $GITHUB_ENV
+            ;;
+            ubuntu-24.04-arm)
+            echo "runtime=linux-arm64" >> $GITHUB_ENV
+            ;;
+            macos-13)
+            echo "runtime=osx-x64" >> $GITHUB_ENV
+            ;;
+            macos-15)
+            echo "runtime=osx-arm64" >> $GITHUB_ENV
+            ;;
+          esac
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
+          submodules: recursive
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v4.0.1
@@ -38,14 +52,48 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Build and publish self-contained assembly
+      - name: Build self-contained assembly
         run: |
-          dotnet publish -c Release -r ${{ matrix.runtime }} --self-contained -p:PublishSingleFile=true -o ./publish/${{ matrix.runtime }}
-          mv ./publish/${{ matrix.runtime }}/EmpireCompiler ./publish/${{ matrix.runtime }}/EmpireCompiler-${{ matrix.runtime }}
+          dotnet publish -c Release -r ${{ env.runtime }} --self-contained -p:PublishSingleFile=true -o ./publish/${{ env.runtime }}
+          mv ./publish/${{ env.runtime }}/EmpireCompiler ./EmpireCompiler/EmpireCompiler
         shell: bash
 
+      - name: Git Archive All
+        run: |
+          python scripts/git_archive_all.py \
+            --include "EmpireCompiler/EmpireCompiler" \
+            publish/EmpireCompiler-${{ env.runtime }}-${{ github.event.inputs.release_version }}.tgz
+        shell: bash
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: EmpireCompiler-${{ env.runtime }}
+          path: ./publish/EmpireCompiler-${{ env.runtime }}-${{ github.event.inputs.release_version }}.tgz
+          if-no-files-found: error
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./publish
+          merge-multiple: true
+
       - name: Create Git tag
-        if: github.event_name == 'workflow_dispatch'
         run: |
           git tag ${{ github.event.inputs.release_version }}
           git push origin ${{ github.event.inputs.release_version }}
@@ -56,7 +104,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
-          files: ./publish/${{ matrix.runtime }}/EmpireCompiler-${{ matrix.runtime }}
+          files: ./publish/*
           tag_name: ${{ github.event.inputs.release_version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
