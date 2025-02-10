@@ -134,28 +134,31 @@ namespace EmpireCompiler.Models.Agents
             return this.FromSerializedGruntTask(task);
         }
 
-        public void Compile(Compiler.RuntimeIdentifier runtimeIdentifier = Compiler.RuntimeIdentifier.win_x64)
+        public void Compile(Common.DotNetVersion dotnetVersion, Compiler.RuntimeIdentifier runtimeIdentifier = Compiler.RuntimeIdentifier.win_x64)
         {
             if (!this.Compiled)
             {
-                foreach (Common.DotNetVersion version in this.CompatibleDotNetVersions)
+                if (!this.CompatibleDotNetVersions.Contains(dotnetVersion))
                 {
-                    if (version == Common.DotNetVersion.Net35)
-                    {
+                    Console.WriteLine($"Error: The provided .NET version {dotnetVersion} is not supported for this task.");
+                    Environment.Exit(1);
+                }
+
+                switch (dotnetVersion)
+                {
+                    case Common.DotNetVersion.Net35:
                         this.CompileDotNet35();
-                    }
-                    else if (version == Common.DotNetVersion.Net40)
-                    {
+                        break;
+                    case Common.DotNetVersion.Net40:
                         this.CompileDotNet40();
-                    }
-                    else if (version == Common.DotNetVersion.Net45)
-                    {
+                        break;
+                    case Common.DotNetVersion.Net45:
                         this.CompileDotNet45();
-                    }
-                    // else if (version == Common.DotNetVersion.NetCore31)
-                    // {
-                    //     this.CompileDotNetCore(runtimeIdentifier);
-                    // }
+                        break;
+                    default:
+                        Console.WriteLine($"Error: Compilation for {dotnetVersion} is not implemented.");
+                        Environment.Exit(1);
+                        break;
                 }
             }
         }
