@@ -346,53 +346,6 @@ namespace EmpireCompiler.Models.Agents
                 })
             );
         }
-
-        private void CompileDotNetCore(Compiler.RuntimeIdentifier runtimeIdentifier)
-        {
-            string cspprojformat =
-@"<Project Sdk=""Microsoft.NET.Sdk"">
-
-  <PropertyGroup>
-    <OutputType>Library</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-  </PropertyGroup>
-
-  {0}
-</Project>";
-            string referencegroupformat =
-@"<ItemGroup>
-    {0}
-  </ItemGroup>";
-            string referenceformat =
-@"<Reference Include=""{0}"">
-      <HintPath>{1}</HintPath>
-    </Reference>";
-
-            IEnumerable<string> references = this.ReferenceAssemblies.Select(RA =>
-            {
-                string name = RA.Name.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) ? RA.Name.Substring(0, RA.Name.Length - 4) : RA.Name;
-                return string.Format(referenceformat, name, RA.Location);
-            });
-            string csproj = string.Format(cspprojformat, string.Format(referencegroupformat, string.Join(Environment.NewLine + "    ", references)));
-            string sanitizedName = Utilities.GetSanitizedFilename(this.Name);
-            string dir = Common.EmpireDataDirectory + "Grunt" + Path.DirectorySeparatorChar + sanitizedName + Path.DirectorySeparatorChar + "Task" + Path.DirectorySeparatorChar;
-            string file = "Task" + Utilities.GetExtensionForLanguage(this.Language);
-            File.WriteAllText(dir + "Task" + ".csproj", csproj);
-            File.WriteAllText(dir + file, this.Code);
-            File.WriteAllBytes(Common.EmpireTaskCSharpCompiledNetCoreApp30Directory + this.Name + ".compiled",
-                Utilities.Compress(Compiler.Compile(new Compiler.CsharpCoreCompilationRequest
-                {
-                    ResultName = "Task",
-                    Language = this.Language,
-                    TargetDotNetVersion = Common.DotNetVersion.NetCore31,
-                    SourceDirectory = dir,
-                    OutputKind = OutputKind.DynamicallyLinkedLibrary,
-                    RuntimeIdentifier = runtimeIdentifier,
-                    UseSubprocess = true
-                }))
-            );
-        }
     }
 
     internal class SerializedGruntTask
