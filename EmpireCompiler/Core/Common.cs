@@ -18,15 +18,6 @@ namespace EmpireCompiler.Core
         public static string EmpireEmbeddedResourcesDirectory = EmpireDataDirectory + "EmbeddedResources" + Path.DirectorySeparatorChar;
         public static string EmpireReferenceSourceLibraries = EmpireDataDirectory + "ReferenceSourceLibraries" + Path.DirectorySeparatorChar;
 
-        public static string EmpireTaskDirectory = EmpireDataDirectory + "Tasks" + Path.DirectorySeparatorChar;
-        public static string EmpireTaskCSharpDirectory = EmpireTaskDirectory + "CSharp" + Path.DirectorySeparatorChar;
-        // public static string EmpireTaskCSharpNetCoreApp30Directory = EmpireTaskCSharpDirectory + "netcoreapp3.0" + Path.DirectorySeparatorChar;
-        public static string EmpireTaskCSharpCompiledDirectory = EmpireTaskCSharpDirectory + "Compiled" + Path.DirectorySeparatorChar;
-        public static string EmpireTaskCSharpCompiledNet35Directory = EmpireTaskCSharpCompiledDirectory + "net35" + Path.DirectorySeparatorChar;
-        public static string EmpireTaskCSharpCompiledNet40Directory = EmpireTaskCSharpCompiledDirectory + "net40" + Path.DirectorySeparatorChar;
-        public static string EmpireTaskCSharpCompiledNet45Directory = EmpireTaskCSharpCompiledDirectory + "net45" + Path.DirectorySeparatorChar;
-        public static string EmpireTaskCSharpCompiledNetCoreApp30Directory = EmpireTaskCSharpCompiledDirectory + "netcoreapp3.0" + Path.DirectorySeparatorChar;
-
         public static List<Compiler.Reference> DefaultNet35References = new List<Compiler.Reference>
         {
             new Compiler.Reference { File = EmpireAssemblyReferenceNet35Directory + "mscorlib.dll", Framework = DotNetVersion.Net35, Enabled = true },

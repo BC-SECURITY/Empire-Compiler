@@ -1,6 +1,4 @@
-﻿using EmpireCompiler.Models.Agents;
-using EmpireCompiler.Utility;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
@@ -8,19 +6,33 @@ using System.Text;
 using System.Threading.Tasks;
 using YamlDotNet.Serialization;
 
+using EmpireCompiler.Models.Agents;
+using EmpireCompiler.Utility;
+using EmpireCompiler.Core;
+
 namespace EmpireCompiler
 {
     public class Program
     {
-        static async Task Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            var taskOption = new Option<string>(
-                "--task",
-                description: "The name of the task to execute");
+            var outputPathOption = new Option<string>(
+                "--output",
+                description: "The output path for the compiled task")
+            {
+                IsRequired = true
+            };
 
             var yamlOption = new Option<string>(
                 "--yaml",
-                description: "The YAML string containing the task definition");
+                description: "The YAML string containing the task definition")
+            {
+                IsRequired = true
+            };
+
+            var dotnetVersionOption = new Option<string>(
+                "--dotnet-version",
+                description: "The version of .NET to use for the task");
 
             var confuseOption = new Option<bool>(
                 "--confuse",
@@ -32,56 +44,51 @@ namespace EmpireCompiler
                 getDefaultValue: () => false,
                 description: "Run in debug mode");
 
-            var rootCommand = new RootCommand
+            var rootCommand = new RootCommand("Empire Compiler")
             {
-                taskOption,
+                outputPathOption,
                 yamlOption,
+                dotnetVersionOption,
                 confuseOption,
                 debugOption
             };
 
-            rootCommand.Description = "Empire Compiler";
-
-            rootCommand.SetHandler(async (InvocationContext context) =>
+            rootCommand.SetHandler(async (outputPath, yaml, dotnetVersion, confuse, debug) =>
             {
-                var task = context.ParseResult.GetValueForOption(taskOption);
-                var yaml = context.ParseResult.GetValueForOption(yamlOption);
-                var confuse = context.ParseResult.GetValueForOption(confuseOption);
-                var debug = context.ParseResult.GetValueForOption(debugOption);
-
                 DebugUtility.IsDebugEnabled = debug;
-
                 DebugUtility.DebugPrint("Debug mode enabled.");
-                DebugUtility.DebugPrint($"Task: {task}");
+                DebugUtility.DebugPrint($"Output Path: {outputPath}");
                 DebugUtility.DebugPrint($"YAML: {yaml}");
+                DebugUtility.DebugPrint($"Dotnet Version: {dotnetVersion}");
                 DebugUtility.DebugPrint($"Confuse: {confuse}");
 
                 try
                 {
-                    if (string.IsNullOrEmpty(task) || string.IsNullOrEmpty(yaml))
-                    {
-                        Console.WriteLine("Task name and YAML are required.");
-                        return;
-                    }
-
                     var decodedYaml = DecodeBase64(yaml);
-                    var deserializer = new DeserializerBuilder() .IgnoreUnmatchedProperties().Build();
+                    var deserializer = new DeserializerBuilder().IgnoreUnmatchedProperties().Build();
                     var serializedTasks = deserializer.Deserialize<List<SerializedGruntTask>>(decodedYaml);
 
                     DebugUtility.DebugPrint("Compiling task...");
                     var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
-                    agentTask.Name = task;
-                    agentTask.Compile();
+                    agentTask.OutputPath = outputPath;
 
-                    DebugUtility.DebugPrint($"Final Task Name: {task}");
-                    Console.WriteLine($"Final Task Name: {task}");
+                    if (!Enum.TryParse(dotnetVersion, true, out Common.DotNetVersion parsedVersion))
+                    {
+                        Console.WriteLine($"Error: Invalid .NET version '{dotnetVersion}'. Supported versions: Net35, Net40, Net45.");
+                        Environment.Exit(1);
+                    }
+
+                    agentTask.Compile(parsedVersion);
+
+                    DebugUtility.DebugPrint($"Final Task Path: {outputPath}");
+                    Console.WriteLine($"Final Task Path: {outputPath}");
                 }
                 catch (System.Exception ex)
                 {
                     DebugUtility.DebugPrint($"Error occurred: {ex.ToString()}");
                     Console.WriteLine("Error occurred: " + ex.ToString());
                 }
-            });
+            }, outputPathOption, yamlOption, dotnetVersionOption, confuseOption, debugOption);
 
             await rootCommand.InvokeAsync(args);
         }
