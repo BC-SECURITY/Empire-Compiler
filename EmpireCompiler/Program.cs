@@ -71,6 +71,7 @@ namespace EmpireCompiler
                     DebugUtility.DebugPrint("Compiling task...");
                     var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
                     agentTask.OutputPath = outputPath;
+                    agentTask.Confuse = confuse;
 
                     if (!Enum.TryParse(dotnetVersion, true, out Common.DotNetVersion parsedVersion))
                     {
