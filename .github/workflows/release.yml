@@ -52,17 +52,14 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Build self-contained assembly
+      - name: Build (framework-dependent, not single-file)
         run: |
-          dotnet publish -c Release -r ${{ env.runtime }} --self-contained -p:PublishSingleFile=true -o ./publish/${{ env.runtime }}
-          mv ./publish/${{ env.runtime }}/EmpireCompiler ./EmpireCompiler/EmpireCompiler
+          dotnet publish -c Release -r ${{ env.runtime }} --self-contained false -p:PublishSingleFile=false -o ./publish/${{ env.runtime }}
         shell: bash
 
-      - name: Git Archive All
+      - name: Package publish output
         run: |
-          python scripts/git_archive_all.py \
-            --include "EmpireCompiler/EmpireCompiler" \
-            publish/EmpireCompiler-${{ env.runtime }}-${{ github.event.inputs.release_version }}.tgz
+          tar -C ./publish/${{ env.runtime }} -czf ./publish/EmpireCompiler-${{ env.runtime }}-${{ github.event.inputs.release_version }}.tgz .
         shell: bash
 
       - name: Upload build artifacts
