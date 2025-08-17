@@ -60,7 +60,7 @@ jobs:
       - name: Git Archive All
         run: |
           python scripts/git_archive_all.py \
-            --include "EmpireCompiler/EmpireCompiler" \
+            --include "EmpireCompiler" \
             publish/EmpireCompiler-${{ env.runtime }}-${{ github.event.inputs.release_version }}.tgz
         shell: bash
 
