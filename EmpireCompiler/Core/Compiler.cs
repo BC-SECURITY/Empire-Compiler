@@ -6,9 +6,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using EmpireCompiler.Utility;
 
 namespace EmpireCompiler.Core
 {
@@ -210,6 +212,7 @@ namespace EmpireCompiler.Core
                     throw new CompilerException("CompilationErrors: " + Environment.NewLine + sb);
                 }
             }
+            DebugUtility.DebugPrint("Compilation successful.");
             if (request.Confuse)
             {
                 return ConfuseAssembly(ILbytes);
@@ -219,14 +222,25 @@ namespace EmpireCompiler.Core
 
         private static byte[] ConfuseAssembly(byte[] ILBytes)
         {
+            DebugUtility.DebugPrint("Confusing assembly...");
+
+            // Prepare input/output paths for Confuser
+            var inputFileName = "confused.exe";
+            var inputPath = Path.Combine(Common.EmpireTempDirectory, inputFileName);
+            var outputDir = Path.Combine(Common.EmpireTempDirectory, "confused_out");
+            Directory.CreateDirectory(outputDir);
+
+            // Write the unprotected IL to a temp file with a proper extension
+            File.WriteAllBytes(inputPath, ILBytes);
+
+            // Build a Confuser project with a separate output directory
             ConfuserProject project = new ConfuserProject();
             System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
-            File.WriteAllBytes(Common.EmpireTempDirectory + "confused", ILBytes);
             string ProjectFile = String.Format(
-                ConfuserExOptions,
-                Common.EmpireTempDirectory,
-                Common.EmpireTempDirectory,
-                "confused"
+                ConfuserExOptions,           // uses aggressive preset below
+                Common.EmpireTempDirectory,  // baseDir
+                outputDir,                   // outputDir
+                inputFileName                // module path (relative to baseDir)
             );
             doc.Load(new StringReader(ProjectFile));
             project.Load(doc);
@@ -234,16 +248,38 @@ namespace EmpireCompiler.Core
             project.ProbePaths.Add(Common.EmpireAssemblyReferenceNet40Directory);
             project.ProbePaths.Add(Common.EmpireAssemblyReferenceNet45Directory);
 
-            ConfuserParameters parameters = new ConfuserParameters();
-            parameters.Project = project;
-            parameters.Logger = default;
+            ConfuserParameters parameters = new ConfuserParameters
+            {
+                Project = project,
+                Logger = default // Consider wiring a logger if you need Confuser logs
+            };
+
             ConfuserEngine.Run(parameters).Wait();
-            return File.ReadAllBytes(Common.EmpireTempDirectory + "confused");
+
+            // Confuser writes to outputDir with the same file name
+            var outputPath = Path.Combine(outputDir, inputFileName);
+            if (!File.Exists(outputPath))
+            {
+                DebugUtility.DebugPrint($"Confuser output not found at: {outputPath}. Returning original bytes.");
+                return ILBytes;
+            }
+
+            var protectedBytes = File.ReadAllBytes(outputPath);
+            DebugUtility.DebugPrint($"Confusion completed. Output size: {protectedBytes.Length} bytes.");
+
+            // Sanity check: if identical, inform for troubleshooting
+            if (protectedBytes.Length == ILBytes.Length &&
+                protectedBytes.SequenceEqual(ILBytes))
+            {
+                DebugUtility.DebugPrint("Protected bytes are identical to input. Obfuscation may not have been applied.");
+            }
+
+            return protectedBytes;
         }
 
         private static string ConfuserExOptions { get; set; } = @"
 <project baseDir=""{0}"" outputDir=""{1}"" xmlns=""http://confuser.codeplex.com"">
-  <rule pattern=""true"" preset=""minimum"" inherit=""false"" />
+  <rule pattern=""true"" preset=""aggressive"" inherit=""false"" />
   <module path=""{2}"" />
 </project>
 ";
