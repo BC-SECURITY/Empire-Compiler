@@ -55,7 +55,7 @@ jobs:
       - name: Build self-contained assembly
         run: |
           dotnet publish -c Release -r ${{ env.runtime }} --self-contained -o ./publish/${{ env.runtime }}
-          mv ./publish/${{ env.runtime }}/* ./EmpireCompiler/EmpireCompiler/
+          mv ./publish/${{ env.runtime }}/* ./EmpireCompiler/
         shell: bash
       - name: Git Archive All
         run: |
