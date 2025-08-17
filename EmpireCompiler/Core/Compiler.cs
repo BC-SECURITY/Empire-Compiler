@@ -279,7 +279,7 @@ namespace EmpireCompiler.Core
 
         private static string ConfuserExOptions { get; set; } = @"
 <project baseDir=""{0}"" outputDir=""{1}"" xmlns=""http://confuser.codeplex.com"">
-  <rule pattern=""true"" preset=""aggressive"" inherit=""false"" />
+  <rule pattern=""true"" preset=""minimum"" inherit=""false"" />
   <module path=""{2}"" />
 </project>
 ";
