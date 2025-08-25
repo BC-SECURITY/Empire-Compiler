@@ -5,6 +5,7 @@ using System.CommandLine.Invocation;
 using System.Text;
 using System.Threading.Tasks;
 using YamlDotNet.Serialization;
+using System.IO;
 
 using EmpireCompiler.Models.Agents;
 using EmpireCompiler.Utility;
@@ -16,6 +17,7 @@ namespace EmpireCompiler
     {
         public static async Task Main(string[] args)
         {
+            
             var outputPathOption = new Option<string>(
                 "--output",
                 description: "The output path for the compiled task")

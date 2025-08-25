@@ -236,8 +236,15 @@ namespace EmpireCompiler.Core
             // Build a Confuser project with a separate output directory
             ConfuserProject project = new ConfuserProject();
             System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
+            string projectFilePath = Path.Combine(Common.EmpireTempDirectory, "empire.crproj");
+
+	    if (!File.Exists(projectFilePath))
+            {
+                throw new CompilerException($"Confuser project file not found at: {projectFilePath}");
+            }
+            string projectFileContent = File.ReadAllText(projectFilePath);
             string ProjectFile = String.Format(
-                ConfuserExOptions,           // uses aggressive preset below
+                projectFileContent,          // uses aggressive preset below
                 Common.EmpireTempDirectory,  // baseDir
                 outputDir,                   // outputDir
                 inputFileName                // module path (relative to baseDir)
@@ -279,7 +286,11 @@ namespace EmpireCompiler.Core
 
         private static string ConfuserExOptions { get; set; } = @"
 <project baseDir=""{0}"" outputDir=""{1}"" xmlns=""http://confuser.codeplex.com"">
-  <rule pattern=""true"" preset=""minimum"" inherit=""false"" />
+  <rule pattern=""true"" preset=""none"" inherit=""false"">
+    <protection id=""rename"" />
+    <protection id=""anti ildasm"" />
+    <protection id=""ctrl flow"" />
+  </rule>
   <module path=""{2}"" />
 </project>
 ";
