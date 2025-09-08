@@ -228,40 +228,43 @@ namespace EmpireCompiler.Core
             var inputFileName = "confused.exe";
             var inputPath = Path.Combine(Common.EmpireTempDirectory, inputFileName);
             var outputDir = Path.Combine(Common.EmpireTempDirectory, "confused_out");
+            var confuserProject = Path.Combine(Common.EmpireTempDirectory, "empire.crproj");
             Directory.CreateDirectory(outputDir);
 
             // Write the unprotected IL to a temp file with a proper extension
             File.WriteAllBytes(inputPath, ILBytes);
 
             // Build a Confuser project with a separate output directory
-            ConfuserProject project = new ConfuserProject();
-            System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
-            string projectFilePath = Path.Combine(Common.EmpireTempDirectory, "empire.crproj");
+            var workingDir = Path.Combine(Common.EmpireTempDirectory,"ConfuserEx-CLI");
+            var startInfo = new ProcessStartInfo
+	    {
+		FileName = "mono",
+		Arguments = $"Confuser.CLI.exe -n \"{confuserProject}\"",
+		WorkingDirectory = workingDir, // path to Confuser.CLI.exe
+		RedirectStandardOutput = true,
+		RedirectStandardError = true,
+		UseShellExecute = false,
+		CreateNoWindow = true
+	    };
+            using (var process = new Process { StartInfo = startInfo })
+		{
+		    process.Start();
 
-	    if (!File.Exists(projectFilePath))
-            {
-                throw new CompilerException($"Confuser project file not found at: {projectFilePath}");
-            }
-            string projectFileContent = File.ReadAllText(projectFilePath);
-            string ProjectFile = String.Format(
-                projectFileContent,          // uses aggressive preset below
-                Common.EmpireTempDirectory,  // baseDir
-                outputDir,                   // outputDir
-                inputFileName                // module path (relative to baseDir)
-            );
-            doc.Load(new StringReader(ProjectFile));
-            project.Load(doc);
-            project.ProbePaths.Add(Common.EmpireAssemblyReferenceNet35Directory);
-            project.ProbePaths.Add(Common.EmpireAssemblyReferenceNet40Directory);
-            project.ProbePaths.Add(Common.EmpireAssemblyReferenceNet45Directory);
+		    // Read output (blocking until finished)
+		    string output = process.StandardOutput.ReadToEnd();
+		    string error = process.StandardError.ReadToEnd();
 
-            ConfuserParameters parameters = new ConfuserParameters
-            {
-                Project = project,
-                Logger = default // Consider wiring a logger if you need Confuser logs
-            };
+		    process.WaitForExit();
 
-            ConfuserEngine.Run(parameters).Wait();
+		    Console.WriteLine("Output:");
+		    Console.WriteLine(output);
+
+		    if (!string.IsNullOrWhiteSpace(error))
+		    {
+		        Console.WriteLine("Errors:");
+		        Console.WriteLine(error);
+		    }
+		}
 
             // Confuser writes to outputDir with the same file name
             var outputPath = Path.Combine(outputDir, inputFileName);
