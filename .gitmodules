@@ -40,6 +40,7 @@
 [submodule "EmpireCompiler/Data/ReferenceSourceLibraries/Sharpire"]
 	path = EmpireCompiler/Data/ReferenceSourceLibraries/Sharpire
 	url = https://github.com/BC-SECURITY/Sharpire.git
+	branch = ACE_Merge
 [submodule "EmpireCompiler/Data/ReferenceSourceLibraries/ThreadlessInject"]
 	path = EmpireCompiler/Data/ReferenceSourceLibraries/ThreadlessInject
 	url = https://github.com/Cx01N/ThreadlessInject.git
