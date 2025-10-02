@@ -234,13 +234,13 @@ namespace EmpireCompiler.Core
             // Write the unprotected IL to a temp file with a proper extension
             File.WriteAllBytes(inputPath, ILBytes);
 
-            // Build a Confuser project with a separate output directory
+            
             var workingDir = Path.Combine(Common.EmpireTempDirectory,"ConfuserEx-CLI");
             var startInfo = new ProcessStartInfo
 	    {
 		FileName = "mono",
 		Arguments = $"Confuser.CLI.exe -n \"{confuserProject}\"",
-		WorkingDirectory = workingDir, // path to Confuser.CLI.exe
+		ConfuserDirectory = Common.EmpireDataDirectory, // path to Confuser.CLI.exe
 		RedirectStandardOutput = true,
 		RedirectStandardError = true,
 		UseShellExecute = false,
