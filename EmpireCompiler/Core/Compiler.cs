@@ -240,7 +240,7 @@ namespace EmpireCompiler.Core
 	    {
 		FileName = "mono",
 		Arguments = $"Confuser.CLI.exe -n \"{confuserProject}\"",
-		ConfuserDirectory = Common.EmpireDataDirectory, // path to Confuser.CLI.exe
+		WorkingDirectory = Common.EmpireDataDirectory, // path to Confuser.CLI.exe
 		RedirectStandardOutput = true,
 		RedirectStandardError = true,
 		UseShellExecute = false,
