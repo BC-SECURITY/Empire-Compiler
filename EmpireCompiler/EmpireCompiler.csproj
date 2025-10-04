@@ -135,4 +135,10 @@
     <Content Remove="Data/ReferenceSourceLibraries\**" />
     <EmbeddedResource Remove="Data/ReferenceSourceLibraries\**" />
   </ItemGroup>
+    <ItemGroup>
+    <None Remove="Data\ConfuserEx-CLI\**" />
+    <Compile Remove="Data\ConfuserEx-CLI\**" />
+    <Content Remove="Data\ConfuserEx-CLI\**" />
+    <EmbeddedResource Remove="Data\ConfuserEx-CLI\**" />
+  </ItemGroup>
 </Project>
