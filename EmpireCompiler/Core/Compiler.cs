@@ -237,34 +237,34 @@ namespace EmpireCompiler.Core
             
             var workingDir = Path.Combine(Common.EmpireTempDirectory,"ConfuserEx-CLI");
             var startInfo = new ProcessStartInfo
-	    {
-		FileName = "mono",
-		Arguments = $"Confuser.CLI.exe -n \"{confuserProject}\"",
-		WorkingDirectory = Common.EmpireDataDirectory, // path to Confuser.CLI.exe
-		RedirectStandardOutput = true,
-		RedirectStandardError = true,
-		UseShellExecute = false,
-		CreateNoWindow = true
-	    };
+        {
+        FileName = "mono",
+        Arguments = $"Confuser.CLI.exe -n \"{confuserProject}\"",
+        WorkingDirectory = Common.EmpireDataDirectory, // path to Confuser.CLI.exe
+        RedirectStandardOutput = true,
+        RedirectStandardError = true,
+        UseShellExecute = false,
+        CreateNoWindow = true
+        };
             using (var process = new Process { StartInfo = startInfo })
-		{
-		    process.Start();
+        {
+            process.Start();
 
-		    // Read output (blocking until finished)
-		    string output = process.StandardOutput.ReadToEnd();
-		    string error = process.StandardError.ReadToEnd();
+            // Read output (blocking until finished)
+            string output = process.StandardOutput.ReadToEnd();
+            string error = process.StandardError.ReadToEnd();
 
-		    process.WaitForExit();
+            process.WaitForExit();
 
-		    Console.WriteLine("Output:");
-		    Console.WriteLine(output);
+            Console.WriteLine("Output:");
+            Console.WriteLine(output);
 
-		    if (!string.IsNullOrWhiteSpace(error))
-		    {
-		        Console.WriteLine("Errors:");
-		        Console.WriteLine(error);
-		    }
-		}
+            if (!string.IsNullOrWhiteSpace(error))
+            {
+                Console.WriteLine("Errors:");
+                Console.WriteLine(error);
+            }
+        }
 
             // Confuser writes to outputDir with the same file name
             var outputPath = Path.Combine(outputDir, inputFileName);
