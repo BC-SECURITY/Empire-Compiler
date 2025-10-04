@@ -50,6 +50,3 @@
 [submodule "EmpireCompiler/Data/ReferenceSourceLibraries/CS_COFFLoader"]
 	path = EmpireCompiler/Data/ReferenceSourceLibraries/CS_COFFLoader
 	url = https://github.com/BC-SECURITY/CS_COFFLoader.git
-[submodule "/home/kali/test/Empire-Compiler/EmpireCompiler/Data/ReferenceSourceLibraries/Sharpire"]
-	path = /home/kali/test/Empire-Compiler/EmpireCompiler/Data/ReferenceSourceLibraries/Sharpire
-	url = git@github.com:BC-SECURITY/Sharpire.git
