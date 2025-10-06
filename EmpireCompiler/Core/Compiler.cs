@@ -228,33 +228,43 @@ namespace EmpireCompiler.Core
             var inputFileName = "confused.exe";
             var inputPath = Path.Combine(Common.EmpireTempDirectory, inputFileName);
             var outputDir = Path.Combine(Common.EmpireTempDirectory, "confused_out");
+            var confuserProject = Path.Combine(Common.EmpireTempDirectory, "empire.crproj");
             Directory.CreateDirectory(outputDir);
 
             // Write the unprotected IL to a temp file with a proper extension
             File.WriteAllBytes(inputPath, ILBytes);
 
-            // Build a Confuser project with a separate output directory
-            ConfuserProject project = new ConfuserProject();
-            System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
-            string ProjectFile = String.Format(
-                ConfuserExOptions,           // uses aggressive preset below
-                Common.EmpireTempDirectory,  // baseDir
-                outputDir,                   // outputDir
-                inputFileName                // module path (relative to baseDir)
-            );
-            doc.Load(new StringReader(ProjectFile));
-            project.Load(doc);
-            project.ProbePaths.Add(Common.EmpireAssemblyReferenceNet35Directory);
-            project.ProbePaths.Add(Common.EmpireAssemblyReferenceNet40Directory);
-            project.ProbePaths.Add(Common.EmpireAssemblyReferenceNet45Directory);
+            
+            var workingDir = Path.Combine(Common.EmpireTempDirectory,"ConfuserEx-CLI");
+            var startInfo = new ProcessStartInfo
+        {
+        FileName = "mono",
+        Arguments = $"Confuser.CLI.exe -n \"{confuserProject}\"",
+        WorkingDirectory = Common.EmpireDataDirectory, // path to Confuser.CLI.exe
+        RedirectStandardOutput = true,
+        RedirectStandardError = true,
+        UseShellExecute = false,
+        CreateNoWindow = true
+        };
+            using (var process = new Process { StartInfo = startInfo })
+        {
+            process.Start();
 
-            ConfuserParameters parameters = new ConfuserParameters
+            // Read output (blocking until finished)
+            string output = process.StandardOutput.ReadToEnd();
+            string error = process.StandardError.ReadToEnd();
+
+            process.WaitForExit();
+
+            Console.WriteLine("Output:");
+            Console.WriteLine(output);
+
+            if (!string.IsNullOrWhiteSpace(error))
             {
-                Project = project,
-                Logger = default // Consider wiring a logger if you need Confuser logs
-            };
-
-            ConfuserEngine.Run(parameters).Wait();
+                Console.WriteLine("Errors:");
+                Console.WriteLine(error);
+            }
+        }
 
             // Confuser writes to outputDir with the same file name
             var outputPath = Path.Combine(outputDir, inputFileName);
@@ -279,7 +289,11 @@ namespace EmpireCompiler.Core
 
         private static string ConfuserExOptions { get; set; } = @"
 <project baseDir=""{0}"" outputDir=""{1}"" xmlns=""http://confuser.codeplex.com"">
-  <rule pattern=""true"" preset=""minimum"" inherit=""false"" />
+  <rule pattern=""true"" preset=""none"" inherit=""false"">
+    <protection id=""rename"" />
+    <protection id=""anti ildasm"" />
+    <protection id=""ctrl flow"" />
+  </rule>
   <module path=""{2}"" />
 </project>
 ";
