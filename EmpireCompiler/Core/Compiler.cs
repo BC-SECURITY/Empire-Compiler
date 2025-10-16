@@ -221,50 +221,71 @@ namespace EmpireCompiler.Core
         }
 
         private static byte[] ConfuseAssembly(byte[] ILBytes)
-        {
-            DebugUtility.DebugPrint("Confusing assembly...");
+	{
+	    DebugUtility.DebugPrint("Confusing assembly...");
+	    
+	    // Prepare input/output paths for Confuser
+	    var inputFileName = "confused.exe";
+	    var inputPath = Path.Combine(Common.EmpireTempDirectory, inputFileName);
+	    var outputDir = Path.Combine(Common.EmpireTempDirectory, "confused_out");
+	    var confuserProject = Path.Combine(Common.EmpireTempDirectory, "empire.crproj");
+	    var logFilePath = Path.Combine(Common.EmpireTempDirectory, "confuser.log");
+	    
+	    Directory.CreateDirectory(outputDir);
+	    
+	    // Write the unprotected IL to a temp file with a proper extension
+	    File.WriteAllBytes(inputPath, ILBytes);
+	    
+	    var workingDir = Path.Combine(Common.EmpireDataDirectory, "ConfuserEx-CLI");
+	   
+	    var startInfo = new ProcessStartInfo
+	    {
+		FileName = "mono",
+		Arguments = $"Confuser.CLI.exe -n \"{confuserProject}\"",
+		WorkingDirectory = workingDir,
+		RedirectStandardOutput = true,
+		RedirectStandardError = true,
+		UseShellExecute = false,
+		CreateNoWindow = true
+	    };
 
-            // Prepare input/output paths for Confuser
-            var inputFileName = "confused.exe";
-            var inputPath = Path.Combine(Common.EmpireTempDirectory, inputFileName);
-            var outputDir = Path.Combine(Common.EmpireTempDirectory, "confused_out");
-            var confuserProject = Path.Combine(Common.EmpireTempDirectory, "empire.crproj");
-            Directory.CreateDirectory(outputDir);
+	    using (var process = Process.Start(startInfo))
+	    using (var logFile = new StreamWriter(logFilePath, append: false))
+	    {
+		// Write timestamp
+		logFile.WriteLine($"=== Confuser Run: {DateTime.Now} ===");
+		
+		// Capture and write stdout
+		process.OutputDataReceived += (sender, args) =>
+		{
+		    if (args.Data != null)
+		    {
+		        logFile.WriteLine($"[OUT] {args.Data}");
+		        logFile.Flush();
+		    }
+		};
+		
+		// Capture and write stderr
+		process.ErrorDataReceived += (sender, args) =>
+		{
+		    if (args.Data != null)
+		    {
+		        logFile.WriteLine($"[ERR] {args.Data}");
+		        logFile.Flush();
+		    }
+		};
+		
+		process.BeginOutputReadLine();
+		process.BeginErrorReadLine();
+		
+		process.WaitForExit();
+		
+		logFile.WriteLine($"Exit Code: {process.ExitCode}");
+		logFile.WriteLine();
+	    }
+	    
 
-            // Write the unprotected IL to a temp file with a proper extension
-            File.WriteAllBytes(inputPath, ILBytes);
 
-            
-            var workingDir = Path.Combine(Common.EmpireTempDirectory,"ConfuserEx-CLI");
-            var startInfo = new ProcessStartInfo
-        {
-        FileName = "mono",
-        Arguments = $"Confuser.CLI.exe -n \"{confuserProject}\"",
-        WorkingDirectory = Common.EmpireDataDirectory, // path to Confuser.CLI.exe
-        RedirectStandardOutput = true,
-        RedirectStandardError = true,
-        UseShellExecute = false,
-        CreateNoWindow = true
-        };
-            using (var process = new Process { StartInfo = startInfo })
-        {
-            process.Start();
-
-            // Read output (blocking until finished)
-            string output = process.StandardOutput.ReadToEnd();
-            string error = process.StandardError.ReadToEnd();
-
-            process.WaitForExit();
-
-            Console.WriteLine("Output:");
-            Console.WriteLine(output);
-
-            if (!string.IsNullOrWhiteSpace(error))
-            {
-                Console.WriteLine("Errors:");
-                Console.WriteLine(error);
-            }
-        }
 
             // Confuser writes to outputDir with the same file name
             var outputPath = Path.Combine(outputDir, inputFileName);
