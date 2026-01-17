@@ -18,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-13, macos-15]
+        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-15]
 
     steps:
       - name: Set runtime env var
@@ -29,9 +29,6 @@ jobs:
             ;;
             ubuntu-24.04-arm)
             echo "runtime=linux-arm64" >> $GITHUB_ENV
-            ;;
-            macos-13)
-            echo "runtime=osx-x64" >> $GITHUB_ENV
             ;;
             macos-15)
             echo "runtime=osx-arm64" >> $GITHUB_ENV
