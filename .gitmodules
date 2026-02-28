@@ -49,3 +49,6 @@
 [submodule "EmpireCompiler/Data/ReferenceSourceLibraries/CS_COFFLoader"]
 	path = EmpireCompiler/Data/ReferenceSourceLibraries/CS_COFFLoader
 	url = https://github.com/BC-SECURITY/CS_COFFLoader.git
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/SharpHound"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/SharpHound
+	url = https://github.com/SpecterOps/SharpHound
