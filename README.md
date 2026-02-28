@@ -28,6 +28,22 @@ dotnet test --filter "profileName=CSharpPS"
 
 Available profiles: `CSharpPS`, `Seatbelt`, `Powershell-Old`, `Powershell-New`
 
+## Lint & Format
+
+This project uses [`.editorconfig`](.editorconfig) and [.NET Analyzers](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/overview) to enforce code style and catch common issues.
+
+To auto-fix formatting:
+
+```bash
+dotnet format
+```
+
+To check formatting without modifying files (used in CI):
+
+```bash
+dotnet format --verify-no-changes
+```
+
 ## Official Discord Channel
 Join us in our Discord with any comments, questions, concerns, or problems!
 

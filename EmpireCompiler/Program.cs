@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.Text;
 using System.Threading.Tasks;
-using YamlDotNet.Serialization;
-using System.IO;
 
+using EmpireCompiler.Core;
 using EmpireCompiler.Models.Agents;
 using EmpireCompiler.Utility;
-using EmpireCompiler.Core;
+
+using YamlDotNet.Serialization;
 
 namespace EmpireCompiler
 {
@@ -16,7 +16,7 @@ namespace EmpireCompiler
     {
         public static async Task Main(string[] args)
         {
-            
+
             var outputPathOption = new Option<string>("--output")
             {
                 Description = "The output path for the compiled task",

@@ -1,12 +1,16 @@
-﻿using EmpireCompiler.Core;
-using Microsoft.CodeAnalysis;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
+
+using EmpireCompiler.Core;
+
+using Microsoft.CodeAnalysis;
+
+using Newtonsoft.Json;
+
 using YamlDotNet.Serialization;
 
 namespace EmpireCompiler.Models.Agents
@@ -21,7 +25,7 @@ namespace EmpireCompiler.Models.Agents
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string OutputPath { get; set; }
-        
+
         [Required]
         public string Name { get; set; } = "GenericTask";
         public List<string> Aliases { get; set; } = new List<string>();
@@ -45,7 +49,7 @@ namespace EmpireCompiler.Models.Agents
 
         public bool UnsafeCompile { get; set; } = false;
         public bool TokenTask { get; set; } = false;
-        
+
         public void Add(ReferenceSourceLibrary library)
         {
             GruntTaskReferenceSourceLibraries.Add(new AgentTaskReferenceSourceLibrary
