@@ -1,15 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.Text;
 using System.Threading.Tasks;
-using YamlDotNet.Serialization;
-using System.IO;
 
+using EmpireCompiler.Core;
 using EmpireCompiler.Models.Agents;
 using EmpireCompiler.Utility;
-using EmpireCompiler.Core;
+
+using YamlDotNet.Serialization;
 
 namespace EmpireCompiler
 {
@@ -17,34 +16,35 @@ namespace EmpireCompiler
     {
         public static async Task Main(string[] args)
         {
-            
-            var outputPathOption = new Option<string>(
-                "--output",
-                description: "The output path for the compiled task")
+
+            var outputPathOption = new Option<string>("--output")
             {
-                IsRequired = true
+                Description = "The output path for the compiled task",
+                Required = true
             };
 
-            var yamlOption = new Option<string>(
-                "--yaml",
-                description: "The YAML string containing the task definition")
+            var yamlOption = new Option<string>("--yaml")
             {
-                IsRequired = true
+                Description = "The YAML string containing the task definition",
+                Required = true
             };
 
-            var dotnetVersionOption = new Option<string>(
-                "--dotnet-version",
-                description: "The version of .NET to use for the task");
+            var dotnetVersionOption = new Option<string>("--dotnet-version")
+            {
+                Description = "The version of .NET to use for the task"
+            };
 
-            var confuseOption = new Option<bool>(
-                "--confuse",
-                getDefaultValue: () => false,
-                description: "Indicates whether to apply obfuscation");
+            var confuseOption = new Option<bool>("--confuse")
+            {
+                Description = "Indicates whether to apply obfuscation",
+                DefaultValueFactory = _ => false
+            };
 
-            var debugOption = new Option<bool>(
-                "--debug",
-                getDefaultValue: () => false,
-                description: "Run in debug mode");
+            var debugOption = new Option<bool>("--debug")
+            {
+                Description = "Run in debug mode",
+                DefaultValueFactory = _ => false
+            };
 
             var rootCommand = new RootCommand("Empire Compiler")
             {
@@ -55,8 +55,14 @@ namespace EmpireCompiler
                 debugOption
             };
 
-            rootCommand.SetHandler(async (outputPath, yaml, dotnetVersion, confuse, debug) =>
+            rootCommand.SetAction(async (parseResult, cancellationToken) =>
             {
+                var outputPath = parseResult.GetValue(outputPathOption);
+                var yaml = parseResult.GetValue(yamlOption);
+                var dotnetVersion = parseResult.GetValue(dotnetVersionOption);
+                var confuse = parseResult.GetValue(confuseOption);
+                var debug = parseResult.GetValue(debugOption);
+
                 DebugUtility.IsDebugEnabled = debug;
                 DebugUtility.DebugPrint("Debug mode enabled.");
                 DebugUtility.DebugPrint($"Output Path: {outputPath}");
@@ -91,9 +97,9 @@ namespace EmpireCompiler
                     DebugUtility.DebugPrint($"Error occurred: {ex.ToString()}");
                     Console.WriteLine("Error occurred: " + ex.ToString());
                 }
-            }, outputPathOption, yamlOption, dotnetVersionOption, confuseOption, debugOption);
+            });
 
-            await rootCommand.InvokeAsync(args);
+            await rootCommand.Parse(args).InvokeAsync();
         }
 
         private static string DecodeBase64(string encodedString)
