@@ -1,0 +1,15 @@
+<Project>
+
+  <PropertyGroup>
+    <!-- Enforce .editorconfig code style rules during build -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!-- Enable .NET code analysis -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+
+    <!-- Treat warnings as errors in CI (opt-in via environment variable) -->
+    <TreatWarningsAsErrors Condition="'$(CI)' == 'true'">false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+</Project>
