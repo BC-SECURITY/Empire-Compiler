@@ -35,8 +35,8 @@ namespace EmpireCompiler.Models.Agents
         public IList<Common.DotNetVersion> CompatibleDotNetVersions { get; set; } = new List<Common.DotNetVersion> { Common.DotNetVersion.Net35, Common.DotNetVersion.Net40, Common.DotNetVersion.Net45 };
 
         public string Code { get; set; } = "";
-        public bool Compiled { get; set; } = false;
-        public bool Confuse { get; set; } = false;
+        public bool Compiled { get; set; }
+        public bool Confuse { get; set; }
         private List<AgentTaskReferenceSourceLibrary> GruntTaskReferenceSourceLibraries { get; set; } = new List<AgentTaskReferenceSourceLibrary>();
         private List<AgentTaskReferenceAssembly> GruntTaskReferenceAssemblies { get; set; } = new List<AgentTaskReferenceAssembly>();
         private List<AgentTaskEmbeddedResource> GruntTaskEmbeddedResources { get; set; } = new List<AgentTaskEmbeddedResource>();
@@ -47,8 +47,8 @@ namespace EmpireCompiler.Models.Agents
         [NotMapped]
         public List<EmbeddedResource> EmbeddedResources => GruntTaskEmbeddedResources.Select(e => e.EmbeddedResource).ToList();
 
-        public bool UnsafeCompile { get; set; } = false;
-        public bool TokenTask { get; set; } = false;
+        public bool UnsafeCompile { get; set; }
+        public bool TokenTask { get; set; }
 
         public void Add(ReferenceSourceLibrary library)
         {
@@ -358,8 +358,8 @@ namespace EmpireCompiler.Models.Agents
         public ImplantLanguage Language { get; set; }
         public IList<Common.DotNetVersion> CompatibleDotNetVersions { get; set; } = new List<Common.DotNetVersion>();
         public string Code { get; set; } = "";
-        public bool UnsafeCompile { get; set; } = false;
-        public bool TokenTask { get; set; } = false;
+        public bool UnsafeCompile { get; set; }
+        public bool TokenTask { get; set; }
         public List<SerializedReferenceSourceLibrary> ReferenceSourceLibraries { get; set; } = new List<SerializedReferenceSourceLibrary>();
         public List<SerializedReferenceAssembly> ReferenceAssemblies { get; set; } = new List<SerializedReferenceAssembly>();
         public List<SerializedEmbeddedResource> EmbeddedResources { get; set; } = new List<SerializedEmbeddedResource>();

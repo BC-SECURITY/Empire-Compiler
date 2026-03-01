@@ -27,19 +27,19 @@ namespace EmpireCompiler.Core
             public Common.DotNetVersion TargetDotNetVersion { get; set; } = Common.DotNetVersion.Net35;
             public OutputKind OutputKind { get; set; } = OutputKind.DynamicallyLinkedLibrary;
             public bool Optimize { get; set; } = true;
-            public bool Confuse { get; set; } = false;
-            public bool UnsafeCompile { get; set; } = false;
-            public bool UseSubprocess { get; set; } = false;
+            public bool Confuse { get; set; }
+            public bool UnsafeCompile { get; set; }
+            public bool UseSubprocess { get; set; }
 
-            public string AssemblyName { get; set; } = null;
+            public string AssemblyName { get; set; }
             public List<Reference> References { get; set; } = new List<Reference>();
             public List<EmbeddedResource> EmbeddedResources { get; set; } = new List<EmbeddedResource>();
         }
 
         public class CsharpFrameworkCompilationRequest : CsharpCompilationRequest
         {
-            public string Source { get; set; } = null;
-            public List<string> SourceDirectories { get; set; } = null;
+            public string Source { get; set; }
+            public List<string> SourceDirectories { get; set; }
         }
 
         public class CsharpCoreCompilationRequest : CsharpCompilationRequest
@@ -69,14 +69,14 @@ namespace EmpireCompiler.Core
             public string Name { get; set; }
             public string File { get; set; }
             public Platform Platform { get; set; } = Platform.AnyCpu;
-            public bool Enabled { get; set; } = false;
+            public bool Enabled { get; set; }
         }
 
         public class Reference
         {
             public string File { get; set; }
             public Common.DotNetVersion Framework { get; set; } = Common.DotNetVersion.Net35;
-            public bool Enabled { get; set; } = false;
+            public bool Enabled { get; set; }
         }
 
         private class SourceSyntaxTree

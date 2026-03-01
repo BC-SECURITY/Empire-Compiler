@@ -48,5 +48,6 @@ public class AgentTaskCompilationTests : IDisposable
     public void Dispose()
     {
         TestHelper.CleanupTempFiles();
+        GC.SuppressFinalize(this);
     }
 }

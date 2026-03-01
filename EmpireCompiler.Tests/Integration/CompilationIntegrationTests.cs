@@ -69,5 +69,6 @@ public class CompilationIntegrationTests : IDisposable
     public void Dispose()
     {
         TestHelper.CleanupTempFiles();
+        GC.SuppressFinalize(this);
     }
 }

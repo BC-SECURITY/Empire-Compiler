@@ -8,6 +8,12 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
 
+    <!-- Enable documentation file generation for IDE0005 support -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- Suppress missing XML comment warnings (CS1591) since this codebase does not use XML doc comments -->
+    <NoWarn>$(NoWarn);1591</NoWarn>
+
     <!-- Treat warnings as errors in CI (opt-in via environment variable) -->
     <TreatWarningsAsErrors Condition="'$(CI)' == 'true'">false</TreatWarningsAsErrors>
   </PropertyGroup>
