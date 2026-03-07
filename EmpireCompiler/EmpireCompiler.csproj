@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
 
 <PropertyGroup>
@@ -8,77 +8,17 @@
     <InformationalVersion>0.2.3</InformationalVersion>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
-
   <ItemGroup>
-    <Compile Remove="API\**" />
-    <Compile Remove="Components\**" />
-    <Compile Remove="Controllers\**" />
-    <Compile Remove="Data\Grunt\**" />
-    <Compile Remove="Data\Tasks\**" />
-    <Compile Remove="Data\Downloads\**" />
-	<Compile Remove="Data\ReferenceSourceLibraries\**" />
-	<Compile Remove="Hubs\**" />
-    <Compile Remove="Models\Covenant\**" />
-    <Compile Remove="Models\Indicators\**" />
-    <Compile Remove="Models\Launchers\**" />
-    <Compile Remove="Models\Listeners\**" />
-    <Compile Remove="Pages\**" />
-    <Content Remove="API\**" />
-    <Content Remove="Components\**" />
-    <Content Remove="Controllers\**" />
-    <Content Remove="Hubs\**" />
-    <Content Remove="Models\Covenant\**" />
-    <Content Remove="Models\Indicators\**" />
-    <Content Remove="Models\Launchers\**" />
-    <Content Remove="Models\Listeners\**" />
-    <Content Remove="Pages\**" />
-    <EmbeddedResource Remove="API\**" />
-    <EmbeddedResource Remove="Components\**" />
-    <EmbeddedResource Remove="Controllers\**" />
-    <EmbeddedResource Remove="Hubs\**" />
-    <EmbeddedResource Remove="Models\Covenant\**" />
-    <EmbeddedResource Remove="Models\Indicators\**" />
-    <EmbeddedResource Remove="Models\Launchers\**" />
-    <EmbeddedResource Remove="Models\Listeners\**" />
-    <EmbeddedResource Remove="Pages\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="API\**" />
-    <None Remove="Components\**" />
-    <None Remove="Controllers\**" />
-    <None Remove="Data\Grunt\**" />
-    <None Remove="Data\Tasks\CSharp\**" />
-    <None Remove="Data\Downloads\**" />
-    <None Remove="Data\Temp\**" />
-	<None Remove="Data\ReferenceSourceLibraries\**" />
-	<None Remove="Hubs\**" />
-    <None Remove="Models\Covenant\**" />
-    <None Remove="Models\Indicators\**" />
-    <None Remove="Models\Launchers\**" />
-    <None Remove="Models\Listeners\**" />
-    <None Remove="Pages\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Core\ConsoleWriter.cs" />
-    <Compile Remove="Core\CovenantAPIService.cs" />
-    <Compile Remove="Core\CovenantHubService.cs" />
-    <Compile Remove="Core\EmpireService.cs" />
-    <Compile Remove="Core\Encryption.cs" />
-    <Compile Remove="Core\Initializer.cs" />
-    <Compile Remove="Core\NotificationService.cs" />
-    <Compile Remove="Covenant.cs" />
-    <Compile Remove="Models\CovenantContext.cs" />
-    <Compile Remove="Models\Module\Grunt.cs" />
-    <Compile Remove="Models\Module\ImplantTemplate.cs" />
-    <Compile Remove="Startup.cs" />
+    <Compile Remove="Data\**" />
+    <Content Remove="Data\**" />
+    <EmbeddedResource Remove="Data\**" />
+    <None Remove="Data\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -121,18 +61,5 @@
     <Reference Include="Donut">
       <HintPath>refs\Donut.dll</HintPath>
     </Reference>
-  </ItemGroup>
-  
-  <ItemGroup>
-    <None Remove="Data/ReferenceSourceLibraries\**" />
-    <Compile Remove="Data/ReferenceSourceLibraries\**" />
-    <Content Remove="Data/ReferenceSourceLibraries\**" />
-    <EmbeddedResource Remove="Data/ReferenceSourceLibraries\**" />
-  </ItemGroup>
-    <ItemGroup>
-    <None Remove="Data\ConfuserEx-CLI\**" />
-    <Compile Remove="Data\ConfuserEx-CLI\**" />
-    <Content Remove="Data\ConfuserEx-CLI\**" />
-    <EmbeddedResource Remove="Data\ConfuserEx-CLI\**" />
   </ItemGroup>
 </Project>

@@ -42,28 +42,6 @@ namespace EmpireCompiler.Core
             public List<string> SourceDirectories { get; set; }
         }
 
-        public class CsharpCoreCompilationRequest : CsharpCompilationRequest
-        {
-            public string ResultName { get; set; } = "";
-            public string SourceDirectory { get; set; } = "";
-            public RuntimeIdentifier RuntimeIdentifier { get; set; } = RuntimeIdentifier.win_x64;
-        }
-
-        public enum RuntimeIdentifier
-        {
-            win_x64, win_x86,
-            win_arm, win_arm64,
-            win7_x64, win7_x86,
-            win81_x64, win81_x86, win81_arm,
-            win10_x64, win10_x86,
-            win10_arm, win10_arm64,
-            linux_x64, linux_musl_x64, linux_arm, linux_arm64,
-            rhel_x64, rhel_6_x64,
-            tizen, tizen_4_0_0, tizen_5_0_0,
-            osx_x64, osx_10_10_x64, osx_10_11_x64,
-            osx_10_12_x64, osx_10_13_x64, osx_10_14_x64, osx_10_15_x64
-        }
-
         public class EmbeddedResource
         {
             public string Name { get; set; }
@@ -307,17 +285,6 @@ namespace EmpireCompiler.Core
 
             return protectedBytes;
         }
-
-        private static string ConfuserExOptions { get; set; } = @"
-<project baseDir=""{0}"" outputDir=""{1}"" xmlns=""http://confuser.codeplex.com"">
-  <rule pattern=""true"" preset=""none"" inherit=""false"">
-    <protection id=""rename"" />
-    <protection id=""anti ildasm"" />
-    <protection id=""ctrl flow"" />
-  </rule>
-  <module path=""{2}"" />
-</project>
-";
 
         private static string GetFullyQualifiedContainingNamespaceName(INamespaceSymbol namespaceSymbol)
         {

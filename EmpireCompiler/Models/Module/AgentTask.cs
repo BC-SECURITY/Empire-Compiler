@@ -138,7 +138,7 @@ namespace EmpireCompiler.Models.Agents
             return this.FromSerializedGruntTask(task);
         }
 
-        public void Compile(Common.DotNetVersion dotnetVersion, Compiler.RuntimeIdentifier runtimeIdentifier = Compiler.RuntimeIdentifier.win_x64)
+        public void Compile(Common.DotNetVersion dotnetVersion)
         {
             if (!this.Compiled)
             {
@@ -222,7 +222,6 @@ namespace EmpireCompiler.Models.Agents
                     EmbeddedResources = resources,
                     UnsafeCompile = this.UnsafeCompile,
                     OutputKind = OutputKind.ConsoleApplication,
-                    //OutputKind = OutputKind.WindowsApplication,
                     Confuse = this.Confuse,
                     Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
                 })
@@ -283,7 +282,6 @@ namespace EmpireCompiler.Models.Agents
                     EmbeddedResources = resources,
                     UnsafeCompile = this.UnsafeCompile,
                     OutputKind = OutputKind.ConsoleApplication,
-                    //OutputKind = OutputKind.WindowsApplication,
                     Confuse = this.Confuse,
                     Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
                 })
@@ -344,7 +342,6 @@ namespace EmpireCompiler.Models.Agents
                     EmbeddedResources = resources,
                     UnsafeCompile = this.UnsafeCompile,
                     OutputKind = OutputKind.ConsoleApplication,
-                    //OutputKind = OutputKind.WindowsApplication,
                     Confuse = this.Confuse,
                     Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
                 })
