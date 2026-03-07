@@ -168,29 +168,33 @@ namespace EmpireCompiler.Models.Agents
 
         private void CompileDotNetFramework(Common.DotNetVersion dotnetVersion)
         {
-            List<Compiler.EmbeddedResource> resources = this.EmbeddedResources.Select(ER =>
-            {
-                return new Compiler.EmbeddedResource
+            List<Compiler.EmbeddedResource> resources = this.EmbeddedResources
+                .Where(ER => ER.DotNetVersion == null || ER.DotNetVersion == dotnetVersion)
+                .Select(ER =>
                 {
-                    Name = ER.Name,
-                    File = Common.EmpireEmbeddedResourcesDirectory + ER.Location,
-                    Platform = Platform.X64,
-                    Enabled = true
-                };
-            }).ToList();
+                    return new Compiler.EmbeddedResource
+                    {
+                        Name = ER.Name,
+                        File = Common.EmpireEmbeddedResourcesDirectory + ER.Location,
+                        Platform = Platform.X64,
+                        Enabled = true
+                    };
+                }).ToList();
             this.ReferenceSourceLibraries.ToList().ForEach(RSL =>
             {
                 resources.AddRange(
-                    RSL.EmbeddedResources.Select(ER =>
-                    {
-                        return new Compiler.EmbeddedResource
+                    RSL.EmbeddedResources
+                        .Where(ER => ER.DotNetVersion == null || ER.DotNetVersion == dotnetVersion)
+                        .Select(ER =>
                         {
-                            Name = ER.Name,
-                            File = Common.EmpireEmbeddedResourcesDirectory + ER.Location,
-                            Platform = Platform.X64,
-                            Enabled = true
-                        };
-                    })
+                            return new Compiler.EmbeddedResource
+                            {
+                                Name = ER.Name,
+                                File = Common.EmpireEmbeddedResourcesDirectory + ER.Location,
+                                Platform = Platform.X64,
+                                Enabled = true
+                            };
+                        })
                 );
             });
             List<Compiler.Reference> references = new List<Compiler.Reference>();
