@@ -42,6 +42,7 @@ public static class TestHelper
         Common.EmpireAssemblyReferenceNet47Directory = Path.Combine(referenceDirectory, "net47") + Path.DirectorySeparatorChar;
         Common.EmpireAssemblyReferenceNet48Directory = Path.Combine(referenceDirectory, "net48") + Path.DirectorySeparatorChar;
         Common.EmpireEmbeddedResourcesDirectory = Path.Combine(empireDataDirectory, "EmbeddedResources") + Path.DirectorySeparatorChar;
+        Common.EmpireEmbeddedResourcesCommonDirectory = Path.Combine(empireDataDirectory, "EmbeddedResources", "common") + Path.DirectorySeparatorChar;
         Common.EmpireReferenceSourceLibraries = Path.Combine(empireDataDirectory, "ReferenceSourceLibraries") + Path.DirectorySeparatorChar;
 
         Directory.CreateDirectory(Common.EmpireTempDirectory);
@@ -84,7 +85,8 @@ public static class TestHelper
     public static void EnsureEmbeddedLauncherFile()
     {
         SetupEmpireDataPaths();
-        var launcherPath = Path.Combine(Common.EmpireEmbeddedResourcesDirectory, "launcher.txt");
+        Directory.CreateDirectory(Common.EmpireEmbeddedResourcesCommonDirectory);
+        var launcherPath = Path.Combine(Common.EmpireEmbeddedResourcesCommonDirectory, "launcher.txt");
         if (!File.Exists(launcherPath))
         {
             File.WriteAllText(launcherPath, "Write-Host \"Test launcher\"");

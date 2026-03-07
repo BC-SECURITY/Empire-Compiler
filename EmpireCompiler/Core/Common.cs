@@ -18,6 +18,7 @@ namespace EmpireCompiler.Core
         public static string EmpireAssemblyReferenceNet47Directory { get; set; } = EmpireAssemblyReferenceDirectory + "net47" + Path.DirectorySeparatorChar;
         public static string EmpireAssemblyReferenceNet48Directory { get; set; } = EmpireAssemblyReferenceDirectory + "net48" + Path.DirectorySeparatorChar;
         public static string EmpireEmbeddedResourcesDirectory { get; set; } = EmpireDataDirectory + "EmbeddedResources" + Path.DirectorySeparatorChar;
+        public static string EmpireEmbeddedResourcesCommonDirectory { get; set; } = EmpireEmbeddedResourcesDirectory + "common" + Path.DirectorySeparatorChar;
         public static string EmpireReferenceSourceLibraries { get; set; } = EmpireDataDirectory + "ReferenceSourceLibraries" + Path.DirectorySeparatorChar;
 
         public enum DotNetVersion

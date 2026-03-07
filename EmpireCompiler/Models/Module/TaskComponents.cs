@@ -75,6 +75,7 @@ namespace EmpireCompiler.Models.Agents
         public int Id { get; set; }
         public string Name { get; set; }
         public string Location { get; set; }
+        public Common.DotNetVersion? DotNetVersion { get; set; }
 
         private List<ReferenceSourceLibraryEmbeddedResource> ReferenceSourceLibraryEmbeddedResources { get; set; } = new List<ReferenceSourceLibraryEmbeddedResource>();
         private List<AgentTaskEmbeddedResource> GruntTaskEmbeddedResources { get; set; } = new List<AgentTaskEmbeddedResource>();
@@ -89,7 +90,8 @@ namespace EmpireCompiler.Models.Agents
             return new SerializedEmbeddedResource
             {
                 Name = this.Name,
-                Location = this.Location.Replace("\\", "/")
+                Location = this.Location.Replace("\\", "/"),
+                DotNetVersion = this.DotNetVersion
             };
         }
 
@@ -97,6 +99,7 @@ namespace EmpireCompiler.Models.Agents
         {
             this.Name = resource.Name;
             this.Location = resource.Location.Replace("\\", "/");
+            this.DotNetVersion = resource.DotNetVersion;
             return this;
         }
 
@@ -290,6 +293,7 @@ namespace EmpireCompiler.Models.Agents
     {
         public string Name { get; set; }
         public string Location { get; set; }
+        public Common.DotNetVersion? DotNetVersion { get; set; }
     }
 
     internal class SerializedReferenceSourceLibrary
