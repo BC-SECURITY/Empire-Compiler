@@ -114,7 +114,7 @@ public class CompilerTests : IDisposable
             }
             """;
 
-        var launcherPath = Path.Combine(Common.EmpireEmbeddedResourcesDirectory, "launcher.txt");
+        var launcherPath = Path.Combine(Common.EmpireEmbeddedResourcesCommonDirectory, "launcher.txt");
         var request = new Compiler.CsharpFrameworkCompilationRequest
         {
             Source = source,
