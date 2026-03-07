@@ -83,7 +83,7 @@ namespace EmpireCompiler
 
                     if (!Enum.TryParse(dotnetVersion, true, out Common.DotNetVersion parsedVersion))
                     {
-                        Console.WriteLine($"Error: Invalid .NET version '{dotnetVersion}'. Supported versions: Net35, Net40, Net45.");
+                        Console.WriteLine($"Error: Invalid .NET version '{dotnetVersion}'. Supported versions: Net35, Net40, Net45, Net46, Net47, Net48.");
                         Environment.Exit(1);
                     }
 

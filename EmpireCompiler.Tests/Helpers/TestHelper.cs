@@ -38,6 +38,9 @@ public static class TestHelper
         Common.EmpireAssemblyReferenceNet35Directory = Path.Combine(referenceDirectory, "net35") + Path.DirectorySeparatorChar;
         Common.EmpireAssemblyReferenceNet40Directory = Path.Combine(referenceDirectory, "net40") + Path.DirectorySeparatorChar;
         Common.EmpireAssemblyReferenceNet45Directory = Path.Combine(referenceDirectory, "net45") + Path.DirectorySeparatorChar;
+        Common.EmpireAssemblyReferenceNet46Directory = Path.Combine(referenceDirectory, "net46") + Path.DirectorySeparatorChar;
+        Common.EmpireAssemblyReferenceNet47Directory = Path.Combine(referenceDirectory, "net47") + Path.DirectorySeparatorChar;
+        Common.EmpireAssemblyReferenceNet48Directory = Path.Combine(referenceDirectory, "net48") + Path.DirectorySeparatorChar;
         Common.EmpireEmbeddedResourcesDirectory = Path.Combine(empireDataDirectory, "EmbeddedResources") + Path.DirectorySeparatorChar;
         Common.EmpireReferenceSourceLibraries = Path.Combine(empireDataDirectory, "ReferenceSourceLibraries") + Path.DirectorySeparatorChar;
 
