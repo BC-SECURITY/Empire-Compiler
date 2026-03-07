@@ -13,7 +13,4 @@ namespace EmpireCompiler.Models
     }
 
     public interface ISerializable<T> : IYamlSerializable<T>, IJsonSerializable<T> { }
-
-    public class ParsedParameter
-    { }
 }
