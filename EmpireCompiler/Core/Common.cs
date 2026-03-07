@@ -14,6 +14,9 @@ namespace EmpireCompiler.Core
         public static string EmpireAssemblyReferenceNet35Directory { get; set; } = EmpireAssemblyReferenceDirectory + "net35" + Path.DirectorySeparatorChar;
         public static string EmpireAssemblyReferenceNet40Directory { get; set; } = EmpireAssemblyReferenceDirectory + "net40" + Path.DirectorySeparatorChar;
         public static string EmpireAssemblyReferenceNet45Directory { get; set; } = EmpireAssemblyReferenceDirectory + "net45" + Path.DirectorySeparatorChar;
+        public static string EmpireAssemblyReferenceNet46Directory { get; set; } = EmpireAssemblyReferenceDirectory + "net46" + Path.DirectorySeparatorChar;
+        public static string EmpireAssemblyReferenceNet47Directory { get; set; } = EmpireAssemblyReferenceDirectory + "net47" + Path.DirectorySeparatorChar;
+        public static string EmpireAssemblyReferenceNet48Directory { get; set; } = EmpireAssemblyReferenceDirectory + "net48" + Path.DirectorySeparatorChar;
         public static string EmpireEmbeddedResourcesDirectory { get; set; } = EmpireDataDirectory + "EmbeddedResources" + Path.DirectorySeparatorChar;
         public static string EmpireReferenceSourceLibraries { get; set; } = EmpireDataDirectory + "ReferenceSourceLibraries" + Path.DirectorySeparatorChar;
 
@@ -22,6 +25,9 @@ namespace EmpireCompiler.Core
             Net35,
             Net40,
             Net45,
+            Net46,
+            Net47,
+            Net48,
             NetCore31
         }
     }

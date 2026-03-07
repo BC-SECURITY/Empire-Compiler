@@ -291,6 +291,9 @@ public class CompilerTests : IDisposable
             Common.DotNetVersion.Net35 => Common.EmpireAssemblyReferenceNet35Directory,
             Common.DotNetVersion.Net40 => Common.EmpireAssemblyReferenceNet40Directory,
             Common.DotNetVersion.Net45 => Common.EmpireAssemblyReferenceNet45Directory,
+            Common.DotNetVersion.Net46 => Common.EmpireAssemblyReferenceNet46Directory,
+            Common.DotNetVersion.Net47 => Common.EmpireAssemblyReferenceNet47Directory,
+            Common.DotNetVersion.Net48 => Common.EmpireAssemblyReferenceNet48Directory,
             _ => Common.EmpireAssemblyReferenceNet40Directory
         };
 
