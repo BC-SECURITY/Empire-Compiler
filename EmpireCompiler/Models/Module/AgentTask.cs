@@ -4,6 +4,8 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 
 using EmpireCompiler.Core;
 
@@ -197,22 +199,11 @@ namespace EmpireCompiler.Models.Agents
                         })
                 );
             });
-            List<Compiler.Reference> references = new List<Compiler.Reference>();
-            this.ReferenceSourceLibraries.ToList().ForEach(RSL =>
-            {
-                references.AddRange(
-                    RSL.ReferenceAssemblies.Where(RA => RA.DotNetVersion == dotnetVersion).Select(RA =>
-                    {
-                        return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = dotnetVersion, Enabled = true };
-                    })
-                );
-            });
-            references.AddRange(
-                this.ReferenceAssemblies.Where(RA => RA.DotNetVersion == dotnetVersion).Select(RA =>
-                {
-                    return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = dotnetVersion, Enabled = true };
-                })
-            );
+            string frameworkDir = Common.GetAssemblyReferenceDirectory(dotnetVersion);
+            List<Compiler.Reference> references = Directory.GetFiles(frameworkDir, "*.dll")
+                .Where(IsManagedFrameworkAssembly)
+                .Select(dll => new Compiler.Reference { File = dll, Framework = dotnetVersion, Enabled = true })
+                .ToList();
 
             File.WriteAllBytes(this.OutputPath,
                 Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
@@ -229,6 +220,49 @@ namespace EmpireCompiler.Models.Agents
                     Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
                 })
             );
+        }
+
+        private static bool IsManagedFrameworkAssembly(string dllPath)
+        {
+            try
+            {
+                using var stream = File.OpenRead(dllPath);
+                using var peReader = new PEReader(stream);
+                if (!peReader.HasMetadata)
+                {
+                    return false;
+                }
+
+                var metadataReader = peReader.GetMetadataReader();
+                if (!metadataReader.IsAssembly)
+                {
+                    return false;
+                }
+
+                // Exclude .NET Standard facade assemblies (e.g. System.Buffers, System.Memory)
+                // that reference System.Runtime instead of mscorlib, as they cause CS0012 errors
+                // when System.Runtime.dll is not present in the reference set.
+                bool refsMscorlib = false;
+                bool refsSysRuntime = false;
+                foreach (var handle in metadataReader.AssemblyReferences)
+                {
+                    var name = metadataReader.GetString(metadataReader.GetAssemblyReference(handle).Name);
+                    if (name == "mscorlib")
+                    {
+                        refsMscorlib = true;
+                    }
+                    else if (name == "System.Runtime")
+                    {
+                        refsSysRuntime = true;
+                    }
+                }
+
+                return refsMscorlib || !refsSysRuntime;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 
