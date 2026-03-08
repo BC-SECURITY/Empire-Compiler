@@ -303,7 +303,7 @@ namespace EmpireCompiler.Models.Agents
         public string Location { get; set; }
         public ImplantLanguage Language { get; set; } = ImplantLanguage.CSharp;
         public List<Common.DotNetVersion> CompatibleDotNetVersions { get; set; }
-        public List<SerializedReferenceAssembly> ReferenceAssemblies { get; set; }
-        public List<SerializedEmbeddedResource> EmbeddedResources { get; set; }
+        public List<SerializedReferenceAssembly> ReferenceAssemblies { get; set; } = new List<SerializedReferenceAssembly>();
+        public List<SerializedEmbeddedResource> EmbeddedResources { get; set; } = new List<SerializedEmbeddedResource>();
     }
 }

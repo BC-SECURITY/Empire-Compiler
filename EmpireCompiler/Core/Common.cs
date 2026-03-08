@@ -31,5 +31,19 @@ namespace EmpireCompiler.Core
             Net48,
             NetCore31
         }
+
+        public static string GetAssemblyReferenceDirectory(DotNetVersion version)
+        {
+            return version switch
+            {
+                DotNetVersion.Net35 => EmpireAssemblyReferenceNet35Directory,
+                DotNetVersion.Net40 => EmpireAssemblyReferenceNet40Directory,
+                DotNetVersion.Net45 => EmpireAssemblyReferenceNet45Directory,
+                DotNetVersion.Net46 => EmpireAssemblyReferenceNet46Directory,
+                DotNetVersion.Net47 => EmpireAssemblyReferenceNet47Directory,
+                DotNetVersion.Net48 => EmpireAssemblyReferenceNet48Directory,
+                _ => throw new System.ArgumentException($"No assembly reference directory for {version}")
+            };
+        }
     }
 }
