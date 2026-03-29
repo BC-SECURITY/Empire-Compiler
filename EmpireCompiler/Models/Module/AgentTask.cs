@@ -217,7 +217,7 @@ namespace EmpireCompiler.Models.Agents
                     UnsafeCompile = this.UnsafeCompile,
                     OutputKind = OutputKind.ConsoleApplication,
                     Confuse = this.Confuse,
-                    Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
+                    Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Any(n => n == "Seatbelt" || n == "SharpHound")
                 })
             );
         }
