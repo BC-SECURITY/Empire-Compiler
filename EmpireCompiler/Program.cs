@@ -46,13 +46,20 @@ namespace EmpireCompiler
                 DefaultValueFactory = _ => false
             };
 
+            var mergeReferencesOption = new Option<bool>("--merge-references")
+            {
+                Description = "Merge non-framework referenced DLLs into the output assembly using ILRepack",
+                DefaultValueFactory = _ => false
+            };
+
             var rootCommand = new RootCommand("Empire Compiler")
             {
                 outputPathOption,
                 yamlOption,
                 dotnetVersionOption,
                 confuseOption,
-                debugOption
+                debugOption,
+                mergeReferencesOption
             };
 
             rootCommand.SetAction(async (parseResult, cancellationToken) =>
@@ -80,6 +87,7 @@ namespace EmpireCompiler
                     var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
                     agentTask.OutputPath = outputPath;
                     agentTask.Confuse = confuse;
+                    agentTask.MergeReferences = parseResult.GetValue(mergeReferencesOption);
 
                     if (!Enum.TryParse(dotnetVersion, true, out Common.DotNetVersion parsedVersion))
                     {

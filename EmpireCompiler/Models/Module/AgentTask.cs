@@ -51,6 +51,7 @@ namespace EmpireCompiler.Models.Agents
 
         public bool UnsafeCompile { get; set; }
         public bool TokenTask { get; set; }
+        public bool MergeReferences { get; set; }
 
         public void Add(ReferenceSourceLibrary library)
         {
@@ -217,7 +218,8 @@ namespace EmpireCompiler.Models.Agents
                     UnsafeCompile = this.UnsafeCompile,
                     OutputKind = OutputKind.ConsoleApplication,
                     Confuse = this.Confuse,
-                    Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
+                    MergeReferences = this.MergeReferences,
+                    Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Any(n => n == "Seatbelt" || n == "SharpHound")
                 })
             );
         }
