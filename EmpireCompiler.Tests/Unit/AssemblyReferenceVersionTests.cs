@@ -21,6 +21,7 @@ public class AssemblyReferenceVersionTests
     // Third-party DLLs compiled against an older CLR that still load fine via CLR v4 compatibility
     private static readonly HashSet<string> KnownClrMismatches = new(StringComparer.OrdinalIgnoreCase)
     {
+        "HtmlSanitizationLibrary.dll",
         "Replicon.Cryptography.SCrypt.dll",
     };
 
