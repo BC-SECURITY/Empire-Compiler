@@ -29,19 +29,19 @@ dotnet format --verify-no-changes    # check only (used in CI)
 
 ### Compilation Pipeline
 
-Base64 YAML input → deserialize to `SerializedGruntTask` → create `AgentTask` → Roslyn compilation → optional code optimization (unused type removal) → optional ConfuserEx obfuscation → output bytes to file.
+Base64 YAML input → deserialize to `SerializedGruntTask` → create `AgentTask` → Roslyn compilation → optional code optimization (unused type removal) → optional ILRepack assembly merging → optional ConfuserEx obfuscation → output bytes to file.
 
 ### Key Source Files
 
-- **`EmpireCompiler/Program.cs`** — CLI entry point using System.CommandLine. Options: `--output`, `--yaml` (base64), `--dotnet-version`, `--confuse`, `--debug`.
+- **`EmpireCompiler/Program.cs`** — CLI entry point using System.CommandLine. Options: `--output`, `--yaml` (base64), `--dotnet-version`, `--confuse`, `--debug`, `--merge-references`.
 - **`EmpireCompiler/Core/Compiler.cs`** — Central compilation engine. `CompileCSharpRoslyn()` handles Roslyn compilation, code optimization via semantic analysis (type dependency graph traversal), and ConfuserEx obfuscation as a subprocess.
-- **`EmpireCompiler/Core/Common.cs`** — Path constants (`EmpireDirectory`, `EmpireDataDirectory`, etc.), `DotNetVersion` enum, default reference assembly lists per framework version.
-- **`EmpireCompiler/Models/Module/AgentTask.cs`** — Core compilation unit. Holds task code, references, embedded resources, source libraries. Has `Compile(DotNetVersion)` entry point and framework-specific compilation methods (`CompileDotNet35/40/45`).
+- **`EmpireCompiler/Core/Common.cs`** — Path constants (`EmpireDirectory`, `EmpireDataDirectory`, etc.), `DotNetVersion` enum, and `GetAssemblyReferenceDirectory()` helper.
+- **`EmpireCompiler/Models/Module/AgentTask.cs`** — Core compilation unit. Holds task code, references, embedded resources, source libraries. Has `Compile(DotNetVersion)` entry point and `CompileDotNetFramework(DotNetVersion)` for all .NET Framework versions.
 - **`EmpireCompiler/Models/Module/TaskComponents.cs`** — Supporting models: `ReferenceAssembly`, `EmbeddedResource`, `ReferenceSourceLibrary` with junction tables.
 
 ### Data Directory (`EmpireCompiler/Data/`)
 
-- **`AssemblyReferences/net35|net40|net45/`** — .NET Framework reference DLLs used during compilation.
+- **`AssemblyReferences/net35|net40|net45|net46|net47|net48/`** — .NET Framework reference DLLs used during compilation.
 - **`ReferenceSourceLibraries/`** — Git submodules (SharpSploit, Rubeus, Seatbelt, etc.) compiled as source libraries into tasks.
 - **`EmbeddedResources/`** — Files embedded into compiled assemblies (e.g., `launcher.txt`).
 - **`ConfuserEx-CLI/`** — Obfuscation tooling invoked as a subprocess.
@@ -61,7 +61,7 @@ Tasks are defined in YAML with fields: Name, Language (`csharp`), CompatibleDotN
 
 - **Roslyn** (`Microsoft.CodeAnalysis.CSharp`) — C# parsing, semantic analysis, compilation
 - **YamlDotNet** — Task YAML deserialization
-- **ConfuserEx** (local DLLs in `refs/`) — Assembly obfuscation (rename, anti-ILDASM, control flow)
+- **ConfuserEx** (local CLI in `Data/ConfuserEx-CLI/`) — Assembly obfuscation (rename, anti-ILDASM, control flow)
 - **Newtonsoft.Json** — JSON serialization
 - **System.CommandLine** — CLI argument parsing
 

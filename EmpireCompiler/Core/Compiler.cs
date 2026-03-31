@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata;
-using System.Reflection.PortableExecutable;
 using System.Text;
 
 using EmpireCompiler.Utility;
@@ -73,7 +71,7 @@ namespace EmpireCompiler.Core
             {
                 return CompileCSharp((CsharpCompilationRequest)request);
             }
-            return null;
+            throw new CompilerException($"Unsupported compilation language: {request.Language}");
         }
 
         private static byte[] CompileCSharp(CsharpCompilationRequest request)
@@ -194,12 +192,11 @@ namespace EmpireCompiler.Core
                 }
             }
             DebugUtility.DebugPrint("Compilation successful.");
-            Console.Error.WriteLine($"MergeReferences={request.MergeReferences}");
             if (request.MergeReferences)
             {
-                Console.Error.WriteLine("Starting ILRepack merge...");
-                ILbytes = MergeNonFrameworkReferences(ILbytes, request.References, request.TargetDotNetVersion, request.OutputKind);
-                Console.Error.WriteLine($"Merge complete, output size: {ILbytes.Length}");
+                DebugUtility.DebugPrint("Starting ILRepack merge...");
+                ILbytes = MergeNonFrameworkReferences(ILbytes, request.TargetDotNetVersion, request.OutputKind);
+                DebugUtility.DebugPrint($"Merge complete, output size: {ILbytes.Length}");
             }
             if (request.Confuse)
             {
@@ -285,7 +282,7 @@ namespace EmpireCompiler.Core
             "XamlBuildTask", "sysglobl", "netstandard",
         };
 
-        private static byte[] MergeNonFrameworkReferences(byte[] compiledBytes, List<Reference> references, Common.DotNetVersion targetVersion, OutputKind outputKind)
+        private static byte[] MergeNonFrameworkReferences(byte[] compiledBytes, Common.DotNetVersion targetVersion, OutputKind outputKind)
         {
             DebugUtility.DebugPrint("Merging non-framework references with ILRepack...");
 
@@ -341,7 +338,7 @@ namespace EmpireCompiler.Core
                 };
                 foreach (var candidate in searchPaths)
                 {
-                    Console.Error.WriteLine($"  Checking: {candidate} -> {File.Exists(candidate)}");
+                    DebugUtility.DebugPrint($"  Checking: {candidate} -> {File.Exists(candidate)}");
                     if (File.Exists(candidate))
                     {
                         ilRepackExe = candidate;
@@ -351,16 +348,13 @@ namespace EmpireCompiler.Core
 
                 if (ilRepackExe == null)
                 {
-                    Console.Error.WriteLine("ILRepack.exe not found! Skipping merge.");
-                    return compiledBytes;
+                    throw new CompilerException(
+                        "ILRepack.exe not found. Searched: " +
+                        string.Join(", ", searchPaths) +
+                        ". Install ILRepack or remove --merge-references.");
                 }
 
-                Console.Error.WriteLine($"Running ILRepack: {ilRepackExe}");
-                Console.Error.WriteLine($"Non-framework DLLs to merge: {nonFrameworkDlls.Count}");
-                foreach (var dll in nonFrameworkDlls)
-                {
-                    Console.Error.WriteLine($"  {Path.GetFileName(dll)}");
-                }
+                DebugUtility.DebugPrint($"Running ILRepack: {ilRepackExe}");
 
                 // ILRepack.exe is a .NET assembly — must run via dotnet on Linux
                 string allArgs = string.Join(" ", ilRepackArgs.Select(a => a.Contains(' ') ? $"\"{a}\"" : a));
@@ -375,41 +369,43 @@ namespace EmpireCompiler.Core
                 };
 
                 using var process = Process.Start(startInfo);
+                var stderrTask = process.StandardError.ReadToEndAsync();
                 string stdout = process.StandardOutput.ReadToEnd();
-                string stderr = process.StandardError.ReadToEnd();
+                string stderr = stderrTask.Result;
                 process.WaitForExit();
 
-                Console.Error.WriteLine($"ILRepack exit code: {process.ExitCode}");
+                DebugUtility.DebugPrint($"ILRepack exit code: {process.ExitCode}");
                 if (!string.IsNullOrEmpty(stdout))
                 {
-                    Console.Error.WriteLine($"ILRepack stdout: {stdout}");
+                    DebugUtility.DebugPrint($"ILRepack stdout: {stdout}");
                 }
 
                 if (!string.IsNullOrEmpty(stderr))
                 {
-                    Console.Error.WriteLine($"ILRepack stderr: {stderr}");
+                    DebugUtility.DebugPrint($"ILRepack stderr: {stderr}");
                 }
 
                 if (process.ExitCode != 0 || !File.Exists(outputPath))
                 {
-                    DebugUtility.DebugPrint($"ILRepack failed (exit code {process.ExitCode}). Returning original assembly.");
-                    return compiledBytes;
+                    throw new CompilerException(
+                        $"ILRepack merge failed (exit code {process.ExitCode}). " +
+                        $"stdout: {stdout}\nstderr: {stderr}");
                 }
 
                 var mergedBytes = File.ReadAllBytes(outputPath);
                 DebugUtility.DebugPrint($"ILRepack merge complete. Original: {compiledBytes.Length} bytes, Merged: {mergedBytes.Length} bytes");
                 return mergedBytes;
             }
-            catch (Exception ex)
-            {
-                DebugUtility.DebugPrint($"ILRepack merge failed: {ex.Message}. Returning original assembly.");
-                return compiledBytes;
-            }
             finally
             {
                 try
-                { Directory.Delete(tempDir, true); }
-                catch { }
+                {
+                    Directory.Delete(tempDir, true);
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Warning: failed to clean up temp directory {tempDir}: {ex.Message}");
+                }
             }
         }
 
@@ -475,17 +471,20 @@ namespace EmpireCompiler.Core
 
                 logFile.WriteLine($"Exit Code: {process.ExitCode}");
                 logFile.WriteLine();
+
+                if (process.ExitCode != 0)
+                {
+                    throw new CompilerException(
+                        $"ConfuserEx obfuscation failed (exit code {process.ExitCode}). See log: {logFilePath}");
+                }
             }
-
-
-
 
             // Confuser writes to outputDir with the same file name
             var outputPath = Path.Combine(outputDir, inputFileName);
             if (!File.Exists(outputPath))
             {
-                DebugUtility.DebugPrint($"Confuser output not found at: {outputPath}. Returning original bytes.");
-                return ILBytes;
+                throw new CompilerException(
+                    $"ConfuserEx output not found at: {outputPath}. Obfuscation failed. See log: {logFilePath}");
             }
 
             var protectedBytes = File.ReadAllBytes(outputPath);

@@ -147,8 +147,7 @@ namespace EmpireCompiler.Models.Agents
             {
                 if (!this.CompatibleDotNetVersions.Contains(dotnetVersion))
                 {
-                    Console.WriteLine($"Error: The provided .NET version {dotnetVersion} is not supported for this task.");
-                    Environment.Exit(1);
+                    throw new CompilerException($"The provided .NET version {dotnetVersion} is not supported for this task.");
                 }
 
                 switch (dotnetVersion)
@@ -162,9 +161,7 @@ namespace EmpireCompiler.Models.Agents
                         this.CompileDotNetFramework(dotnetVersion);
                         break;
                     default:
-                        Console.WriteLine($"Error: Compilation for {dotnetVersion} is not implemented.");
-                        Environment.Exit(1);
-                        break;
+                        throw new CompilerException($"Compilation for {dotnetVersion} is not implemented.");
                 }
             }
         }
@@ -206,22 +203,25 @@ namespace EmpireCompiler.Models.Agents
                 .Select(dll => new Compiler.Reference { File = dll, Framework = dotnetVersion, Enabled = true })
                 .ToList();
 
-            File.WriteAllBytes(this.OutputPath,
-                Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
-                {
-                    Language = this.Language,
-                    Source = this.Code,
-                    SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
-                    TargetDotNetVersion = dotnetVersion,
-                    References = references,
-                    EmbeddedResources = resources,
-                    UnsafeCompile = this.UnsafeCompile,
-                    OutputKind = OutputKind.ConsoleApplication,
-                    Confuse = this.Confuse,
-                    MergeReferences = this.MergeReferences,
-                    Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Any(n => n == "Seatbelt" || n == "SharpHound")
-                })
-            );
+            var compiledBytes = Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
+            {
+                Language = this.Language,
+                Source = this.Code,
+                SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
+                TargetDotNetVersion = dotnetVersion,
+                References = references,
+                EmbeddedResources = resources,
+                UnsafeCompile = this.UnsafeCompile,
+                OutputKind = OutputKind.ConsoleApplication,
+                Confuse = this.Confuse,
+                MergeReferences = this.MergeReferences,
+                Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Any(n => n == "Seatbelt" || n == "SharpHound")
+            });
+            if (compiledBytes == null || compiledBytes.Length == 0)
+            {
+                throw new CompilerException($"Compilation produced no output for task '{this.Name}'.");
+            }
+            File.WriteAllBytes(this.OutputPath, compiledBytes);
         }
 
         private static bool IsManagedFrameworkAssembly(string dllPath)
@@ -261,8 +261,13 @@ namespace EmpireCompiler.Models.Agents
 
                 return refsMscorlib || !refsSysRuntime;
             }
-            catch
+            catch (BadImageFormatException)
             {
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Warning: could not read assembly metadata for {dllPath}: {ex.Message}");
                 return false;
             }
         }

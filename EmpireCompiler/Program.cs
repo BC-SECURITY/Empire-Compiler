@@ -102,8 +102,8 @@ namespace EmpireCompiler
                 }
                 catch (System.Exception ex)
                 {
-                    DebugUtility.DebugPrint($"Error occurred: {ex.ToString()}");
-                    Console.WriteLine("Error occurred: " + ex.ToString());
+                    Console.Error.WriteLine("Error occurred: " + ex.ToString());
+                    Environment.Exit(1);
                 }
             });
 
