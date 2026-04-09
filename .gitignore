@@ -331,3 +331,9 @@ ASALocalRun/
 
 # Built Binary
 EmpireCompiler/EmpireCompiler
+
+# AI tooling
+.sisyphus/
+
+# Launcher payload file
+launcher.txt

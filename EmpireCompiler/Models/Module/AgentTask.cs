@@ -1,12 +1,18 @@
-﻿using EmpireCompiler.Core;
-using Microsoft.CodeAnalysis;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
+
+using EmpireCompiler.Core;
+
+using Microsoft.CodeAnalysis;
+
+using Newtonsoft.Json;
+
 using YamlDotNet.Serialization;
 
 namespace EmpireCompiler.Models.Agents
@@ -21,18 +27,18 @@ namespace EmpireCompiler.Models.Agents
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string OutputPath { get; set; }
-        
+
         [Required]
         public string Name { get; set; } = "GenericTask";
         public List<string> Aliases { get; set; } = new List<string>();
         public string Description { get; set; } = "A generic GruntTask.";
         public string Help { get; set; }
         public ImplantLanguage Language { get; set; } = ImplantLanguage.CSharp;
-        public IList<Common.DotNetVersion> CompatibleDotNetVersions { get; set; } = new List<Common.DotNetVersion> { Common.DotNetVersion.Net35, Common.DotNetVersion.Net40, Common.DotNetVersion.Net45 };
+        public IList<Common.DotNetVersion> CompatibleDotNetVersions { get; set; } = new List<Common.DotNetVersion> { Common.DotNetVersion.Net35, Common.DotNetVersion.Net40, Common.DotNetVersion.Net45, Common.DotNetVersion.Net46, Common.DotNetVersion.Net47, Common.DotNetVersion.Net48 };
 
         public string Code { get; set; } = "";
-        public bool Compiled { get; set; } = false;
-        public bool Confuse { get; set; } = false;
+        public bool Compiled { get; set; }
+        public bool Confuse { get; set; }
         private List<AgentTaskReferenceSourceLibrary> GruntTaskReferenceSourceLibraries { get; set; } = new List<AgentTaskReferenceSourceLibrary>();
         private List<AgentTaskReferenceAssembly> GruntTaskReferenceAssemblies { get; set; } = new List<AgentTaskReferenceAssembly>();
         private List<AgentTaskEmbeddedResource> GruntTaskEmbeddedResources { get; set; } = new List<AgentTaskEmbeddedResource>();
@@ -43,9 +49,9 @@ namespace EmpireCompiler.Models.Agents
         [NotMapped]
         public List<EmbeddedResource> EmbeddedResources => GruntTaskEmbeddedResources.Select(e => e.EmbeddedResource).ToList();
 
-        public bool UnsafeCompile { get; set; } = false;
-        public bool TokenTask { get; set; } = false;
-        
+        public bool UnsafeCompile { get; set; }
+        public bool TokenTask { get; set; }
+
         public void Add(ReferenceSourceLibrary library)
         {
             GruntTaskReferenceSourceLibraries.Add(new AgentTaskReferenceSourceLibrary
@@ -134,7 +140,7 @@ namespace EmpireCompiler.Models.Agents
             return this.FromSerializedGruntTask(task);
         }
 
-        public void Compile(Common.DotNetVersion dotnetVersion, Compiler.RuntimeIdentifier runtimeIdentifier = Compiler.RuntimeIdentifier.win_x64)
+        public void Compile(Common.DotNetVersion dotnetVersion)
         {
             if (!this.Compiled)
             {
@@ -147,13 +153,12 @@ namespace EmpireCompiler.Models.Agents
                 switch (dotnetVersion)
                 {
                     case Common.DotNetVersion.Net35:
-                        this.CompileDotNet35();
-                        break;
                     case Common.DotNetVersion.Net40:
-                        this.CompileDotNet40();
-                        break;
                     case Common.DotNetVersion.Net45:
-                        this.CompileDotNet45();
+                    case Common.DotNetVersion.Net46:
+                    case Common.DotNetVersion.Net47:
+                    case Common.DotNetVersion.Net48:
+                        this.CompileDotNetFramework(dotnetVersion);
                         break;
                     default:
                         Console.WriteLine($"Error: Compilation for {dotnetVersion} is not implemented.");
@@ -163,49 +168,42 @@ namespace EmpireCompiler.Models.Agents
             }
         }
 
-        private void CompileDotNet35()
+        private void CompileDotNetFramework(Common.DotNetVersion dotnetVersion)
         {
-            List<Compiler.EmbeddedResource> resources = this.EmbeddedResources.Select(ER =>
-            {
-                return new Compiler.EmbeddedResource
+            List<Compiler.EmbeddedResource> resources = this.EmbeddedResources
+                .Where(ER => ER.DotNetVersion == null || ER.DotNetVersion == dotnetVersion)
+                .Select(ER =>
                 {
-                    Name = ER.Name,
-                    File = Common.EmpireEmbeddedResourcesDirectory + ER.Location,
-                    Platform = Platform.X64,
-                    Enabled = true
-                };
-            }).ToList();
+                    return new Compiler.EmbeddedResource
+                    {
+                        Name = ER.Name,
+                        File = Common.EmpireEmbeddedResourcesDirectory + ER.Location,
+                        Platform = Platform.X64,
+                        Enabled = true
+                    };
+                }).ToList();
             this.ReferenceSourceLibraries.ToList().ForEach(RSL =>
             {
                 resources.AddRange(
-                    RSL.EmbeddedResources.Select(ER =>
-                    {
-                        return new Compiler.EmbeddedResource
+                    RSL.EmbeddedResources
+                        .Where(ER => ER.DotNetVersion == null || ER.DotNetVersion == dotnetVersion)
+                        .Select(ER =>
                         {
-                            Name = ER.Name,
-                            File = Common.EmpireEmbeddedResourcesDirectory + ER.Location,
-                            Platform = Platform.X64,
-                            Enabled = true
-                        };
-                    })
+                            return new Compiler.EmbeddedResource
+                            {
+                                Name = ER.Name,
+                                File = Common.EmpireEmbeddedResourcesDirectory + ER.Location,
+                                Platform = Platform.X64,
+                                Enabled = true
+                            };
+                        })
                 );
             });
-            List<Compiler.Reference> references35 = new List<Compiler.Reference>();
-            this.ReferenceSourceLibraries.ToList().ForEach(RSL =>
-            {
-                references35.AddRange(
-                    RSL.ReferenceAssemblies.Where(RA => RA.DotNetVersion == Common.DotNetVersion.Net35).Select(RA =>
-                    {
-                        return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net35, Enabled = true };
-                    })
-                );
-            });
-            references35.AddRange(
-                this.ReferenceAssemblies.Where(RA => RA.DotNetVersion == Common.DotNetVersion.Net35).Select(RA =>
-                {
-                    return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net35, Enabled = true };
-                })
-            );
+            string frameworkDir = Common.GetAssemblyReferenceDirectory(dotnetVersion);
+            List<Compiler.Reference> references = Directory.GetFiles(frameworkDir, "*.dll")
+                .Where(IsManagedFrameworkAssembly)
+                .Select(dll => new Compiler.Reference { File = dll, Framework = dotnetVersion, Enabled = true })
+                .ToList();
 
             File.WriteAllBytes(this.OutputPath,
                 Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
@@ -213,138 +211,58 @@ namespace EmpireCompiler.Models.Agents
                     Language = this.Language,
                     Source = this.Code,
                     SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
-                    TargetDotNetVersion = Common.DotNetVersion.Net35,
-                    References = references35,
+                    TargetDotNetVersion = dotnetVersion,
+                    References = references,
                     EmbeddedResources = resources,
                     UnsafeCompile = this.UnsafeCompile,
                     OutputKind = OutputKind.ConsoleApplication,
-                    //OutputKind = OutputKind.WindowsApplication,
                     Confuse = this.Confuse,
                     Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
                 })
             );
         }
 
-        private void CompileDotNet40()
+        private static bool IsManagedFrameworkAssembly(string dllPath)
         {
-            List<Compiler.EmbeddedResource> resources = this.EmbeddedResources.Select(ER =>
+            try
             {
-                return new Compiler.EmbeddedResource
+                using var stream = File.OpenRead(dllPath);
+                using var peReader = new PEReader(stream);
+                if (!peReader.HasMetadata)
                 {
-                    Name = ER.Name,
-                    File = Common.EmpireEmbeddedResourcesDirectory + ER.Location,
-                    Platform = Platform.X64,
-                    Enabled = true
-                };
-            }).ToList();
-            this.ReferenceSourceLibraries.ToList().ForEach(RSL =>
-            {
-                resources.AddRange(
-                    RSL.EmbeddedResources.Select(ER =>
-                    {
-                        return new Compiler.EmbeddedResource
-                        {
-                            Name = ER.Name,
-                            File = Common.EmpireEmbeddedResourcesDirectory + ER.Location,
-                            Platform = Platform.X64,
-                            Enabled = true
-                        };
-                    })
-                );
-            });
-            List<Compiler.Reference> references40 = new List<Compiler.Reference>();
-            this.ReferenceSourceLibraries.ToList().ForEach(RSL =>
-            {
-                references40.AddRange(
-                    RSL.ReferenceAssemblies.Where(RA => RA.DotNetVersion == Common.DotNetVersion.Net40).Select(RA =>
-                    {
-                        return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net40, Enabled = true };
-                    })
-                );
-            });
-            references40.AddRange(
-                this.ReferenceAssemblies.Where(RA => RA.DotNetVersion == Common.DotNetVersion.Net40).Select(RA =>
-                {
-                    return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net40, Enabled = true };
-                })
-            );
-            File.WriteAllBytes(this.OutputPath,
-                Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
-                {
-                    Language = this.Language,
-                    Source = this.Code,
-                    SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
-                    TargetDotNetVersion = Common.DotNetVersion.Net40,
-                    References = references40,
-                    EmbeddedResources = resources,
-                    UnsafeCompile = this.UnsafeCompile,
-                    OutputKind = OutputKind.ConsoleApplication,
-                    //OutputKind = OutputKind.WindowsApplication,
-                    Confuse = this.Confuse,
-                    Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
-                })
-            );
-        }
+                    return false;
+                }
 
-        private void CompileDotNet45()
-        {
-            List<Compiler.EmbeddedResource> resources = this.EmbeddedResources.Select(ER =>
-            {
-                return new Compiler.EmbeddedResource
+                var metadataReader = peReader.GetMetadataReader();
+                if (!metadataReader.IsAssembly)
                 {
-                    Name = ER.Name,
-                    File = Common.EmpireEmbeddedResourcesDirectory + ER.Location,
-                    Platform = Platform.X64,
-                    Enabled = true
-                };
-            }).ToList();
-            this.ReferenceSourceLibraries.ToList().ForEach(RSL =>
-            {
-                resources.AddRange(
-                    RSL.EmbeddedResources.Select(ER =>
+                    return false;
+                }
+
+                // Exclude .NET Standard facade assemblies (e.g. System.Buffers, System.Memory)
+                // that reference System.Runtime instead of mscorlib, as they cause CS0012 errors
+                // when System.Runtime.dll is not present in the reference set.
+                bool refsMscorlib = false;
+                bool refsSysRuntime = false;
+                foreach (var handle in metadataReader.AssemblyReferences)
+                {
+                    var name = metadataReader.GetString(metadataReader.GetAssemblyReference(handle).Name);
+                    if (name == "mscorlib")
                     {
-                        return new Compiler.EmbeddedResource
-                        {
-                            Name = ER.Name,
-                            File = Common.EmpireEmbeddedResourcesDirectory + ER.Location,
-                            Platform = Platform.X64,
-                            Enabled = true
-                        };
-                    })
-                );
-            });
-            List<Compiler.Reference> references45 = new List<Compiler.Reference>();
-            this.ReferenceSourceLibraries.ToList().ForEach(RSL =>
-            {
-                references45.AddRange(
-                    RSL.ReferenceAssemblies.Where(RA => RA.DotNetVersion == Common.DotNetVersion.Net45).Select(RA =>
+                        refsMscorlib = true;
+                    }
+                    else if (name == "System.Runtime")
                     {
-                        return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net45, Enabled = true };
-                    })
-                );
-            });
-            references45.AddRange(
-                this.ReferenceAssemblies.Where(RA => RA.DotNetVersion == Common.DotNetVersion.Net45).Select(RA =>
-                {
-                    return new Compiler.Reference { File = Common.EmpireAssemblyReferenceDirectory + RA.Location, Framework = Common.DotNetVersion.Net45, Enabled = true };
-                })
-            );
-            File.WriteAllBytes(this.OutputPath,
-                Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
-                {
-                    Language = this.Language,
-                    Source = this.Code,
-                    SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
-                    TargetDotNetVersion = Common.DotNetVersion.Net45,
-                    References = references45,
-                    EmbeddedResources = resources,
-                    UnsafeCompile = this.UnsafeCompile,
-                    OutputKind = OutputKind.ConsoleApplication,
-                    //OutputKind = OutputKind.WindowsApplication,
-                    Confuse = this.Confuse,
-                    Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Contains("Seatbelt")
-                })
-            );
+                        refsSysRuntime = true;
+                    }
+                }
+
+                return refsMscorlib || !refsSysRuntime;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 
@@ -354,8 +272,8 @@ namespace EmpireCompiler.Models.Agents
         public ImplantLanguage Language { get; set; }
         public IList<Common.DotNetVersion> CompatibleDotNetVersions { get; set; } = new List<Common.DotNetVersion>();
         public string Code { get; set; } = "";
-        public bool UnsafeCompile { get; set; } = false;
-        public bool TokenTask { get; set; } = false;
+        public bool UnsafeCompile { get; set; }
+        public bool TokenTask { get; set; }
         public List<SerializedReferenceSourceLibrary> ReferenceSourceLibraries { get; set; } = new List<SerializedReferenceSourceLibrary>();
         public List<SerializedReferenceAssembly> ReferenceAssemblies { get; set; } = new List<SerializedReferenceAssembly>();
         public List<SerializedEmbeddedResource> EmbeddedResources { get; set; } = new List<SerializedEmbeddedResource>();

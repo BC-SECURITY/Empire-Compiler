@@ -1,16 +1,16 @@
-﻿using Confuser.Core;
-using Confuser.Core.Project;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+
 using EmpireCompiler.Utility;
+
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Emit;
 
 namespace EmpireCompiler.Core
 {
@@ -27,41 +27,19 @@ namespace EmpireCompiler.Core
             public Common.DotNetVersion TargetDotNetVersion { get; set; } = Common.DotNetVersion.Net35;
             public OutputKind OutputKind { get; set; } = OutputKind.DynamicallyLinkedLibrary;
             public bool Optimize { get; set; } = true;
-            public bool Confuse { get; set; } = false;
-            public bool UnsafeCompile { get; set; } = false;
-            public bool UseSubprocess { get; set; } = false;
+            public bool Confuse { get; set; }
+            public bool UnsafeCompile { get; set; }
+            public bool UseSubprocess { get; set; }
 
-            public string AssemblyName { get; set; } = null;
+            public string AssemblyName { get; set; }
             public List<Reference> References { get; set; } = new List<Reference>();
             public List<EmbeddedResource> EmbeddedResources { get; set; } = new List<EmbeddedResource>();
         }
 
         public class CsharpFrameworkCompilationRequest : CsharpCompilationRequest
         {
-            public string Source { get; set; } = null;
-            public List<string> SourceDirectories { get; set; } = null;
-        }
-
-        public class CsharpCoreCompilationRequest : CsharpCompilationRequest
-        {
-            public string ResultName { get; set; } = "";
-            public string SourceDirectory { get; set; } = "";
-            public RuntimeIdentifier RuntimeIdentifier { get; set; } = RuntimeIdentifier.win_x64;
-        }
-
-        public enum RuntimeIdentifier
-        {
-            win_x64, win_x86,
-            win_arm, win_arm64,
-            win7_x64, win7_x86,
-            win81_x64, win81_x86, win81_arm,
-            win10_x64, win10_x86,
-            win10_arm, win10_arm64,
-            linux_x64, linux_musl_x64, linux_arm, linux_arm64,
-            rhel_x64, rhel_6_x64,
-            tizen, tizen_4_0_0, tizen_5_0_0,
-            osx_x64, osx_10_10_x64, osx_10_11_x64,
-            osx_10_12_x64, osx_10_13_x64, osx_10_14_x64, osx_10_15_x64
+            public string Source { get; set; }
+            public List<string> SourceDirectories { get; set; }
         }
 
         public class EmbeddedResource
@@ -69,14 +47,14 @@ namespace EmpireCompiler.Core
             public string Name { get; set; }
             public string File { get; set; }
             public Platform Platform { get; set; } = Platform.AnyCpu;
-            public bool Enabled { get; set; } = false;
+            public bool Enabled { get; set; }
         }
 
         public class Reference
         {
             public string File { get; set; }
             public Common.DotNetVersion Framework { get; set; } = Common.DotNetVersion.Net35;
-            public bool Enabled { get; set; } = false;
+            public bool Enabled { get; set; }
         }
 
         private class SourceSyntaxTree
@@ -128,7 +106,7 @@ namespace EmpireCompiler.Core
                 .ToList();
 
             string entryPointClass = "Program";
-            
+
             // Use specified OutputKind and Platform
             CSharpCompilationOptions options = new CSharpCompilationOptions(
                 outputKind: request.OutputKind,
@@ -137,7 +115,7 @@ namespace EmpireCompiler.Core
                 allowUnsafe: request.UnsafeCompile,
                 mainTypeName: entryPointClass
             );
-            
+
             CSharpCompilation compilation = CSharpCompilation.Create(
                 request.AssemblyName == null ? Path.GetRandomFileName() : request.AssemblyName,
                 compilationTrees,
@@ -149,7 +127,7 @@ namespace EmpireCompiler.Core
             if (request.Optimize)
             {
                 // Find all Types used by the generated compilation
-                HashSet<ITypeSymbol> usedTypes = new HashSet<ITypeSymbol>();
+                HashSet<ITypeSymbol> usedTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
                 List<SyntaxTree> searchedTrees = new List<SyntaxTree>();
                 GetUsedTypesRecursively(compilation, sourceTree, ref usedTypes, ref sourceSyntaxTrees, ref searchedTrees);
                 List<string> usedTypeNames = usedTypes.Select(T => GetFullyQualifiedTypeName(T)).ToList();
@@ -164,7 +142,7 @@ namespace EmpireCompiler.Core
                     .Select(T => GetFullyQualifiedContainingNamespaceName(T)).Distinct().ToList();
                 List<SyntaxNode> unusedUsingDirectives = sourceTree.GetRoot().DescendantNodes().Where(N =>
                 {
-                    return N.Kind() == SyntaxKind.UsingDirective && !((UsingDirectiveSyntax)N).Name.ToFullString().StartsWith("System.") && !usedNamespaceNames.Contains(((UsingDirectiveSyntax)N).Name.ToFullString());
+                    return N.IsKind(SyntaxKind.UsingDirective) && !((UsingDirectiveSyntax)N).Name.ToFullString().StartsWith("System.") && !usedNamespaceNames.Contains(((UsingDirectiveSyntax)N).Name.ToFullString());
                 }).ToList();
                 sourceTree = sourceTree.GetRoot().RemoveNodes(unusedUsingDirectives, SyntaxRemoveOptions.KeepNoTrivia).SyntaxTree;
 
@@ -221,69 +199,69 @@ namespace EmpireCompiler.Core
         }
 
         private static byte[] ConfuseAssembly(byte[] ILBytes)
-	{
-	    DebugUtility.DebugPrint("Confusing assembly...");
-	    
-	    // Prepare input/output paths for Confuser
-	    var inputFileName = "confused.exe";
-	    var inputPath = Path.Combine(Common.EmpireTempDirectory, inputFileName);
-	    var outputDir = Path.Combine(Common.EmpireTempDirectory, "confused_out");
-	    var confuserProject = Path.Combine(Common.EmpireTempDirectory, "empire.crproj");
-	    var logFilePath = Path.Combine(Common.EmpireTempDirectory, "confuser.log");
-	    
-	    Directory.CreateDirectory(outputDir);
-	    
-	    // Write the unprotected IL to a temp file with a proper extension
-	    File.WriteAllBytes(inputPath, ILBytes);
-	    
-	    var workingDir = Path.Combine(Common.EmpireDataDirectory, "ConfuserEx-CLI");
-	   
-	    var startInfo = new ProcessStartInfo
-	    {
-		FileName = "mono",
-		Arguments = $"Confuser.CLI.exe -n \"{confuserProject}\"",
-		WorkingDirectory = workingDir,
-		RedirectStandardOutput = true,
-		RedirectStandardError = true,
-		UseShellExecute = false,
-		CreateNoWindow = true
-	    };
+        {
+            DebugUtility.DebugPrint("Confusing assembly...");
 
-	    using (var process = Process.Start(startInfo))
-	    using (var logFile = new StreamWriter(logFilePath, append: false))
-	    {
-		// Write timestamp
-		logFile.WriteLine($"=== Confuser Run: {DateTime.Now} ===");
-		
-		// Capture and write stdout
-		process.OutputDataReceived += (sender, args) =>
-		{
-		    if (args.Data != null)
-		    {
-		        logFile.WriteLine($"[OUT] {args.Data}");
-		        logFile.Flush();
-		    }
-		};
-		
-		// Capture and write stderr
-		process.ErrorDataReceived += (sender, args) =>
-		{
-		    if (args.Data != null)
-		    {
-		        logFile.WriteLine($"[ERR] {args.Data}");
-		        logFile.Flush();
-		    }
-		};
-		
-		process.BeginOutputReadLine();
-		process.BeginErrorReadLine();
-		
-		process.WaitForExit();
-		
-		logFile.WriteLine($"Exit Code: {process.ExitCode}");
-		logFile.WriteLine();
-	    }
-	    
+            // Prepare input/output paths for Confuser
+            var inputFileName = "confused.exe";
+            var inputPath = Path.Combine(Common.EmpireTempDirectory, inputFileName);
+            var outputDir = Path.Combine(Common.EmpireTempDirectory, "confused_out");
+            var confuserProject = Path.Combine(Common.EmpireTempDirectory, "empire.crproj");
+            var logFilePath = Path.Combine(Common.EmpireTempDirectory, "confuser.log");
+
+            Directory.CreateDirectory(outputDir);
+
+            // Write the unprotected IL to a temp file with a proper extension
+            File.WriteAllBytes(inputPath, ILBytes);
+
+            var workingDir = Path.Combine(Common.EmpireDataDirectory, "ConfuserEx-CLI");
+
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "mono",
+                Arguments = $"Confuser.CLI.exe -n \"{confuserProject}\"",
+                WorkingDirectory = workingDir,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using (var process = Process.Start(startInfo))
+            using (var logFile = new StreamWriter(logFilePath, append: false))
+            {
+                // Write timestamp
+                logFile.WriteLine($"=== Confuser Run: {DateTime.Now} ===");
+
+                // Capture and write stdout
+                process.OutputDataReceived += (sender, args) =>
+                {
+                    if (args.Data != null)
+                    {
+                        logFile.WriteLine($"[OUT] {args.Data}");
+                        logFile.Flush();
+                    }
+                };
+
+                // Capture and write stderr
+                process.ErrorDataReceived += (sender, args) =>
+                {
+                    if (args.Data != null)
+                    {
+                        logFile.WriteLine($"[ERR] {args.Data}");
+                        logFile.Flush();
+                    }
+                };
+
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+
+                process.WaitForExit();
+
+                logFile.WriteLine($"Exit Code: {process.ExitCode}");
+                logFile.WriteLine();
+            }
+
 
 
 
@@ -307,17 +285,6 @@ namespace EmpireCompiler.Core
 
             return protectedBytes;
         }
-
-        private static string ConfuserExOptions { get; set; } = @"
-<project baseDir=""{0}"" outputDir=""{1}"" xmlns=""http://confuser.codeplex.com"">
-  <rule pattern=""true"" preset=""none"" inherit=""false"">
-    <protection id=""rename"" />
-    <protection id=""anti ildasm"" />
-    <protection id=""ctrl flow"" />
-  </rule>
-  <module path=""{2}"" />
-</project>
-";
 
         private static string GetFullyQualifiedContainingNamespaceName(INamespaceSymbol namespaceSymbol)
         {
@@ -350,22 +317,22 @@ namespace EmpireCompiler.Core
             SemanticModel model = compilation.GetSemanticModel(tree);
             return null != tree.GetRoot().DescendantNodes().FirstOrDefault(SN =>
             {
-                if (SN.Kind() == SyntaxKind.ClassDeclaration)
+                if (SN.IsKind(SyntaxKind.ClassDeclaration))
                 {
                     ITypeSymbol symbol = model.GetDeclaredSymbol((ClassDeclarationSyntax)SN);
                     return typeNames.Contains(GetFullyQualifiedTypeName(symbol));
                 }
-                else if (SN.Kind() == SyntaxKind.InterfaceDeclaration)
+                else if (SN.IsKind(SyntaxKind.InterfaceDeclaration))
                 {
                     ITypeSymbol symbol = model.GetDeclaredSymbol((InterfaceDeclarationSyntax)SN);
                     return typeNames.Contains(GetFullyQualifiedTypeName(symbol));
                 }
-                else if (SN.Kind() == SyntaxKind.StructDeclaration)
+                else if (SN.IsKind(SyntaxKind.StructDeclaration))
                 {
                     ITypeSymbol symbol = model.GetDeclaredSymbol((StructDeclarationSyntax)SN);
                     return typeNames.Contains(GetFullyQualifiedTypeName(symbol));
                 }
-                else if (SN.Kind() == SyntaxKind.EnumDeclaration)
+                else if (SN.IsKind(SyntaxKind.EnumDeclaration))
                 {
                     ITypeSymbol symbol = model.GetDeclaredSymbol((EnumDeclarationSyntax)SN);
                     return typeNames.Contains(GetFullyQualifiedTypeName(symbol));
@@ -387,7 +354,7 @@ namespace EmpireCompiler.Core
                     types.Add(typeSymbol);
                 }
             });
-            return types.ToHashSet();
+            return new HashSet<ITypeSymbol>(types, SymbolEqualityComparer.Default);
         }
 
         private static HashSet<ITypeSymbol> GetUsedTypesRecursively(CSharpCompilation compilation, SyntaxTree sourceTree, ref HashSet<ITypeSymbol> currentUsedTypes, ref List<SourceSyntaxTree> sourceSyntaxTrees, ref List<SyntaxTree> searchedTrees)
@@ -404,7 +371,8 @@ namespace EmpireCompiler.Core
                 if (sr != null)
                 {
                     SourceSyntaxTree sst = sourceSyntaxTrees.FirstOrDefault(SST => SST.SyntaxTree == sr.SyntaxTree);
-                    if (sst != null) { sst.UsedTypes.Add(symbol); }
+                    if (sst != null)
+                    { sst.UsedTypes.Add(symbol); }
                     string fullyQualifiedTypeName = GetFullyQualifiedTypeName(symbol);
                     searchTrees.Add(sr.SyntaxTree);
                 }

@@ -1,9 +1,12 @@
-﻿using EmpireCompiler.Core;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+
+using EmpireCompiler.Core;
+
+using Newtonsoft.Json;
+
 using YamlDotNet.Serialization;
 
 namespace EmpireCompiler.Models.Agents
@@ -72,6 +75,7 @@ namespace EmpireCompiler.Models.Agents
         public int Id { get; set; }
         public string Name { get; set; }
         public string Location { get; set; }
+        public Common.DotNetVersion? DotNetVersion { get; set; }
 
         private List<ReferenceSourceLibraryEmbeddedResource> ReferenceSourceLibraryEmbeddedResources { get; set; } = new List<ReferenceSourceLibraryEmbeddedResource>();
         private List<AgentTaskEmbeddedResource> GruntTaskEmbeddedResources { get; set; } = new List<AgentTaskEmbeddedResource>();
@@ -86,7 +90,8 @@ namespace EmpireCompiler.Models.Agents
             return new SerializedEmbeddedResource
             {
                 Name = this.Name,
-                Location = this.Location.Replace("\\", "/")
+                Location = this.Location.Replace("\\", "/"),
+                DotNetVersion = this.DotNetVersion
             };
         }
 
@@ -94,6 +99,7 @@ namespace EmpireCompiler.Models.Agents
         {
             this.Name = resource.Name;
             this.Location = resource.Location.Replace("\\", "/");
+            this.DotNetVersion = resource.DotNetVersion;
             return this;
         }
 
@@ -129,7 +135,7 @@ namespace EmpireCompiler.Models.Agents
         public string Description { get; set; }
         public string Location { get; set; }
         public ImplantLanguage Language { get; set; } = ImplantLanguage.CSharp;
-        public List<Common.DotNetVersion> CompatibleDotNetVersions { get; set; } = new List<Common.DotNetVersion> { Common.DotNetVersion.Net35, Common.DotNetVersion.Net40, Common.DotNetVersion.Net45 };
+        public List<Common.DotNetVersion> CompatibleDotNetVersions { get; set; } = new List<Common.DotNetVersion> { Common.DotNetVersion.Net35, Common.DotNetVersion.Net40, Common.DotNetVersion.Net45, Common.DotNetVersion.Net46, Common.DotNetVersion.Net47, Common.DotNetVersion.Net48 };
 
         private List<ReferenceSourceLibraryReferenceAssembly> ReferenceSourceLibraryReferenceAssemblies { get; set; } = new List<ReferenceSourceLibraryReferenceAssembly>();
         private List<ReferenceSourceLibraryEmbeddedResource> ReferenceSourceLibraryEmbeddedResources { get; set; } = new List<ReferenceSourceLibraryEmbeddedResource>();
@@ -287,6 +293,7 @@ namespace EmpireCompiler.Models.Agents
     {
         public string Name { get; set; }
         public string Location { get; set; }
+        public Common.DotNetVersion? DotNetVersion { get; set; }
     }
 
     internal class SerializedReferenceSourceLibrary
@@ -296,7 +303,7 @@ namespace EmpireCompiler.Models.Agents
         public string Location { get; set; }
         public ImplantLanguage Language { get; set; } = ImplantLanguage.CSharp;
         public List<Common.DotNetVersion> CompatibleDotNetVersions { get; set; }
-        public List<SerializedReferenceAssembly> ReferenceAssemblies { get; set; }
-        public List<SerializedEmbeddedResource> EmbeddedResources { get; set; }
+        public List<SerializedReferenceAssembly> ReferenceAssemblies { get; set; } = new List<SerializedReferenceAssembly>();
+        public List<SerializedEmbeddedResource> EmbeddedResources { get; set; } = new List<SerializedEmbeddedResource>();
     }
 }
