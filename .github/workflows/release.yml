@@ -47,7 +47,7 @@ jobs:
           dotnet-version: '10.x'
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore -r ${{ env.runtime }}
       
       - name: Build self-contained assembly
         run: |
