@@ -7,6 +7,8 @@ using System.Text;
 
 using EmpireCompiler.Utility;
 
+using ILRepacking;
+
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -316,80 +318,37 @@ namespace EmpireCompiler.Core
                 var outputPath = Path.Combine(tempDir, "merged.exe");
                 File.WriteAllBytes(primaryPath, compiledBytes);
 
-                // Build ILRepack command line arguments
-                var ilRepackArgs = new List<string>
-                {
-                    "/internalize",
-                    "/ndebug",
-                    outputKind == OutputKind.ConsoleApplication ? "/target:exe" : "/target:library",
-                    $"/out:{outputPath}",
-                    $"/lib:{frameworkDir}",
-                    primaryPath,
-                };
-                ilRepackArgs.AddRange(nonFrameworkDlls);
+                var inputAssemblies = new List<string> { primaryPath };
+                inputAssemblies.AddRange(nonFrameworkDlls);
 
-                // Find ILRepack.exe - check multiple locations
-                string ilRepackExe = null;
-                string[] searchPaths = new[]
+                var options = new RepackOptions
                 {
-                    Path.Combine(Common.EmpireDirectory, "tools", "ILRepack.exe"),
-                    Path.Combine(Common.EmpireDirectory, "ILRepack.exe"),
-                    Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "", "ILRepack.exe"),
+                    InputAssemblies = inputAssemblies.ToArray(),
+                    OutputFile = outputPath,
+                    SearchDirectories = new[] { frameworkDir },
+                    Internalize = true,
+                    DebugInfo = false,
+                    TargetKind = outputKind == OutputKind.ConsoleApplication
+                        ? ILRepack.Kind.Exe
+                        : ILRepack.Kind.Dll,
                 };
-                foreach (var candidate in searchPaths)
+
+                DebugUtility.DebugPrint("Running ILRepack in-process (library mode)");
+
+                try
                 {
-                    DebugUtility.DebugPrint($"  Checking: {candidate} -> {File.Exists(candidate)}");
-                    if (File.Exists(candidate))
-                    {
-                        ilRepackExe = candidate;
-                        break;
-                    }
+                    new ILRepack(options).Repack();
                 }
-
-                if (ilRepackExe == null)
+                catch (Exception ex)
                 {
                     throw new CompilerException(
-                        "ILRepack.exe not found. Searched: " +
-                        string.Join(", ", searchPaths) +
-                        ". Install ILRepack or remove --merge-references.");
+                        $"ILRepack merge failed: {ex.Message}", ex);
                 }
 
-                DebugUtility.DebugPrint($"Running ILRepack: {ilRepackExe}");
-
-                // ILRepack.exe is a .NET assembly — must run via dotnet on Linux
-                string allArgs = string.Join(" ", ilRepackArgs.Select(a => a.Contains(' ') ? $"\"{a}\"" : a));
-                var startInfo = new ProcessStartInfo
-                {
-                    FileName = "dotnet",
-                    Arguments = $"\"{ilRepackExe}\" {allArgs}",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                };
-
-                using var process = Process.Start(startInfo);
-                var stderrTask = process.StandardError.ReadToEndAsync();
-                string stdout = process.StandardOutput.ReadToEnd();
-                string stderr = stderrTask.Result;
-                process.WaitForExit();
-
-                DebugUtility.DebugPrint($"ILRepack exit code: {process.ExitCode}");
-                if (!string.IsNullOrEmpty(stdout))
-                {
-                    DebugUtility.DebugPrint($"ILRepack stdout: {stdout}");
-                }
-
-                if (!string.IsNullOrEmpty(stderr))
-                {
-                    DebugUtility.DebugPrint($"ILRepack stderr: {stderr}");
-                }
-
-                if (process.ExitCode != 0 || !File.Exists(outputPath))
+                if (!File.Exists(outputPath))
                 {
                     throw new CompilerException(
-                        $"ILRepack merge failed (exit code {process.ExitCode}). " +
-                        $"stdout: {stdout}\nstderr: {stderr}");
+                        "ILRepack merge produced no output file.");
                 }
 
                 var mergedBytes = File.ReadAllBytes(outputPath);
@@ -610,6 +569,11 @@ namespace EmpireCompiler.Core
     {
 
         public CompilerException(string message) : base(message)
+        {
+
+        }
+
+        public CompilerException(string message, System.Exception inner) : base(message, inner)
         {
 
         }
