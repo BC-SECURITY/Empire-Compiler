@@ -384,6 +384,16 @@ namespace EmpireCompiler.Core
             // Write the unprotected IL to a temp file with a proper extension
             File.WriteAllBytes(inputPath, ILBytes);
 
+            // Generate and write the Confuser project file
+            var projectXml = string.Format(
+                ConfuserExOptions,
+                Common.EmpireTempDirectory,
+                outputDir,
+                inputFileName
+            );
+            File.WriteAllText(confuserProject, projectXml);
+            DebugUtility.DebugPrint($"Created Confuser project at: {confuserProject}");
+
             var workingDir = Path.Combine(Common.EmpireDataDirectory, "ConfuserEx-CLI");
 
             var startInfo = new ProcessStartInfo
@@ -458,6 +468,17 @@ namespace EmpireCompiler.Core
 
             return protectedBytes;
         }
+
+        private static string ConfuserExOptions { get; } = @"
+<project baseDir=""{0}"" outputDir=""{1}"" xmlns=""http://confuser.codeplex.com"">
+  <rule pattern=""true"" preset=""none"" inherit=""false"">
+    <protection id=""rename"" />
+    <protection id=""anti ildasm"" />
+    <protection id=""ctrl flow"" />
+  </rule>
+  <module path=""{2}"" />
+</project>
+";
 
         private static string GetFullyQualifiedContainingNamespaceName(INamespaceSymbol namespaceSymbol)
         {
