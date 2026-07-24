@@ -40,6 +40,7 @@
 [submodule "EmpireCompiler/Data/ReferenceSourceLibraries/Sharpire"]
 	path = EmpireCompiler/Data/ReferenceSourceLibraries/Sharpire
 	url = https://github.com/BC-SECURITY/Sharpire.git
+	branch = master
 [submodule "EmpireCompiler/Data/ReferenceSourceLibraries/ThreadlessInject"]
 	path = EmpireCompiler/Data/ReferenceSourceLibraries/ThreadlessInject
 	url = https://github.com/Cx01N/ThreadlessInject.git
@@ -49,3 +50,6 @@
 [submodule "EmpireCompiler/Data/ReferenceSourceLibraries/CS_COFFLoader"]
 	path = EmpireCompiler/Data/ReferenceSourceLibraries/CS_COFFLoader
 	url = https://github.com/BC-SECURITY/CS_COFFLoader.git
+[submodule "EmpireCompiler/Data/ReferenceSourceLibraries/SharpHound"]
+	path = EmpireCompiler/Data/ReferenceSourceLibraries/SharpHound
+	url = https://github.com/SpecterOps/SharpHound.git

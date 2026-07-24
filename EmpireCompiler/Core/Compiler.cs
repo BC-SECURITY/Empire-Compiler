@@ -7,6 +7,8 @@ using System.Text;
 
 using EmpireCompiler.Utility;
 
+using ILRepacking;
+
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -28,6 +30,7 @@ namespace EmpireCompiler.Core
             public OutputKind OutputKind { get; set; } = OutputKind.DynamicallyLinkedLibrary;
             public bool Optimize { get; set; } = true;
             public bool Confuse { get; set; }
+            public bool MergeReferences { get; set; }
             public bool UnsafeCompile { get; set; }
             public bool UseSubprocess { get; set; }
 
@@ -70,7 +73,7 @@ namespace EmpireCompiler.Core
             {
                 return CompileCSharp((CsharpCompilationRequest)request);
             }
-            return null;
+            throw new CompilerException($"Unsupported compilation language: {request.Language}");
         }
 
         private static byte[] CompileCSharp(CsharpCompilationRequest request)
@@ -191,11 +194,178 @@ namespace EmpireCompiler.Core
                 }
             }
             DebugUtility.DebugPrint("Compilation successful.");
+            if (request.MergeReferences)
+            {
+                DebugUtility.DebugPrint("Starting ILRepack merge...");
+                ILbytes = MergeNonFrameworkReferences(ILbytes, request.TargetDotNetVersion, request.OutputKind);
+                DebugUtility.DebugPrint($"Merge complete, output size: {ILbytes.Length}");
+            }
             if (request.Confuse)
             {
                 return ConfuseAssembly(ILbytes);
             }
             return ILbytes;
+        }
+
+        // Core .NET Framework assemblies that ship with every Windows installation
+        // and should never be merged. Everything else in the reference directory
+        // is a third-party or NuGet assembly that needs merging.
+        private static readonly HashSet<string> CoreFrameworkAssemblies = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "mscorlib", "System", "System.Configuration", "System.Core",
+            "System.Data", "System.Data.DataSetExtensions", "System.Data.Entity",
+            "System.Data.Entity.Design", "System.Data.Linq",
+            "System.Data.OracleClient", "System.Data.Services",
+            "System.Data.Services.Client", "System.Data.Services.Design",
+            "System.Data.SqlXml", "System.Deployment", "System.Design",
+            "System.Device", "System.DirectoryServices",
+            "System.DirectoryServices.AccountManagement",
+            "System.DirectoryServices.Protocols", "System.Drawing",
+            "System.Drawing.Design", "System.Dynamic",
+            "System.EnterpriseServices", "System.EnterpriseServices.Thunk",
+            "System.EnterpriseServices.Wrapper", "System.IdentityModel",
+            "System.IdentityModel.Selectors", "System.IdentityModel.Services",
+            "System.IO.Compression", "System.IO.Compression.FileSystem",
+            "System.IO.Log", "System.Management", "System.Management.Automation",
+            "System.Management.Instrumentation", "System.Messaging",
+            "System.Net", "System.Net.Http", "System.Net.Http.WebRequest",
+            "System.Numerics", "System.Printing",
+            "System.Reflection.Context", "System.Runtime.Caching",
+            "System.Runtime.DurableInstancing", "System.Runtime.Remoting",
+            "System.Runtime.Serialization",
+            "System.Runtime.Serialization.Formatters.Soap",
+            "System.Security", "System.ServiceModel",
+            "System.ServiceModel.Activation", "System.ServiceModel.Activities",
+            "System.ServiceModel.Channels", "System.ServiceModel.Discovery",
+            "System.ServiceModel.Routing", "System.ServiceModel.Web",
+            "System.ServiceProcess", "System.Speech",
+            "System.Transactions", "System.Web",
+            "System.Web.Abstractions", "System.Web.ApplicationServices",
+            "System.Web.DataVisualization", "System.Web.DataVisualization.Design",
+            "System.Web.DynamicData", "System.Web.DynamicData.Design",
+            "System.Web.Entity", "System.Web.Entity.Design",
+            "System.Web.Extensions", "System.Web.Extensions.Design",
+            "System.Web.Mobile", "System.Web.RegularExpressions",
+            "System.Web.Routing", "System.Web.Services",
+            "System.Windows.Controls.Ribbon", "System.Windows.Forms",
+            "System.Windows.Forms.DataVisualization",
+            "System.Windows.Forms.DataVisualization.Design",
+            "System.Windows.Input.Manipulations",
+            "System.Windows.Presentation",
+            "System.Workflow.Activities", "System.Workflow.ComponentModel",
+            "System.Workflow.Runtime", "System.WorkflowServices",
+            "System.Xaml", "System.Xml", "System.Xml.Linq",
+            "System.Xml.Serialization",
+            "Microsoft.CSharp", "Microsoft.JScript",
+            "Microsoft.VisualBasic", "Microsoft.VisualBasic.Compatibility",
+            "Microsoft.VisualBasic.Compatibility.Data",
+            "Microsoft.VisualC", "Microsoft.VisualC.STLCLR",
+            "Microsoft.Build", "Microsoft.Build.Conversion.v4.0",
+            "Microsoft.Build.Engine", "Microsoft.Build.Framework",
+            "Microsoft.Build.Tasks.v4.0", "Microsoft.Build.Utilities.v4.0",
+            "Microsoft.Activities.Build",
+            "Accessibility", "CustomMarshalers", "ISymWrapper",
+            "WindowsBase", "WindowsFormsIntegration",
+            "PresentationBuildTasks", "PresentationCore",
+            "PresentationFramework", "PresentationFramework.Aero",
+            "PresentationFramework.Aero2", "PresentationFramework.AeroLite",
+            "PresentationFramework.Classic", "PresentationFramework.Luna",
+            "PresentationFramework.Royale", "ReachFramework",
+            "UIAutomationClient", "UIAutomationClientsideProviders",
+            "UIAutomationProvider", "UIAutomationTypes",
+            "System.Activities", "System.Activities.Core.Presentation",
+            "System.Activities.DurableInstancing", "System.Activities.Presentation",
+            "System.AddIn", "System.AddIn.Contract",
+            "System.ComponentModel.Composition",
+            "System.ComponentModel.Composition.Registration",
+            "System.ComponentModel.DataAnnotations",
+            "System.Configuration.Install",
+            "System.Windows",
+            "XamlBuildTask", "sysglobl", "netstandard",
+        };
+
+        private static byte[] MergeNonFrameworkReferences(byte[] compiledBytes, Common.DotNetVersion targetVersion, OutputKind outputKind)
+        {
+            DebugUtility.DebugPrint("Merging non-framework references with ILRepack...");
+
+            // Scan the entire framework reference directory for non-framework
+            // DLLs to merge. Some NuGet packages (System.Memory, System.Buffers)
+            // aren't in the Roslyn reference list because they target netstandard,
+            // but they're still needed at runtime by merged assemblies.
+            string frameworkDir = Common.GetAssemblyReferenceDirectory(targetVersion);
+            var nonFrameworkDlls = Directory.GetFiles(frameworkDir, "*.dll")
+                .Where(f => !CoreFrameworkAssemblies.Contains(
+                    Path.GetFileNameWithoutExtension(f)))
+                .ToList();
+
+            if (nonFrameworkDlls.Count == 0)
+            {
+                DebugUtility.DebugPrint("No non-framework references to merge.");
+                return compiledBytes;
+            }
+
+            foreach (var dll in nonFrameworkDlls)
+            {
+                DebugUtility.DebugPrint($"  Will merge: {Path.GetFileName(dll)}");
+            }
+
+            var tempDir = Path.Combine(Common.EmpireTempDirectory, "ilrepack_" + Guid.NewGuid().ToString("N")[..8]);
+            Directory.CreateDirectory(tempDir);
+
+            try
+            {
+                var primaryPath = Path.Combine(tempDir, "primary.exe");
+                var outputPath = Path.Combine(tempDir, "merged.exe");
+                File.WriteAllBytes(primaryPath, compiledBytes);
+
+                var inputAssemblies = new List<string> { primaryPath };
+                inputAssemblies.AddRange(nonFrameworkDlls);
+
+                var options = new RepackOptions
+                {
+                    InputAssemblies = inputAssemblies.ToArray(),
+                    OutputFile = outputPath,
+                    SearchDirectories = new[] { frameworkDir },
+                    Internalize = true,
+                    DebugInfo = false,
+                    TargetKind = outputKind == OutputKind.ConsoleApplication
+                        ? ILRepack.Kind.Exe
+                        : ILRepack.Kind.Dll,
+                };
+
+                DebugUtility.DebugPrint("Running ILRepack in-process (library mode)");
+
+                try
+                {
+                    new ILRepack(options).Repack();
+                }
+                catch (Exception ex)
+                {
+                    throw new CompilerException(
+                        $"ILRepack merge failed: {ex.Message}", ex);
+                }
+
+                if (!File.Exists(outputPath))
+                {
+                    throw new CompilerException(
+                        "ILRepack merge produced no output file.");
+                }
+
+                var mergedBytes = File.ReadAllBytes(outputPath);
+                DebugUtility.DebugPrint($"ILRepack merge complete. Original: {compiledBytes.Length} bytes, Merged: {mergedBytes.Length} bytes");
+                return mergedBytes;
+            }
+            finally
+            {
+                try
+                {
+                    Directory.Delete(tempDir, true);
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Warning: failed to clean up temp directory {tempDir}: {ex.Message}");
+                }
+            }
         }
 
         private static byte[] ConfuseAssembly(byte[] ILBytes)
@@ -260,17 +430,20 @@ namespace EmpireCompiler.Core
 
                 logFile.WriteLine($"Exit Code: {process.ExitCode}");
                 logFile.WriteLine();
+
+                if (process.ExitCode != 0)
+                {
+                    throw new CompilerException(
+                        $"ConfuserEx obfuscation failed (exit code {process.ExitCode}). See log: {logFilePath}");
+                }
             }
-
-
-
 
             // Confuser writes to outputDir with the same file name
             var outputPath = Path.Combine(outputDir, inputFileName);
             if (!File.Exists(outputPath))
             {
-                DebugUtility.DebugPrint($"Confuser output not found at: {outputPath}. Returning original bytes.");
-                return ILBytes;
+                throw new CompilerException(
+                    $"ConfuserEx output not found at: {outputPath}. Obfuscation failed. See log: {logFilePath}");
             }
 
             var protectedBytes = File.ReadAllBytes(outputPath);
@@ -396,6 +569,11 @@ namespace EmpireCompiler.Core
     {
 
         public CompilerException(string message) : base(message)
+        {
+
+        }
+
+        public CompilerException(string message, System.Exception inner) : base(message, inner)
         {
 
         }
