@@ -1,6 +1,6 @@
 [submodule "EmpireCompiler/Data/ReferenceSourceLibraries/Certify"]
 	path = EmpireCompiler/Data/ReferenceSourceLibraries/Certify
-	url = https://github.com/GhostPack/Certify.git
+	url = https://github.com/BC-SECURITY/Certify.git
 [submodule "EmpireCompiler/Data/ReferenceSourceLibraries/DotNetStratumMiner"]
 	path = EmpireCompiler/Data/ReferenceSourceLibraries/DotNetStratumMiner
 	url = https://github.com/BC-SECURITY/DotNetStratumMiner.git
