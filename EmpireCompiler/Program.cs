@@ -62,6 +62,10 @@ namespace EmpireCompiler
                 mergeReferencesOption
             };
 
+            var abiCommand = new Command("abi", "Print the engine ABI version");
+            abiCommand.SetAction(_ => Console.WriteLine(Abi.Version));
+            rootCommand.Subcommands.Add(abiCommand);
+
             rootCommand.SetAction(async (parseResult, cancellationToken) =>
             {
                 var outputPath = parseResult.GetValue(outputPathOption);
