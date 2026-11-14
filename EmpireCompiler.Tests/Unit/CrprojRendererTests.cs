@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+
 using EmpireCompiler.Core;
 
 namespace EmpireCompiler.Tests.Unit;
