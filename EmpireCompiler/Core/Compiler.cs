@@ -30,6 +30,7 @@ namespace EmpireCompiler.Core
             public OutputKind OutputKind { get; set; } = OutputKind.DynamicallyLinkedLibrary;
             public bool Optimize { get; set; } = true;
             public bool Confuse { get; set; }
+            public string ConfuserProjectTemplate { get; set; }
             public bool MergeReferences { get; set; }
             public bool UnsafeCompile { get; set; }
             public bool UseSubprocess { get; set; }
@@ -202,7 +203,7 @@ namespace EmpireCompiler.Core
             }
             if (request.Confuse)
             {
-                return ConfuseAssembly(ILbytes);
+                return ConfuseAssembly(ILbytes, request.ConfuserProjectTemplate);
             }
             return ILbytes;
         }
@@ -368,21 +369,112 @@ namespace EmpireCompiler.Core
             }
         }
 
-        private static byte[] ConfuseAssembly(byte[] ILBytes)
+        private static byte[] ConfuseAssembly(byte[] ILBytes, string confuserProjectTemplate)
         {
             DebugUtility.DebugPrint("Confusing assembly...");
 
-            // Prepare input/output paths for Confuser
-            var inputFileName = "confused.exe";
-            var inputPath = Path.Combine(Common.EmpireTempDirectory, inputFileName);
-            var outputDir = Path.Combine(Common.EmpireTempDirectory, "confused_out");
-            var confuserProject = Path.Combine(Common.EmpireTempDirectory, "empire.crproj");
-            var logFilePath = Path.Combine(Common.EmpireTempDirectory, "confuser.log");
+            byte[] protectedBytes;
+            if (string.IsNullOrEmpty(confuserProjectTemplate))
+            {
+                // Legacy (ABI 0) path: shared Data/Temp with a server-written empire.crproj.
+                var inputPath = Path.Combine(Common.EmpireTempDirectory, ConfusedFileName);
+                var outputDir = Path.Combine(Common.EmpireTempDirectory, "confused_out");
+                Directory.CreateDirectory(outputDir);
+                File.WriteAllBytes(inputPath, ILBytes);
+                protectedBytes = RunConfuserEx(
+                    inputPath,
+                    Path.Combine(Common.EmpireTempDirectory, "empire.crproj"),
+                    outputDir,
+                    Path.Combine(Common.EmpireTempDirectory, "confuser.log"));
+            }
+            else
+            {
+                protectedBytes = ConfuseInRunDir(
+                    runDir => File.WriteAllBytes(Path.Combine(runDir, ConfusedFileName), ILBytes),
+                    confuserProjectTemplate);
+            }
 
+            DebugUtility.DebugPrint($"Confusion completed. Output size: {protectedBytes.Length} bytes.");
+            if (protectedBytes.Length == ILBytes.Length &&
+                protectedBytes.SequenceEqual(ILBytes))
+            {
+                DebugUtility.DebugPrint("Protected bytes are identical to input. Obfuscation may not have been applied.");
+            }
+
+            return protectedBytes;
+        }
+
+        private const string ConfusedFileName = "confused.exe";
+
+        /// <summary>
+        /// Obfuscates an existing assembly with a server-supplied crproj template, using a
+        /// private per-run temp directory (removed on success and failure).
+        /// </summary>
+        public static void ObfuscateFile(string inputAssembly, string outputPath, string confuserProjectTemplate, string dotNetProbeDir = null)
+        {
+            if (!File.Exists(inputAssembly))
+            {
+                throw new CompilerException($"Input assembly not found: {inputAssembly}");
+            }
+
+            var bytes = ConfuseInRunDir(
+                runDir => File.Copy(inputAssembly, Path.Combine(runDir, ConfusedFileName)),
+                confuserProjectTemplate,
+                dotNetProbeDir);
+            File.WriteAllBytes(outputPath, bytes);
+        }
+
+        private static byte[] ConfuseInRunDir(Action<string> stageInput, string confuserProjectTemplate, string probeDir = null)
+        {
+            var runDir = Path.Combine(Common.EmpireTempDirectory, "obf-" + Guid.NewGuid().ToString("N"));
+            var outputDir = Path.Combine(runDir, "out");
             Directory.CreateDirectory(outputDir);
+            try
+            {
+                stageInput(runDir);
 
-            // Write the unprotected IL to a temp file with a proper extension
-            File.WriteAllBytes(inputPath, ILBytes);
+                var rendered = CrprojRenderer.Render(confuserProjectTemplate, new Dictionary<string, string>
+                {
+                    ["confuser_base_dir"] = runDir,
+                    ["confuser_output_dir"] = outputDir,
+                    ["confuser_module_path"] = Path.Combine(runDir, ConfusedFileName),
+                    ["confuser_proj_dir"] = (probeDir ?? Common.EmpireDirectory).TrimEnd('/', '\\'),
+                });
+                var crprojPath = Path.Combine(runDir, "empire.crproj");
+                File.WriteAllText(crprojPath, rendered);
+
+                var logPath = Path.Combine(runDir, "confuser.log");
+                try
+                {
+                    return RunConfuserEx(Path.Combine(runDir, ConfusedFileName), crprojPath, outputDir, logPath);
+                }
+                catch (CompilerException ex)
+                {
+                    // The run dir (and its log) is deleted below, so surface the log tail now.
+                    var logTail = File.Exists(logPath)
+                        ? string.Join("\n", File.ReadAllLines(logPath).TakeLast(50))
+                        : "(no log written)";
+                    throw new CompilerException($"{ex.Message}\n\nConfuserEx log tail:\n{logTail}", ex);
+                }
+            }
+            finally
+            {
+                try
+                {
+                    Directory.Delete(runDir, true);
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Warning: failed to clean up temp directory {runDir}: {ex.Message}");
+                }
+            }
+        }
+
+        private static byte[] RunConfuserEx(string inputPath, string crprojPath, string outputDir, string logPath)
+        {
+            var logFilePath = logPath;
+            var confuserProject = crprojPath;
+            var inputFileName = Path.GetFileName(inputPath);
 
             var workingDir = Path.Combine(Common.EmpireDataDirectory, "ConfuserEx-CLI");
 
@@ -447,15 +539,6 @@ namespace EmpireCompiler.Core
             }
 
             var protectedBytes = File.ReadAllBytes(outputPath);
-            DebugUtility.DebugPrint($"Confusion completed. Output size: {protectedBytes.Length} bytes.");
-
-            // Sanity check: if identical, inform for troubleshooting
-            if (protectedBytes.Length == ILBytes.Length &&
-                protectedBytes.SequenceEqual(ILBytes))
-            {
-                DebugUtility.DebugPrint("Protected bytes are identical to input. Obfuscation may not have been applied.");
-            }
-
             return protectedBytes;
         }
 

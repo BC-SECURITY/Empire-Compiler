@@ -39,6 +39,7 @@ namespace EmpireCompiler.Models.Agents
         public string Code { get; set; } = "";
         public bool Compiled { get; set; }
         public bool Confuse { get; set; }
+        public string ConfuserProjectTemplate { get; set; }
         private List<AgentTaskReferenceSourceLibrary> GruntTaskReferenceSourceLibraries { get; set; } = new List<AgentTaskReferenceSourceLibrary>();
         private List<AgentTaskReferenceAssembly> GruntTaskReferenceAssemblies { get; set; } = new List<AgentTaskReferenceAssembly>();
         private List<AgentTaskEmbeddedResource> GruntTaskEmbeddedResources { get; set; } = new List<AgentTaskEmbeddedResource>();
@@ -215,6 +216,7 @@ namespace EmpireCompiler.Models.Agents
                 UnsafeCompile = this.UnsafeCompile,
                 OutputKind = OutputKind.ConsoleApplication,
                 Confuse = this.Confuse,
+                ConfuserProjectTemplate = this.ConfuserProjectTemplate,
                 MergeReferences = this.MergeReferences,
                 Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Any(n => n == "Seatbelt" || n == "SharpHound")
             });
