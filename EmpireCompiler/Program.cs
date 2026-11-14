@@ -52,6 +52,13 @@ namespace EmpireCompiler
                 DefaultValueFactory = _ => false
             };
 
+            var sourceRootOption = new Option<string[]>("--source-root")
+            {
+                Description = "External source root directory (repeatable)",
+                Arity = ArgumentArity.ZeroOrMore,
+                AllowMultipleArgumentsPerToken = false
+            };
+
             var rootCommand = new RootCommand("Empire Compiler")
             {
                 outputPathOption,
@@ -59,7 +66,8 @@ namespace EmpireCompiler
                 dotnetVersionOption,
                 confuseOption,
                 debugOption,
-                mergeReferencesOption
+                mergeReferencesOption,
+                sourceRootOption
             };
 
             var abiCommand = new Command("abi", "Print the engine ABI version");
@@ -92,6 +100,7 @@ namespace EmpireCompiler
                     agentTask.OutputPath = outputPath;
                     agentTask.Confuse = confuse;
                     agentTask.MergeReferences = parseResult.GetValue(mergeReferencesOption);
+                    agentTask.SourceRoots = parseResult.GetValue(sourceRootOption) ?? Array.Empty<string>();
 
                     if (!Enum.TryParse(dotnetVersion, true, out Common.DotNetVersion parsedVersion))
                     {

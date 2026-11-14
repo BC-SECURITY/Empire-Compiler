@@ -52,6 +52,7 @@ namespace EmpireCompiler.Models.Agents
         public bool UnsafeCompile { get; set; }
         public bool TokenTask { get; set; }
         public bool MergeReferences { get; set; }
+        public IReadOnlyList<string> SourceRoots { get; set; } = Array.Empty<string>();
 
         public void Add(ReferenceSourceLibrary library)
         {
@@ -207,7 +208,7 @@ namespace EmpireCompiler.Models.Agents
             {
                 Language = this.Language,
                 Source = this.Code,
-                SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
+                SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => SourceRootResolver.Resolve(RSL.Location, this.SourceRoots, Common.EmpireReferenceSourceLibraries)).ToList(),
                 TargetDotNetVersion = dotnetVersion,
                 References = references,
                 EmbeddedResources = resources,

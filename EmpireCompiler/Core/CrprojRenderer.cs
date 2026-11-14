@@ -42,14 +42,26 @@ public static class CrprojRenderer
 
                 var end = template.IndexOf('}', i + 1);
                 if (end < 0)
+                {
                     throw new CrprojRenderException($"Unmatched '{{' at position {i}");
+                }
+
                 var name = template.Substring(i + 1, end - i - 1);
                 if (name.Contains('{'))
+                {
                     throw new CrprojRenderException($"Unmatched '{{' at position {i}");
+                }
+
                 if (Array.IndexOf(Placeholders, name) < 0)
+                {
                     throw new CrprojRenderException($"Unknown placeholder '{{{name}}}'");
+                }
+
                 if (!values.TryGetValue(name, out var value))
+                {
                     throw new CrprojRenderException($"No value supplied for placeholder '{{{name}}}'");
+                }
+
                 sb.Append(value);
                 i = end + 1;
             }
