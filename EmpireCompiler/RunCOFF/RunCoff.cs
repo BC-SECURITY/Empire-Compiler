@@ -18,6 +18,11 @@ public static class Program
 
             try
             {
+                if (args.Length < 3)
+                {
+                    throw new ArgumentException("Usage: RunCoff <functionName> <coffData> <argDataHex>");
+                }
+
                 string functionName = args[0];
                 string coffData = args[1];
                 string argDataHex = args[2];

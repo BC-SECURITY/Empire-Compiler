@@ -472,8 +472,6 @@ namespace EmpireCompiler.Core
 
         private static byte[] RunConfuserEx(string inputPath, string crprojPath, string outputDir, string logPath)
         {
-            var logFilePath = logPath;
-            var confuserProject = crprojPath;
             var inputFileName = Path.GetFileName(inputPath);
 
             var workingDir = Path.Combine(Common.EmpireDataDirectory, "ConfuserEx-CLI");
@@ -481,7 +479,7 @@ namespace EmpireCompiler.Core
             var startInfo = new ProcessStartInfo
             {
                 FileName = "mono",
-                Arguments = $"Confuser.CLI.exe -n \"{confuserProject}\"",
+                Arguments = $"Confuser.CLI.exe -n \"{crprojPath}\"",
                 WorkingDirectory = workingDir,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -490,7 +488,7 @@ namespace EmpireCompiler.Core
             };
 
             using (var process = Process.Start(startInfo))
-            using (var logFile = new StreamWriter(logFilePath, append: false))
+            using (var logFile = new StreamWriter(logPath, append: false))
             {
                 // Write timestamp
                 logFile.WriteLine($"=== Confuser Run: {DateTime.Now} ===");
@@ -526,7 +524,7 @@ namespace EmpireCompiler.Core
                 if (process.ExitCode != 0)
                 {
                     throw new CompilerException(
-                        $"ConfuserEx obfuscation failed (exit code {process.ExitCode}). See log: {logFilePath}");
+                        $"ConfuserEx obfuscation failed (exit code {process.ExitCode}). See log: {logPath}");
                 }
             }
 
@@ -535,7 +533,7 @@ namespace EmpireCompiler.Core
             if (!File.Exists(outputPath))
             {
                 throw new CompilerException(
-                    $"ConfuserEx output not found at: {outputPath}. Obfuscation failed. See log: {logFilePath}");
+                    $"ConfuserEx output not found at: {outputPath}. Obfuscation failed. See log: {logPath}");
             }
 
             var protectedBytes = File.ReadAllBytes(outputPath);

@@ -102,7 +102,7 @@ namespace EmpireCompiler
                 DebugUtility.DebugPrint($"Dotnet Version: {dotnetVersion}");
                 DebugUtility.DebugPrint($"Confuse: {confuse}");
 
-                var modeError = ValidateMode(obfuscateOnly, outputPath, yaml, dotnetVersion, confuserProject);
+                var modeError = ValidateMode(obfuscateOnly, outputPath, yaml, dotnetVersion, confuserProject, confuse);
                 if (modeError != null)
                 {
                     Console.Error.WriteLine($"Error: {modeError}");
@@ -143,7 +143,7 @@ namespace EmpireCompiler
 
                     if (!Enum.TryParse(dotnetVersion, true, out Common.DotNetVersion parsedVersion))
                     {
-                        Console.WriteLine($"Error: Invalid .NET version '{dotnetVersion}'. Supported versions: Net35, Net40, Net45, Net46, Net47, Net48.");
+                        Console.Error.WriteLine($"Error: Invalid .NET version '{dotnetVersion}'. Supported versions: Net35, Net40, Net45, Net46, Net47, Net48.");
                         Environment.Exit(1);
                     }
 
@@ -163,7 +163,7 @@ namespace EmpireCompiler
         }
 
         /// <summary>Returns an error message for an invalid option combination, or null if valid.</summary>
-        private static string ValidateMode(string obfuscateOnly, string outputPath, string yaml, string dotnetVersion, string confuserProject)
+        private static string ValidateMode(string obfuscateOnly, string outputPath, string yaml, string dotnetVersion, string confuserProject, bool confuse)
         {
             if (obfuscateOnly != null)
             {
@@ -175,6 +175,8 @@ namespace EmpireCompiler
                 { return "--yaml cannot be used with --obfuscate-only."; }
                 if (dotnetVersion != null)
                 { return "--dotnet-version cannot be used with --obfuscate-only."; }
+                if (confuse)
+                { return "--confuse cannot be used with --obfuscate-only (obfuscation is always applied)."; }
                 return null;
             }
 
@@ -182,6 +184,8 @@ namespace EmpireCompiler
             { return "--yaml is required (or use --obfuscate-only)."; }
             if (outputPath == null)
             { return "--output is required."; }
+            if (dotnetVersion == null)
+            { return "--dotnet-version is required."; }
             return null;
         }
 
