@@ -94,8 +94,9 @@
   </ItemGroup>
 
   <!-- Build the platform-independent net40 RunCOFF artifact into Data/Prebuilt using the SDK's Roslyn,
-       so no mono/Windows toolchain is needed. Pinned to the bundled CS_COFFLoader. -->
-  <Target Name="BuildPrebuiltRunCoff" BeforeTargets="Build">
+       so no mono/Windows toolchain is needed. Pinned to the bundled CS_COFFLoader.
+       Release CI builds it once and passes -p:SkipPrebuiltRunCoff=true to the per-OS publish legs. -->
+  <Target Name="BuildPrebuiltRunCoff" BeforeTargets="Build" Condition="'$(SkipPrebuiltRunCoff)' != 'true'">
     <PropertyGroup>
       <RunCoffCsc>$(RoslynTargetsPath)/bincore/csc.dll</RunCoffCsc>
       <RunCoffRefs>$(MSBuildProjectDirectory)/Data/AssemblyReferences/net40</RunCoffRefs>

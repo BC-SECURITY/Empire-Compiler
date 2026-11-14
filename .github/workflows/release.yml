@@ -13,7 +13,38 @@ on:
         required: true
 
 jobs:
+  # RunCOFF is platform-independent net40 IL: build it once here and hand the same bytes to every leg.
+  build-runcoff:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          submodules: recursive
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.x'
+
+      - name: Build RunCOFF
+        run: |
+          dotnet restore
+          dotnet msbuild EmpireCompiler/EmpireCompiler.csproj -t:BuildPrebuiltRunCoff -p:Configuration=Release
+          sha256sum EmpireCompiler/Data/Prebuilt/RunCoff.exe
+        shell: bash
+
+      - name: Upload RunCOFF
+        uses: actions/upload-artifact@v4
+        with:
+          name: prebuilt-runcoff
+          path: EmpireCompiler/Data/Prebuilt/RunCoff.exe
+          if-no-files-found: error
+
   build:
+    needs: build-runcoff
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -46,12 +77,18 @@ jobs:
         with:
           dotnet-version: '10.x'
 
+      - name: Download prebuilt RunCOFF
+        uses: actions/download-artifact@v4
+        with:
+          name: prebuilt-runcoff
+          path: EmpireCompiler/Data/Prebuilt
+
       - name: Restore dependencies
         run: dotnet restore
       
       - name: Build self-contained assembly
         run: |
-          dotnet publish -c Release -r ${{ env.runtime }} --self-contained -o ./publish/${{ env.runtime }}
+          dotnet publish -c Release -r ${{ env.runtime }} --self-contained -p:SkipPrebuiltRunCoff=true -o ./publish/${{ env.runtime }}
           mv ./publish/${{ env.runtime }}/* ./EmpireCompiler/
         shell: bash
 
@@ -70,7 +107,7 @@ jobs:
           archive=publish/EmpireCompiler-${{ env.runtime }}-${{ github.event.inputs.release_version }}.tgz
           members=$(tar -tzf "$archive")
           for f in EmpireCompiler/Data/abi EmpireCompiler/Data/Prebuilt/RunCoff.exe; do
-            echo "$members" | grep -qE "/${f}$" || { echo "::error::$f missing from $archive"; exit 1; }
+            echo "$members" | grep -qE "(^|/)${f}$" || { echo "::error::$f missing from $archive"; exit 1; }
           done
           sha256sum EmpireCompiler/Data/Prebuilt/RunCoff.exe 2>/dev/null || shasum -a 256 EmpireCompiler/Data/Prebuilt/RunCoff.exe
         shell: bash
@@ -103,8 +140,7 @@ jobs:
           path: ./publish
           merge-multiple: true
 
-      # RunCOFF is compiled with csc -deterministic from identical sources into platform-independent
-      # net40 IL, so every leg must produce a byte-identical RunCoff.exe. Fail the release if not.
+      # RunCOFF is built once (build-runcoff) and shared, so every archive must carry identical bytes.
       - name: Verify RunCOFF is identical across legs
         run: |
           mkdir -p "$RUNNER_TEMP/runcoff"
@@ -113,8 +149,10 @@ jobs:
             mkdir -p "$d"
             tar -xzf "$a" -C "$d" --wildcards '*/EmpireCompiler/Data/Prebuilt/RunCoff.exe'
           done
-          hashes=$(find "$RUNNER_TEMP/runcoff" -name RunCoff.exe -exec sha256sum {} + | tee /dev/stderr | awk '{print $1}' | sort -u)
-          [ "$(echo "$hashes" | wc -l)" -eq 1 ] || { echo "::error::RunCoff.exe differs across legs"; exit 1; }
+          archives=$(ls publish/EmpireCompiler-*.tgz | wc -l)
+          sums=$(find "$RUNNER_TEMP/runcoff" -name RunCoff.exe -exec sha256sum {} + | tee /dev/stderr | awk '{print $1}')
+          [ "$archives" -ge 1 ] && [ "$(echo "$sums" | grep -c .)" -eq "$archives" ] || { echo "::error::expected one RunCoff.exe per archive ($archives)"; exit 1; }
+          [ "$(echo "$sums" | sort -u | wc -l)" -eq 1 ] || { echo "::error::RunCoff.exe differs across legs"; exit 1; }
         shell: bash
 
       - name: Create Git tag
