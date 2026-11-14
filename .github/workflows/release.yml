@@ -138,6 +138,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ./publish
+          pattern: EmpireCompiler-*
           merge-multiple: true
 
       # RunCOFF is built once (build-runcoff) and shared, so every archive must carry identical bytes.
@@ -147,7 +148,7 @@ jobs:
           for a in publish/EmpireCompiler-*.tgz; do
             d="$RUNNER_TEMP/runcoff/$(basename "$a" .tgz)"
             mkdir -p "$d"
-            tar -xzf "$a" -C "$d" --wildcards '*/EmpireCompiler/Data/Prebuilt/RunCoff.exe'
+            tar -xzf "$a" -C "$d" --wildcards '*EmpireCompiler/Data/Prebuilt/RunCoff.exe'
           done
           archives=$(ls publish/EmpireCompiler-*.tgz | wc -l)
           sums=$(find "$RUNNER_TEMP/runcoff" -name RunCoff.exe -exec sha256sum {} + | tee /dev/stderr | awk '{print $1}')
