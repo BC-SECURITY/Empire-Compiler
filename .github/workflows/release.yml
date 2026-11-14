@@ -62,6 +62,19 @@ jobs:
             publish/EmpireCompiler-${{ env.runtime }}-${{ github.event.inputs.release_version }}.tgz
         shell: bash
 
+      # Data/abi and Data/Prebuilt/RunCoff.exe are untracked build outputs written by MSBuild targets
+      # (WriteAbiFile, BuildPrebuiltRunCoff). git_archive_all.py --include adds the EmpireCompiler
+      # directory recursively via tarfile, so they are archived even though git does not track them.
+      - name: Verify archive contains engine ABI and prebuilt RunCOFF
+        run: |
+          archive=publish/EmpireCompiler-${{ env.runtime }}-${{ github.event.inputs.release_version }}.tgz
+          members=$(tar -tzf "$archive")
+          for f in EmpireCompiler/Data/abi EmpireCompiler/Data/Prebuilt/RunCoff.exe; do
+            echo "$members" | grep -qE "/${f}$" || { echo "::error::$f missing from $archive"; exit 1; }
+          done
+          sha256sum EmpireCompiler/Data/Prebuilt/RunCoff.exe 2>/dev/null || shasum -a 256 EmpireCompiler/Data/Prebuilt/RunCoff.exe
+        shell: bash
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -89,6 +102,20 @@ jobs:
         with:
           path: ./publish
           merge-multiple: true
+
+      # RunCOFF is compiled with csc -deterministic from identical sources into platform-independent
+      # net40 IL, so every leg must produce a byte-identical RunCoff.exe. Fail the release if not.
+      - name: Verify RunCOFF is identical across legs
+        run: |
+          mkdir -p "$RUNNER_TEMP/runcoff"
+          for a in publish/EmpireCompiler-*.tgz; do
+            d="$RUNNER_TEMP/runcoff/$(basename "$a" .tgz)"
+            mkdir -p "$d"
+            tar -xzf "$a" -C "$d" --wildcards '*/EmpireCompiler/Data/Prebuilt/RunCoff.exe'
+          done
+          hashes=$(find "$RUNNER_TEMP/runcoff" -name RunCoff.exe -exec sha256sum {} + | tee /dev/stderr | awk '{print $1}' | sort -u)
+          [ "$(echo "$hashes" | wc -l)" -eq 1 ] || { echo "::error::RunCoff.exe differs across legs"; exit 1; }
+        shell: bash
 
       - name: Create Git tag
         run: |
