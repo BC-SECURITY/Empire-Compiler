@@ -11,6 +11,10 @@ on:
       release_version:
         description: 'Release version (e.g., v1.0.0)'
         required: true
+      prerelease:
+        description: 'Publish as a pre-release (betas); it is then not marked Latest'
+        type: boolean
+        default: false
 
 jobs:
   # RunCOFF is platform-independent net40 IL: build it once here and hand the same bytes to every leg.
@@ -106,8 +110,10 @@ jobs:
         run: |
           archive=publish/EmpireCompiler-${{ env.runtime }}-${{ github.event.inputs.release_version }}.tgz
           members=$(tar -tzf "$archive")
+          # Here-string, not `echo | grep -q`: grep -q exits on the first match, echo then dies of
+          # SIGPIPE on a long member list, and the runner's pipefail reports a present file as missing.
           for f in EmpireCompiler/Data/abi EmpireCompiler/Data/Prebuilt/RunCoff.exe; do
-            echo "$members" | grep -qE "(^|/)${f}$" || { echo "::error::$f missing from $archive"; exit 1; }
+            grep -qE "(^|/)${f}$" <<<"$members" || { echo "::error::$f missing from $archive"; exit 1; }
           done
           sha256sum EmpireCompiler/Data/Prebuilt/RunCoff.exe 2>/dev/null || shasum -a 256 EmpireCompiler/Data/Prebuilt/RunCoff.exe
         shell: bash
@@ -168,5 +174,7 @@ jobs:
         with:
           files: ./publish/*
           tag_name: ${{ github.event.inputs.release_version }}
+          prerelease: ${{ github.event.inputs.prerelease == 'true' }}
+          make_latest: ${{ github.event.inputs.prerelease != 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
