@@ -42,10 +42,11 @@ Base64 YAML input → deserialize to `SerializedGruntTask` → create `AgentTask
 ### Data Directory (`EmpireCompiler/Data/`)
 
 - **`AssemblyReferences/net35|net40|net45|net46|net47|net48/`** — .NET Framework reference DLLs used during compilation.
-- **`ReferenceSourceLibraries/`** — Git submodules (SharpSploit, Rubeus, Seatbelt, etc.) compiled as source libraries into tasks.
+- **`ReferenceSourceLibraries/`** — Git submodules (SharpSploit, Rubeus, Seatbelt, etc.) compiled as source libraries into tasks. Used by the tests, local builds and the prebuilt RunCOFF build (`CS_COFFLoader`). **Release archives ship only `Sharpire/` and `CSharpPy/`** (the stagers compile from them); `release.yml` deletes the rest and `.gitattributes` export-ignores them (keep the two allowlists in sync). Any other `ReferenceSourceLibraries[].Location` must resolve under a `--source-root`, or compilation fails with `SourceLibraryNotFoundException` naming the library and the roots searched. `SourceRootResolver` checks `--source-root`s in order, then this directory.
 - **`EmbeddedResources/`** — Files embedded into compiled assemblies (e.g., `launcher.txt`).
 - **`ConfuserEx-CLI/`** — Obfuscation tooling invoked as a subprocess.
 - **`Tasks/`** — Example task templates (simple C# classes with static `Execute()` methods).
+- **`abi`**, **`Prebuilt/RunCoff.exe`** — Build outputs (untracked) written by the `WriteAbiFile` and `BuildPrebuiltRunCoff` MSBuild targets; both ship in release archives.
 
 ### YAML Task Format
 

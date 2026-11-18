@@ -14,6 +14,8 @@ git submodule update --init --recursive
 dotnet build
 ```
 
+The `EmpireCompiler/Data/ReferenceSourceLibraries/` submodules are for development and tests. Release archives include only the stager libraries (`Sharpire`, `CSharpPy`); for any other library, pass its source with `--source-root <dir>` (repeatable), where each task's `ReferenceSourceLibraries[].Location` names a directory under one of the roots.
+
 ## Test
 
 ```bash

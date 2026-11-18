@@ -1,0 +1,9 @@
+# Release archives ship only the bundled library source the stagers compile from
+# (Sharpire, CSharpPy); module libraries come from the caller's --source-root. The other
+# submodules stay in the repo for the engine's tests and for building the prebuilt RunCOFF
+# (CS_COFFLoader). release.yml deletes the same directories before archiving; this keeps
+# scripts/git_archive_all.py from following the then-missing submodule paths.
+# Keep this list in sync with the "Remove bundled module libraries" step in release.yml.
+EmpireCompiler/Data/ReferenceSourceLibraries/* export-ignore
+EmpireCompiler/Data/ReferenceSourceLibraries/Sharpire -export-ignore
+EmpireCompiler/Data/ReferenceSourceLibraries/CSharpPy -export-ignore
