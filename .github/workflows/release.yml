@@ -96,15 +96,13 @@ jobs:
           mv ./publish/${{ env.runtime }}/* ./EmpireCompiler/
         shell: bash
 
-      # The archive keeps only the library source the stagers compile from (Sharpire, CSharpPy).
-      # Every other ReferenceSourceLibrary must come from the caller's --source-root, so a missing
-      # one fails instead of compiling a bundled copy. Allowlist, so a new submodule is stripped by
-      # default. .gitattributes (same allowlist) keeps git_archive_all.py off the removed submodules.
-      - name: Remove bundled module libraries
+      # The archive ships no library source: every ReferenceSourceLibrary (stagers included) comes
+      # from the caller's --source-root, so a missing one fails instead of compiling a bundled copy.
+      # .gitattributes export-ignores the same tree so git_archive_all.py skips the removed submodules.
+      - name: Remove bundled source libraries
         run: |
-          find EmpireCompiler/Data/ReferenceSourceLibraries -mindepth 1 -maxdepth 1 \
-            ! -name Sharpire ! -name CSharpPy -exec rm -rf {} +
-          ls EmpireCompiler/Data/ReferenceSourceLibraries
+          find EmpireCompiler/Data/ReferenceSourceLibraries -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+          ls -A EmpireCompiler/Data/ReferenceSourceLibraries
         shell: bash
 
       - name: Git Archive All
@@ -117,7 +115,7 @@ jobs:
       # Data/abi and Data/Prebuilt/RunCoff.exe are untracked build outputs written by MSBuild targets
       # (WriteAbiFile, BuildPrebuiltRunCoff). git_archive_all.py --include adds the EmpireCompiler
       # directory recursively via tarfile, so they are archived even though git does not track them.
-      - name: Verify archive contents (ABI, prebuilt RunCOFF, stager libraries only)
+      - name: Verify archive contents (ABI, prebuilt RunCOFF, no bundled source libraries)
         run: |
           archive=publish/EmpireCompiler-${{ env.runtime }}-${{ github.event.inputs.release_version }}.tgz
           members=$(tar -tzf "$archive")
@@ -129,13 +127,8 @@ jobs:
           for d in EmpireCompiler/Data/AssemblyReferences/ EmpireCompiler/Data/EmbeddedResources/ EmpireCompiler/Data/ConfuserEx-CLI/; do
             grep -qE "(^|/)${d}" <<<"$members" || { echo "::error::$d missing from $archive"; exit 1; }
           done
-          for f in Sharpire/Sharpire CSharpPy; do
-            grep -qE "(^|/)EmpireCompiler/Data/ReferenceSourceLibraries/${f}/.*\.cs$" <<<"$members" \
-              || { echo "::error::stager library $f missing from $archive"; exit 1; }
-          done
-          extra=$(grep -E "(^|/)EmpireCompiler/Data/ReferenceSourceLibraries/" <<<"$members" \
-            | grep -vE "(^|/)EmpireCompiler/Data/ReferenceSourceLibraries/((Sharpire|CSharpPy)(/.*)?)?$" || true)
-          [ -z "$extra" ] || { echo "::error::$archive ships bundled module libraries:"; head -5 <<<"$extra"; exit 1; }
+          extra=$(grep -E "(^|/)EmpireCompiler/Data/ReferenceSourceLibraries/.+" <<<"$members" || true)
+          [ -z "$extra" ] || { echo "::error::$archive ships bundled source libraries:"; head -5 <<<"$extra"; exit 1; }
           sha256sum EmpireCompiler/Data/Prebuilt/RunCoff.exe 2>/dev/null || shasum -a 256 EmpireCompiler/Data/Prebuilt/RunCoff.exe
         shell: bash
 
