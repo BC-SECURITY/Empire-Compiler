@@ -73,6 +73,17 @@ public static class TestHelper
     /// Runs the compiler with <c>dotnet run --project</c>, adding <c>--no-build</c> unless
     /// <paramref name="build"/> is set. Callers belong to <see cref="DotnetRunCollection"/>.
     /// </summary>
+    /// <summary>
+    /// The configuration this test assembly was built in. The ProjectReference builds the
+    /// compiler in the same one, so <c>dotnet run --no-build</c> finds it there.
+    /// </summary>
+    private const string BuildConfiguration =
+#if DEBUG
+        "Debug";
+#else
+        "Release";
+#endif
+
     public static async Task<(int Code, string Out, string Err)> RunCompilerAsync(bool build, params string[] args)
     {
         var startInfo = new ProcessStartInfo
@@ -89,6 +100,8 @@ public static class TestHelper
             startInfo.ArgumentList.Add("--no-build");
         }
 
+        startInfo.ArgumentList.Add("--configuration");
+        startInfo.ArgumentList.Add(BuildConfiguration);
         startInfo.ArgumentList.Add("--project");
         startInfo.ArgumentList.Add(GetEmpireCompilerProjectPath());
         startInfo.ArgumentList.Add("--");
