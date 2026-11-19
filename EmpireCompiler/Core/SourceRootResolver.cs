@@ -12,9 +12,8 @@ public class SourceLibraryNotFoundException : Exception
 
 /// <summary>
 /// Resolves a library Location against ordered source roots, then the bundled root.
-/// Release archives ship only the stager libraries (Sharpire, CSharpPy) in the bundled root,
-/// so any other library must come from a source root; a bundled root that does not exist
-/// at all is treated as empty.
+/// Release archives ship no bundled root (ABI 2), so every library must come from a source
+/// root there; a bundled root that does not exist at all is treated as empty.
 /// A root matches only if root/location, with all symlinks resolved, stays inside the
 /// (symlink-resolved) root and is a directory containing at least one .cs file.
 /// </summary>
