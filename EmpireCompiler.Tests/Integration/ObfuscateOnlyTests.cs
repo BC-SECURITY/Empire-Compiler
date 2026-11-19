@@ -6,8 +6,10 @@ using EmpireCompiler.Tests.Helpers;
 
 namespace EmpireCompiler.Tests.Integration;
 
+[Collection(DotnetRunCollection.Name)]
 public class ObfuscateOnlyTests : IDisposable
 {
+    private readonly TempOutputs _outputs = new();
     private readonly List<string> _tempDirs = new();
 
     static ObfuscateOnlyTests()
@@ -98,10 +100,10 @@ public class ObfuscateOnlyTests : IDisposable
   EmbeddedResources: []
 """;
 
-    private static string BuildPlainAssembly()
+    private string BuildPlainAssembly()
     {
         var yaml = PlainYaml;
-        var output = TestHelper.GetTempOutputPath();
+        var output = _outputs.NewPath();
         var enc = Convert.ToBase64String(Encoding.UTF8.GetBytes(yaml));
         var (code, so, se) = RunCompiler("--yaml", enc, "--output", output, "--dotnet-version", "Net40").GetAwaiter().GetResult();
         Assert.True(code == 0, $"compile exit {code}\n{so}\n{se}");
@@ -230,5 +232,6 @@ public class ObfuscateOnlyTests : IDisposable
             { Directory.Delete(d, true); }
             catch { }
         }
+        _outputs.Dispose();
     }
 }

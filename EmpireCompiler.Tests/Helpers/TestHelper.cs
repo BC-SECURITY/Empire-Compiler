@@ -5,8 +5,7 @@ namespace EmpireCompiler.Tests.Helpers;
 
 public static class TestHelper
 {
-    private static readonly HashSet<string> TempFiles = new(StringComparer.OrdinalIgnoreCase);
-    private static readonly object Sync = new();
+    private static readonly object LauncherLock = new();
 
     /// <summary>First-party fixture libraries, copied next to the test assembly; pass as a source root.</summary>
     public static string FixtureSourceRoot { get; } = Path.Combine(AppContext.BaseDirectory, "Fixtures", "SourceLibraries");
@@ -55,43 +54,17 @@ public static class TestHelper
         return Path.Combine(GetSolutionRoot(), "EmpireCompiler", "EmpireCompiler.csproj");
     }
 
-    public static string GetTempOutputPath()
-    {
-        SetupEmpireDataPaths();
-        var outputPath = Path.Combine(Common.EmpireTempDirectory, $"test-{Guid.NewGuid():N}.exe");
-
-        lock (Sync)
-        {
-            TempFiles.Add(outputPath);
-        }
-
-        return outputPath;
-    }
-
-    public static void CleanupTempFiles()
-    {
-        lock (Sync)
-        {
-            foreach (var file in TempFiles.ToList())
-            {
-                if (File.Exists(file))
-                {
-                    File.Delete(file);
-                }
-
-                TempFiles.Remove(file);
-            }
-        }
-    }
-
     public static void EnsureEmbeddedLauncherFile()
     {
         SetupEmpireDataPaths();
         Directory.CreateDirectory(Common.EmpireEmbeddedResourcesCommonDirectory);
         var launcherPath = Path.Combine(Common.EmpireEmbeddedResourcesCommonDirectory, "launcher.txt");
-        if (!File.Exists(launcherPath))
+        lock (LauncherLock)
         {
-            File.WriteAllText(launcherPath, "Write-Host \"Test launcher\"");
+            if (!File.Exists(launcherPath))
+            {
+                File.WriteAllText(launcherPath, "Write-Host \"Test launcher\"");
+            }
         }
     }
 
@@ -112,5 +85,32 @@ public static class TestHelper
         var typedMethod = deserializeMethod.MakeGenericMethod(typeof(List<SerializedGruntTask>));
         var parsed = typedMethod.Invoke(deserializer, [yaml]) as List<SerializedGruntTask>;
         return parsed ?? throw new InvalidOperationException("YAML deserialization returned null.");
+    }
+}
+
+/// <summary>
+/// Compiler output paths for one test. xUnit builds a class instance per test, so a test
+/// class holds one of these and disposes it, deleting only the files that test created.
+/// </summary>
+public sealed class TempOutputs : IDisposable
+{
+    private readonly List<string> _paths = new();
+
+    public string NewPath()
+    {
+        TestHelper.SetupEmpireDataPaths();
+        var path = Path.Combine(Common.EmpireTempDirectory, $"test-{Guid.NewGuid():N}.exe");
+        _paths.Add(path);
+        return path;
+    }
+
+    public void Dispose()
+    {
+        foreach (var path in _paths)
+        {
+            File.Delete(path);
+        }
+
+        _paths.Clear();
     }
 }

@@ -8,6 +8,7 @@ namespace EmpireCompiler.Tests.Unit;
 
 public class AgentTaskCompilationTests : IDisposable
 {
+    private readonly TempOutputs _outputs = new();
     static AgentTaskCompilationTests()
     {
         TestHelper.SetupEmpireDataPaths();
@@ -20,35 +21,28 @@ public class AgentTaskCompilationTests : IDisposable
     [MemberData(nameof(Profiles))]
     public void Compile_FromDeserializedSerializedGruntTask_CreatesOutput(string profileName, string base64Yaml)
     {
-        var outputPath = TestHelper.GetTempOutputPath();
-        try
-        {
-            var yaml = Encoding.UTF8.GetString(Convert.FromBase64String(base64Yaml));
-            var serializedTasks = TestHelper.DeserializeSerializedGruntTasks(yaml);
+        var outputPath = _outputs.NewPath();
+        var yaml = Encoding.UTF8.GetString(Convert.FromBase64String(base64Yaml));
+        var serializedTasks = TestHelper.DeserializeSerializedGruntTasks(yaml);
 
-            Assert.NotNull(serializedTasks);
-            Assert.NotEmpty(serializedTasks);
+        Assert.NotNull(serializedTasks);
+        Assert.NotEmpty(serializedTasks);
 
-            var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
-            agentTask.OutputPath = outputPath;
-            agentTask.SourceRoots = new[] { TestHelper.FixtureSourceRoot };
+        var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
+        agentTask.OutputPath = outputPath;
+        agentTask.SourceRoots = new[] { TestHelper.FixtureSourceRoot };
 
-            var exception = Record.Exception(() => agentTask.Compile(Common.DotNetVersion.Net40));
-            Assert.Null(exception);
-            Assert.True(File.Exists(outputPath), $"Expected output file to exist for profile {profileName}: {outputPath}");
+        var exception = Record.Exception(() => agentTask.Compile(Common.DotNetVersion.Net40));
+        Assert.Null(exception);
+        Assert.True(File.Exists(outputPath), $"Expected output file to exist for profile {profileName}: {outputPath}");
 
-            var outputBytes = new FileInfo(outputPath).Length;
-            Assert.True(outputBytes > 0, $"Expected non-empty output for profile {profileName}: {outputPath}");
-        }
-        finally
-        {
-            TestHelper.CleanupTempFiles();
-        }
+        var outputBytes = new FileInfo(outputPath).Length;
+        Assert.True(outputBytes > 0, $"Expected non-empty output for profile {profileName}: {outputPath}");
     }
 
     public void Dispose()
     {
-        TestHelper.CleanupTempFiles();
+        _outputs.Dispose();
         GC.SuppressFinalize(this);
     }
 }

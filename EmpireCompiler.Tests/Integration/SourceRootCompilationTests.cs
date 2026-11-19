@@ -5,8 +5,10 @@ using EmpireCompiler.Tests.Helpers;
 
 namespace EmpireCompiler.Tests.Integration;
 
+[Collection(DotnetRunCollection.Name)]
 public class SourceRootCompilationTests : IDisposable
 {
+    private readonly TempOutputs _outputs = new();
     private readonly List<string> _tempDirs = new();
 
     static SourceRootCompilationTests()
@@ -100,7 +102,7 @@ public class SourceRootCompilationTests : IDisposable
         File.WriteAllText(Path.Combine(lib, "Greeter.cs"),
             "namespace ExtOnlyLib { public static class Greeter { public static string Hi() { return \"hi\"; } } }");
 
-        var output = TestHelper.GetTempOutputPath();
+        var output = _outputs.NewPath();
         var yaml = BuildYaml("ExtOnlyLib", "ExtOnlyLib", "ExtOnlyLib", "Greeter.Hi()");
 
         var (code, so, se) = await RunCompiler(yaml, output, "--source-root", root);
@@ -112,7 +114,7 @@ public class SourceRootCompilationTests : IDisposable
     [Fact]
     public async Task WithoutSourceRoot_ExternalOnlyLibraryIsNotFound()
     {
-        var output = TestHelper.GetTempOutputPath();
+        var output = _outputs.NewPath();
         var yaml = BuildYaml("ExtOnlyLib", "ExtOnlyLib", "ExtOnlyLib", "Greeter.Hi()");
 
         var (code, so, se) = await RunCompiler(yaml, output);
@@ -124,7 +126,7 @@ public class SourceRootCompilationTests : IDisposable
     [Fact]
     public async Task SourceRoot_CompilesFixtureLibraryFromTestFixtures()
     {
-        var output = TestHelper.GetTempOutputPath();
+        var output = _outputs.NewPath();
         var (code, so, se) = await RunCompiler(ProfileYamlData.FixtureLib, output, "--source-root", TestHelper.FixtureSourceRoot);
 
         Assert.True(code == 0, $"exit {code}\nSTDOUT:\n{so}\nSTDERR:\n{se}");
@@ -139,7 +141,7 @@ public class SourceRootCompilationTests : IDisposable
             { Directory.Delete(d, true); }
             catch { }
         }
-        TestHelper.CleanupTempFiles();
+        _outputs.Dispose();
         GC.SuppressFinalize(this);
     }
 }
