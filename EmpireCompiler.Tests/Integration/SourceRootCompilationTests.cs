@@ -122,10 +122,10 @@ public class SourceRootCompilationTests : IDisposable
     }
 
     [Fact]
-    public async Task WithoutSourceRoot_BundledLibraryStillCompiles()
+    public async Task SourceRoot_CompilesFixtureLibraryFromTestFixtures()
     {
         var output = TestHelper.GetTempOutputPath();
-        var (code, so, se) = await RunCompiler(ProfileYamlData.Seatbelt, output);
+        var (code, so, se) = await RunCompiler(ProfileYamlData.FixtureLib, output, "--source-root", TestHelper.FixtureSourceRoot);
 
         Assert.True(code == 0, $"exit {code}\nSTDOUT:\n{so}\nSTDERR:\n{se}");
         Assert.True(File.Exists(output) && new FileInfo(output).Length > 0);

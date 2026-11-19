@@ -31,6 +31,7 @@ public class AgentTaskCompilationTests : IDisposable
 
             var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
             agentTask.OutputPath = outputPath;
+            agentTask.SourceRoots = new[] { TestHelper.FixtureSourceRoot };
 
             var exception = Record.Exception(() => agentTask.Compile(Common.DotNetVersion.Net40));
             Assert.Null(exception);

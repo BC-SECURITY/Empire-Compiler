@@ -8,6 +8,9 @@ public static class TestHelper
     private static readonly HashSet<string> TempFiles = new(StringComparer.OrdinalIgnoreCase);
     private static readonly object Sync = new();
 
+    /// <summary>First-party fixture libraries, copied next to the test assembly; pass as a source root.</summary>
+    public static string FixtureSourceRoot { get; } = Path.Combine(AppContext.BaseDirectory, "Fixtures", "SourceLibraries");
+
     public static string GetSolutionRoot()
     {
         var current = new DirectoryInfo(AppContext.BaseDirectory);
