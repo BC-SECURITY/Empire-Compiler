@@ -8,7 +8,7 @@
     <InformationalVersion>0.2.3</InformationalVersion>
     <OutputType>Exe</OutputType>
     <!-- Single source of truth for the engine ABI. Core/Abi.cs and Data/abi are generated from this. -->
-    <EngineAbi>1</EngineAbi>
+    <EngineAbi>2</EngineAbi>
   </PropertyGroup>
 
   <PropertyGroup>

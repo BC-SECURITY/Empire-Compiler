@@ -147,6 +147,35 @@ public class SourceRootResolverTests : IDisposable
 
         var ex = Assert.Throws<SourceLibraryNotFoundException>(
             () => SourceRootResolver.Resolve("Ghost", new[] { root0 }, bundled));
-        Assert.Equal("library 'Ghost' not found in any source root", ex.Message);
+        Assert.Equal(
+            $"library 'Ghost' not found in any source root; searched: '{root0}', bundled '{bundled}'",
+            ex.Message);
+    }
+
+    // Release archives ship without the bundled tree: a missing bundled root is a normal
+    // "not found", never a DirectoryNotFoundException, and the message says it is absent.
+    [Fact]
+    public void Missing_Bundled_Root_Throws_Clear_Error()
+    {
+        var root0 = NewDir("root0");
+        var root1 = NewDir("root1");
+        var bundled = Path.Combine(_tmp, "no-bundled-tree");
+
+        var ex = Assert.Throws<SourceLibraryNotFoundException>(
+            () => SourceRootResolver.Resolve("SharpSploit", new[] { root0, root1 }, bundled));
+        Assert.Equal(
+            $"library 'SharpSploit' not found in any source root; searched: '{root0}', '{root1}', bundled '{bundled}' (not present)",
+            ex.Message);
+    }
+
+    [Fact]
+    public void Missing_Bundled_Root_Still_Resolves_From_Source_Root()
+    {
+        var root0 = NewDir("root0");
+        AddLib(root0, "SharpSploit");
+
+        var result = SourceRootResolver.Resolve("SharpSploit", new[] { root0 }, Path.Combine(_tmp, "no-bundled-tree"));
+
+        Assert.Equal(Path.Combine(root0, "SharpSploit"), result);
     }
 }

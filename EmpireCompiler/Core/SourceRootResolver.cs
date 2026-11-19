@@ -12,6 +12,8 @@ public class SourceLibraryNotFoundException : Exception
 
 /// <summary>
 /// Resolves a library Location against ordered source roots, then the bundled root.
+/// Release archives ship no bundled root (ABI 2), so every library must come from a source
+/// root there; a bundled root that does not exist at all is treated as empty.
 /// A root matches only if root/location, with all symlinks resolved, stays inside the
 /// (symlink-resolved) root and is a directory containing at least one .cs file.
 /// </summary>
@@ -30,7 +32,10 @@ public static class SourceRootResolver
             }
         }
 
-        throw new SourceLibraryNotFoundException($"library '{location}' not found in any source root");
+        var searched = sourceRoots.Select(r => $"'{r}'")
+            .Append(Directory.Exists(bundledRoot) ? $"bundled '{bundledRoot}'" : $"bundled '{bundledRoot}' (not present)");
+        throw new SourceLibraryNotFoundException(
+            $"library '{location}' not found in any source root; searched: {string.Join(", ", searched)}");
     }
 
     private static string? TryMatch(string root, string location)

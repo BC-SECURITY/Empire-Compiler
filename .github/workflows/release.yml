@@ -96,6 +96,15 @@ jobs:
           mv ./publish/${{ env.runtime }}/* ./EmpireCompiler/
         shell: bash
 
+      # The archive ships no library source: every ReferenceSourceLibrary (stagers included) comes
+      # from the caller's --source-root, so a missing one fails instead of compiling a bundled copy.
+      # .gitattributes export-ignores the same tree so git_archive_all.py skips the removed submodules.
+      - name: Remove bundled source libraries
+        run: |
+          find EmpireCompiler/Data/ReferenceSourceLibraries -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+          ls -A EmpireCompiler/Data/ReferenceSourceLibraries
+        shell: bash
+
       - name: Git Archive All
         run: |
           python scripts/git_archive_all.py \
@@ -106,7 +115,7 @@ jobs:
       # Data/abi and Data/Prebuilt/RunCoff.exe are untracked build outputs written by MSBuild targets
       # (WriteAbiFile, BuildPrebuiltRunCoff). git_archive_all.py --include adds the EmpireCompiler
       # directory recursively via tarfile, so they are archived even though git does not track them.
-      - name: Verify archive contains engine ABI and prebuilt RunCOFF
+      - name: Verify archive contents (ABI, prebuilt RunCOFF, no bundled source libraries)
         run: |
           archive=publish/EmpireCompiler-${{ env.runtime }}-${{ github.event.inputs.release_version }}.tgz
           members=$(tar -tzf "$archive")
@@ -115,6 +124,11 @@ jobs:
           for f in EmpireCompiler/Data/abi EmpireCompiler/Data/Prebuilt/RunCoff.exe; do
             grep -qE "(^|/)${f}$" <<<"$members" || { echo "::error::$f missing from $archive"; exit 1; }
           done
+          for d in EmpireCompiler/Data/AssemblyReferences/ EmpireCompiler/Data/EmbeddedResources/ EmpireCompiler/Data/ConfuserEx-CLI/; do
+            grep -qE "(^|/)${d}" <<<"$members" || { echo "::error::$d missing from $archive"; exit 1; }
+          done
+          extra=$(grep -E "(^|/)EmpireCompiler/Data/ReferenceSourceLibraries/.+" <<<"$members" || true)
+          [ -z "$extra" ] || { echo "::error::$archive ships bundled source libraries:"; head -5 <<<"$extra"; exit 1; }
           sha256sum EmpireCompiler/Data/Prebuilt/RunCoff.exe 2>/dev/null || shasum -a 256 EmpireCompiler/Data/Prebuilt/RunCoff.exe
         shell: bash
 
