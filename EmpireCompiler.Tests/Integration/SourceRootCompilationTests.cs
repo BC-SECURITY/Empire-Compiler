@@ -1,13 +1,13 @@
-using System.Diagnostics;
 using System.Text;
 
 using EmpireCompiler.Tests.Helpers;
 
 namespace EmpireCompiler.Tests.Integration;
 
+[Collection(DotnetRunCollection.Name)]
 public class SourceRootCompilationTests : IDisposable
 {
-    private readonly List<string> _tempDirs = new();
+    private readonly TempOutputs _outputs = new();
 
     static SourceRootCompilationTests()
     {
@@ -58,49 +58,19 @@ public class SourceRootCompilationTests : IDisposable
         return Convert.ToBase64String(Encoding.UTF8.GetBytes(yaml));
     }
 
-    private string MakeTempDir()
-    {
-        var dir = Path.Combine(Path.GetTempPath(), "srctest-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(dir);
-        _tempDirs.Add(dir);
-        return dir;
-    }
-
-    private static async Task<(int Code, string Out, string Err)> RunCompiler(string yaml, string output, params string[] extra)
-    {
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = "dotnet",
-            ArgumentList = { "run", "--project", TestHelper.GetEmpireCompilerProjectPath(), "--",
-                "--yaml", yaml, "--output", output, "--dotnet-version", "Net40" },
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-        foreach (var e in extra)
-        {
-            startInfo.ArgumentList.Add(e);
-        }
-
-        using var process = new Process { StartInfo = startInfo };
-        process.Start();
-        var o = process.StandardOutput.ReadToEndAsync();
-        var e2 = process.StandardError.ReadToEndAsync();
-        await process.WaitForExitAsync();
-        return (process.ExitCode, await o, await e2);
-    }
+    private static Task<(int Code, string Out, string Err)> RunCompiler(string yaml, string output, params string[] extra) =>
+        TestHelper.RunCompilerAsync(build: true, ["--yaml", yaml, "--output", output, "--dotnet-version", "Net40", .. extra]);
 
     [Fact]
     public async Task SourceRoot_CompilesLibraryThatExistsOnlyUnderExternalRoot()
     {
-        var root = MakeTempDir();
+        var root = _outputs.NewDir("srctest-");
         var lib = Path.Combine(root, "ExtOnlyLib");
         Directory.CreateDirectory(lib);
         File.WriteAllText(Path.Combine(lib, "Greeter.cs"),
             "namespace ExtOnlyLib { public static class Greeter { public static string Hi() { return \"hi\"; } } }");
 
-        var output = TestHelper.GetTempOutputPath();
+        var output = _outputs.NewPath();
         var yaml = BuildYaml("ExtOnlyLib", "ExtOnlyLib", "ExtOnlyLib", "Greeter.Hi()");
 
         var (code, so, se) = await RunCompiler(yaml, output, "--source-root", root);
@@ -112,7 +82,7 @@ public class SourceRootCompilationTests : IDisposable
     [Fact]
     public async Task WithoutSourceRoot_ExternalOnlyLibraryIsNotFound()
     {
-        var output = TestHelper.GetTempOutputPath();
+        var output = _outputs.NewPath();
         var yaml = BuildYaml("ExtOnlyLib", "ExtOnlyLib", "ExtOnlyLib", "Greeter.Hi()");
 
         var (code, so, se) = await RunCompiler(yaml, output);
@@ -124,7 +94,7 @@ public class SourceRootCompilationTests : IDisposable
     [Fact]
     public async Task SourceRoot_CompilesFixtureLibraryFromTestFixtures()
     {
-        var output = TestHelper.GetTempOutputPath();
+        var output = _outputs.NewPath();
         var (code, so, se) = await RunCompiler(ProfileYamlData.FixtureLib, output, "--source-root", TestHelper.FixtureSourceRoot);
 
         Assert.True(code == 0, $"exit {code}\nSTDOUT:\n{so}\nSTDERR:\n{se}");
@@ -133,13 +103,7 @@ public class SourceRootCompilationTests : IDisposable
 
     public void Dispose()
     {
-        foreach (var d in _tempDirs)
-        {
-            try
-            { Directory.Delete(d, true); }
-            catch { }
-        }
-        TestHelper.CleanupTempFiles();
+        _outputs.Dispose();
         GC.SuppressFinalize(this);
     }
 }
