@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 using EmpireCompiler.Core;
 using EmpireCompiler.Models.Agents;
 
@@ -5,7 +7,18 @@ namespace EmpireCompiler.Tests.Helpers;
 
 public static class TestHelper
 {
-    private static readonly object LauncherLock = new();
+    private static readonly Lazy<string> LauncherFile = new(() =>
+    {
+        SetupEmpireDataPaths();
+        Directory.CreateDirectory(Common.EmpireEmbeddedResourcesCommonDirectory);
+        var launcherPath = Path.Combine(Common.EmpireEmbeddedResourcesCommonDirectory, "launcher.txt");
+        if (!File.Exists(launcherPath))
+        {
+            File.WriteAllText(launcherPath, "Write-Host \"Test launcher\"");
+        }
+
+        return launcherPath;
+    });
 
     /// <summary>First-party fixture libraries, copied next to the test assembly; pass as a source root.</summary>
     public static string FixtureSourceRoot { get; } = Path.Combine(AppContext.BaseDirectory, "Fixtures", "SourceLibraries");
@@ -54,18 +67,42 @@ public static class TestHelper
         return Path.Combine(GetSolutionRoot(), "EmpireCompiler", "EmpireCompiler.csproj");
     }
 
-    public static void EnsureEmbeddedLauncherFile()
+    public static void EnsureEmbeddedLauncherFile() => _ = LauncherFile.Value;
+
+    /// <summary>
+    /// Runs the compiler with <c>dotnet run --project</c>, adding <c>--no-build</c> unless
+    /// <paramref name="build"/> is set. Callers belong to <see cref="DotnetRunCollection"/>.
+    /// </summary>
+    public static async Task<(int Code, string Out, string Err)> RunCompilerAsync(bool build, params string[] args)
     {
-        SetupEmpireDataPaths();
-        Directory.CreateDirectory(Common.EmpireEmbeddedResourcesCommonDirectory);
-        var launcherPath = Path.Combine(Common.EmpireEmbeddedResourcesCommonDirectory, "launcher.txt");
-        lock (LauncherLock)
+        var startInfo = new ProcessStartInfo
         {
-            if (!File.Exists(launcherPath))
-            {
-                File.WriteAllText(launcherPath, "Write-Host \"Test launcher\"");
-            }
+            FileName = "dotnet",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+        startInfo.ArgumentList.Add("run");
+        if (!build)
+        {
+            startInfo.ArgumentList.Add("--no-build");
         }
+
+        startInfo.ArgumentList.Add("--project");
+        startInfo.ArgumentList.Add(GetEmpireCompilerProjectPath());
+        startInfo.ArgumentList.Add("--");
+        foreach (var arg in args)
+        {
+            startInfo.ArgumentList.Add(arg);
+        }
+
+        using var process = new Process { StartInfo = startInfo };
+        process.Start();
+        var stdOut = process.StandardOutput.ReadToEndAsync();
+        var stdErr = process.StandardError.ReadToEndAsync();
+        await process.WaitForExitAsync();
+        return (process.ExitCode, await stdOut, await stdErr);
     }
 
     internal static List<SerializedGruntTask> DeserializeSerializedGruntTasks(string yaml)
@@ -85,32 +122,5 @@ public static class TestHelper
         var typedMethod = deserializeMethod.MakeGenericMethod(typeof(List<SerializedGruntTask>));
         var parsed = typedMethod.Invoke(deserializer, [yaml]) as List<SerializedGruntTask>;
         return parsed ?? throw new InvalidOperationException("YAML deserialization returned null.");
-    }
-}
-
-/// <summary>
-/// Compiler output paths for one test. xUnit builds a class instance per test, so a test
-/// class holds one of these and disposes it, deleting only the files that test created.
-/// </summary>
-public sealed class TempOutputs : IDisposable
-{
-    private readonly List<string> _paths = new();
-
-    public string NewPath()
-    {
-        TestHelper.SetupEmpireDataPaths();
-        var path = Path.Combine(Common.EmpireTempDirectory, $"test-{Guid.NewGuid():N}.exe");
-        _paths.Add(path);
-        return path;
-    }
-
-    public void Dispose()
-    {
-        foreach (var path in _paths)
-        {
-            File.Delete(path);
-        }
-
-        _paths.Clear();
     }
 }
