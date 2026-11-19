@@ -17,8 +17,8 @@ public class AgentTaskMultiFrameworkTests : IDisposable
     [Theory]
     [InlineData("CSharpPS", Common.DotNetVersion.Net35)]
     [InlineData("CSharpPS", Common.DotNetVersion.Net40)]
-    [InlineData("Seatbelt", Common.DotNetVersion.Net35)]
-    [InlineData("Seatbelt", Common.DotNetVersion.Net40)]
+    [InlineData("FixtureLib", Common.DotNetVersion.Net35)]
+    [InlineData("FixtureLib", Common.DotNetVersion.Net40)]
     [InlineData("Powershell-New", Common.DotNetVersion.Net35)]
     [InlineData("Powershell-New", Common.DotNetVersion.Net40)]
     public void Compile_ProfileWithFrameworkVersion_CreatesOutput(string profileName, Common.DotNetVersion version)
@@ -26,7 +26,7 @@ public class AgentTaskMultiFrameworkTests : IDisposable
         var base64Yaml = profileName switch
         {
             "CSharpPS" => ProfileYamlData.CSharpPs,
-            "Seatbelt" => ProfileYamlData.Seatbelt,
+            "FixtureLib" => ProfileYamlData.FixtureLib,
             "Powershell-New" => ProfileYamlData.PowerShellNew,
             _ => throw new ArgumentException($"Unknown profile: {profileName}")
         };
@@ -39,6 +39,7 @@ public class AgentTaskMultiFrameworkTests : IDisposable
 
             var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
             agentTask.OutputPath = outputPath;
+            agentTask.SourceRoots = new[] { TestHelper.FixtureSourceRoot };
 
             var exception = Record.Exception(() => agentTask.Compile(version));
             Assert.Null(exception);
@@ -79,6 +80,7 @@ public class AgentTaskMultiFrameworkTests : IDisposable
 
             var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
             agentTask.OutputPath = outputPath;
+            agentTask.SourceRoots = new[] { TestHelper.FixtureSourceRoot };
             agentTask.Compile(Common.DotNetVersion.Net40);
 
             var bytes = File.ReadAllBytes(outputPath);

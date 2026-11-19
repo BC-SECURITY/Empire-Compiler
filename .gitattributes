@@ -1,6 +1,0 @@
-# Release archives ship no bundled library source: callers pass every library with
-# --source-root. The submodules stay in the repo for the engine's tests and for building
-# the prebuilt RunCOFF (CS_COFFLoader). release.yml deletes the same tree before
-# archiving; this keeps scripts/git_archive_all.py from following the then-missing
-# submodule paths.
-EmpireCompiler/Data/ReferenceSourceLibraries/* export-ignore

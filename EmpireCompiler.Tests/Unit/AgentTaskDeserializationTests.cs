@@ -72,15 +72,15 @@ public class AgentTaskDeserializationTests
     }
 
     [Fact]
-    public void Deserialize_Seatbelt_HasReferenceSourceLibrary()
+    public void Deserialize_FixtureLib_HasReferenceSourceLibrary()
     {
-        var yaml = Encoding.UTF8.GetString(Convert.FromBase64String(ProfileYamlData.Seatbelt));
+        var yaml = Encoding.UTF8.GetString(Convert.FromBase64String(ProfileYamlData.FixtureLib));
         var serializedTasks = TestHelper.DeserializeSerializedGruntTasks(yaml);
 
         var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
 
         Assert.NotEmpty(agentTask.ReferenceSourceLibraries);
-        Assert.Contains(agentTask.ReferenceSourceLibraries, rsl => rsl.Name == "Seatbelt");
+        Assert.Contains(agentTask.ReferenceSourceLibraries, rsl => rsl.Name == "FixtureLib");
     }
 
     public static IEnumerable<object[]> Profiles => ProfileYamlData.AllProfiles();

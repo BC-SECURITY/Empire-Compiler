@@ -8,7 +8,7 @@
     <InformationalVersion>0.2.3</InformationalVersion>
     <OutputType>Exe</OutputType>
     <!-- Single source of truth for the engine ABI. Core/Abi.cs and Data/abi are generated from this. -->
-    <EngineAbi>2</EngineAbi>
+    <EngineAbi>3</EngineAbi>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -87,23 +87,5 @@
                       Lines="$(EngineAbi)"
                       Overwrite="true"
                       WriteOnlyWhenDifferent="true" />
-  </Target>
-  <!-- RunCoff.cs is compiled separately into a net40 artifact (BuildPrebuiltRunCoff), not into the engine. -->
-  <ItemGroup>
-    <Compile Remove="RunCOFF/**" />
-  </ItemGroup>
-
-  <!-- Build the platform-independent net40 RunCOFF artifact into Data/Prebuilt using the SDK's Roslyn,
-       so no mono/Windows toolchain is needed. Pinned to the bundled CS_COFFLoader.
-       Release CI builds it once and passes -p:SkipPrebuiltRunCoff=true to the per-OS publish legs. -->
-  <Target Name="BuildPrebuiltRunCoff" BeforeTargets="Build" Condition="'$(SkipPrebuiltRunCoff)' != 'true'">
-    <PropertyGroup>
-      <RunCoffCsc>$(RoslynTargetsPath)/bincore/csc.dll</RunCoffCsc>
-      <RunCoffRefs>$(MSBuildProjectDirectory)/Data/AssemblyReferences/net40</RunCoffRefs>
-      <RunCoffLoader>$(MSBuildProjectDirectory)/Data/ReferenceSourceLibraries/CS_COFFLoader/CoffLoader</RunCoffLoader>
-      <RunCoffOut>$(MSBuildProjectDirectory)/Data/Prebuilt/RunCoff.exe</RunCoffOut>
-    </PropertyGroup>
-    <MakeDir Directories="$(MSBuildProjectDirectory)/Data/Prebuilt" />
-    <Exec Command="&quot;$(DOTNET_HOST_PATH)&quot; exec &quot;$(RunCoffCsc)&quot; -nologo -nostdlib -noconfig -unsafe -deterministic -target:exe -main:Program -out:&quot;$(RunCoffOut)&quot; -r:&quot;$(RunCoffRefs)/mscorlib.dll&quot; -r:&quot;$(RunCoffRefs)/System.dll&quot; -r:&quot;$(RunCoffRefs)/System.Core.dll&quot; &quot;$(MSBuildProjectDirectory)/RunCOFF/RunCoff.cs&quot; &quot;$(RunCoffLoader)/Program.cs&quot; &quot;$(RunCoffLoader)/src/CoffParser.cs&quot; &quot;$(RunCoffLoader)/src/CoffStructs.cs&quot;" />
   </Target>
 </Project>

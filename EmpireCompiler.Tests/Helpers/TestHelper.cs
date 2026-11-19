@@ -8,6 +8,9 @@ public static class TestHelper
     private static readonly HashSet<string> TempFiles = new(StringComparer.OrdinalIgnoreCase);
     private static readonly object Sync = new();
 
+    /// <summary>First-party fixture libraries, copied next to the test assembly; pass as a source root.</summary>
+    public static string FixtureSourceRoot { get; } = Path.Combine(AppContext.BaseDirectory, "Fixtures", "SourceLibraries");
+
     public static string GetSolutionRoot()
     {
         var current = new DirectoryInfo(AppContext.BaseDirectory);
@@ -43,7 +46,6 @@ public static class TestHelper
         Common.EmpireAssemblyReferenceNet48Directory = Path.Combine(referenceDirectory, "net48") + Path.DirectorySeparatorChar;
         Common.EmpireEmbeddedResourcesDirectory = Path.Combine(empireDataDirectory, "EmbeddedResources") + Path.DirectorySeparatorChar;
         Common.EmpireEmbeddedResourcesCommonDirectory = Path.Combine(empireDataDirectory, "EmbeddedResources", "common") + Path.DirectorySeparatorChar;
-        Common.EmpireReferenceSourceLibraries = Path.Combine(empireDataDirectory, "ReferenceSourceLibraries") + Path.DirectorySeparatorChar;
 
         Directory.CreateDirectory(Common.EmpireTempDirectory);
     }

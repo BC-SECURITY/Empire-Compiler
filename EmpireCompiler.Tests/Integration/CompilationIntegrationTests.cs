@@ -36,6 +36,8 @@ public class CompilationIntegrationTests : IDisposable
                     outputPath,
                     "--dotnet-version",
                     "Net40",
+                    "--source-root",
+                    TestHelper.FixtureSourceRoot,
                     "--debug"
                 },
                 RedirectStandardOutput = true,

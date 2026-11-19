@@ -256,11 +256,3 @@ dotnet_diagnostic.IDE0060.severity = suggestion
 
 # IDE0161: Namespace declaration preferences
 dotnet_diagnostic.IDE0161.severity = silent
-
-# ============================================================================
-# Exclude reference source libraries (git submodules)
-# ============================================================================
-[EmpireCompiler/Data/ReferenceSourceLibraries/**.cs]
-generated_code = true
-dotnet_analyzer_diagnostic.severity = none
-dotnet_diagnostic.IDE0055.severity = none
