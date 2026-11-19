@@ -9,15 +9,15 @@ public class RepoHygieneTests
 
     [Fact]
     public void No_Gitmodules_File() =>
-        Assert.False(File.Exists(Path.Combine(Root, ".gitmodules")), ".gitmodules must not exist");
+        Assert.False(File.Exists(Path.Combine(Root, ".gitmodules")), ".gitmodules must not exist (leftover from the removed submodules): delete it");
 
     [Fact]
     public void No_ReferenceSourceLibraries_Directory() =>
         Assert.False(Directory.Exists(Path.Combine(Root, "EmpireCompiler", "Data", "ReferenceSourceLibraries")),
-            "EmpireCompiler/Data/ReferenceSourceLibraries must not exist");
+            "EmpireCompiler/Data/ReferenceSourceLibraries is a leftover work-tree from the removed submodules: delete it (rm -rf EmpireCompiler/Data/ReferenceSourceLibraries)");
 
     [Fact]
     public void No_RunCOFF_Directory() =>
         Assert.False(Directory.Exists(Path.Combine(Root, "EmpireCompiler", "RunCOFF")),
-            "EmpireCompiler/RunCOFF must not exist");
+            "EmpireCompiler/RunCOFF is a leftover work-tree from the removed submodules: delete it (rm -rf EmpireCompiler/RunCOFF)");
 }

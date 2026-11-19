@@ -27,7 +27,7 @@ To run a specific test profile:
 dotnet test --filter "profileName=CSharpPS"
 ```
 
-Available profiles: `CSharpPS`, `Seatbelt`, `Powershell-Old`, `Powershell-New`
+Available profiles: `CSharpPS`, `FixtureLib`, `Powershell-New`
 
 ## Lint & Format
 
