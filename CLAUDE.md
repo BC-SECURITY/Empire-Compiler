@@ -9,8 +9,7 @@ Empire-Compiler is a .NET 10 console application that dynamically compiles C# ta
 ## Build & Test Commands
 
 ```bash
-# Prerequisites: .NET 10 SDK, git submodules
-git submodule update --init --recursive
+# Prerequisites: .NET 10 SDK (no submodules)
 dotnet build
 
 # Run all tests
@@ -42,11 +41,11 @@ Base64 YAML input → deserialize to `SerializedGruntTask` → create `AgentTask
 ### Data Directory (`EmpireCompiler/Data/`)
 
 - **`AssemblyReferences/net35|net40|net45|net46|net47|net48/`** — .NET Framework reference DLLs used during compilation.
-- **`ReferenceSourceLibraries/`** — Git submodules (SharpSploit, Rubeus, Seatbelt, etc.) compiled as source libraries into tasks. Used by the tests, local builds and the prebuilt RunCOFF build (`CS_COFFLoader`). **Release archives ship none of them** (ABI 2): `release.yml` deletes the tree and `.gitattributes` export-ignores it. Every `ReferenceSourceLibraries[].Location`, stagers included, must resolve under a `--source-root`, or compilation fails with `SourceLibraryNotFoundException` naming the library and the roots searched. `SourceRootResolver` checks `--source-root`s in order, then this directory.
+- **Library source** — The repo has no submodules and no `ReferenceSourceLibraries/` directory (ABI 3). Every `ReferenceSourceLibraries[].Location`, stagers included, must resolve under a `--source-root`, or compilation fails with `SourceLibraryNotFoundException` naming the library and every root searched. `SourceRootResolver` checks the `--source-root`s in order. Tests use first-party fixtures under `EmpireCompiler.Tests/Fixtures/SourceLibraries/`.
 - **`EmbeddedResources/`** — Files embedded into compiled assemblies (e.g., `launcher.txt`).
 - **`ConfuserEx-CLI/`** — Obfuscation tooling invoked as a subprocess.
 - **`Tasks/`** — Example task templates (simple C# classes with static `Execute()` methods).
-- **`abi`**, **`Prebuilt/RunCoff.exe`** — Build outputs (untracked) written by the `WriteAbiFile` and `BuildPrebuiltRunCoff` MSBuild targets; both ship in release archives.
+- **`abi`** — Build output (untracked) written by the `WriteAbiFile` MSBuild target from `EngineAbi`; it ships in release archives. The engine ships no prebuilt RunCOFF; that loader is built by a module pack.
 
 ### YAML Task Format
 

@@ -209,7 +209,7 @@ namespace EmpireCompiler.Models.Agents
             {
                 Language = this.Language,
                 Source = this.Code,
-                SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => SourceRootResolver.Resolve(RSL.Location, this.SourceRoots, Common.EmpireReferenceSourceLibraries)).ToList(),
+                SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => SourceRootResolver.Resolve(RSL.Location, this.SourceRoots)).ToList(),
                 TargetDotNetVersion = dotnetVersion,
                 References = references,
                 EmbeddedResources = resources,
