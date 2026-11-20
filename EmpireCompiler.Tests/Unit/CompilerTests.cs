@@ -270,6 +270,96 @@ public class CompilerTests : IDisposable
         Assert.True(bytes.Length > 0);
     }
 
+    [Fact]
+    public void Compile_WithOptimization_KeepsExtensionMethodOnlyClasses()
+    {
+        // Regression: the Optimize pass used to record only types named in source, so a
+        // static class reached solely through extension-method calls was pruned (CS1061).
+        var libDir = Directory.CreateTempSubdirectory("empire-treeshake-").FullName;
+        try
+        {
+            File.WriteAllText(Path.Combine(libDir, "ByteArrayExtensions.cs"), """
+                namespace Lib.Ext
+                {
+                    public static class ByteArrayExtensions
+                    {
+                        public static string ToHex(this byte[] bytes) { return System.BitConverter.ToString(bytes); }
+                    }
+                }
+                """);
+            File.WriteAllText(Path.Combine(libDir, "FlagExtensions.cs"), """
+                namespace Lib.Ext
+                {
+                    public static class FlagExtensions
+                    {
+                        public static bool IsSet(this int flags, int flag) { return (flags & flag) == flag; }
+                    }
+                }
+                """);
+            File.WriteAllText(Path.Combine(libDir, "Helper.cs"), """
+                using Lib.Ext;
+                namespace Lib
+                {
+                    public static class Helper
+                    {
+                        public static bool Check(int flags) { return flags.IsSet(1); }
+                    }
+                }
+                """);
+            File.WriteAllText(Path.Combine(libDir, "Unused.cs"), """
+                namespace Lib
+                {
+                    public static class Unused
+                    {
+                        public static void Nothing() { }
+                    }
+                }
+                """);
+
+            var source = """
+                using System;
+                using Lib;
+                using Lib.Ext;
+                public static class Program
+                {
+                    public static void Main(string[] args)
+                    {
+                        Console.WriteLine(new byte[] { 1, 2 }.ToHex());
+                        Console.WriteLine(Helper.Check(3));
+                    }
+                }
+                """;
+
+            var request = new Compiler.CsharpFrameworkCompilationRequest
+            {
+                Source = source,
+                SourceDirectories = new List<string> { libDir },
+                TargetDotNetVersion = Common.DotNetVersion.Net40,
+                OutputKind = OutputKind.ConsoleApplication,
+                References = GetDefaultReferences(Common.DotNetVersion.Net40),
+                Optimize = true
+            };
+
+            var typeNames = GetDefinedTypeNames(Compiler.Compile(request));
+
+            Assert.Contains("ByteArrayExtensions", typeNames);
+            Assert.Contains("FlagExtensions", typeNames);
+            Assert.Contains("Helper", typeNames);
+            Assert.DoesNotContain("Unused", typeNames);
+        }
+        finally
+        {
+            Directory.Delete(libDir, recursive: true);
+        }
+    }
+
+    private static List<string> GetDefinedTypeNames(byte[] assembly)
+    {
+        using var pe = new System.Reflection.PortableExecutable.PEReader(new MemoryStream(assembly));
+        var reader = System.Reflection.Metadata.PEReaderExtensions.GetMetadataReader(pe);
+        return reader.TypeDefinitions.Select(h => reader.GetString(reader.GetTypeDefinition(h).Name)).ToList();
+    }
+
     private static byte[] CompileSource(string source, Common.DotNetVersion version, bool optimize = false)
     {
         var request = new Compiler.CsharpFrameworkCompilationRequest

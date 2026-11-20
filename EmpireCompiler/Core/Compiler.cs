@@ -627,10 +627,20 @@ namespace EmpireCompiler.Core
             List<ITypeSymbol> types = new List<ITypeSymbol>();
             sourceTree.GetRoot().DescendantNodes().Select(N => sm.GetSymbolInfo(N).Symbol).ToList().ForEach(Symbol =>
             {
-                if (Symbol != null && typeKinds.Contains(Symbol.Kind))
+                if (Symbol == null)
                 {
-                    ITypeSymbol typeSymbol = (ITypeSymbol)Symbol;
-                    types.Add(typeSymbol);
+                    return;
+                }
+                if (typeKinds.Contains(Symbol.Kind))
+                {
+                    types.Add((ITypeSymbol)Symbol);
+                }
+                // A member reference keeps its declaring type alive. Extension-method calls
+                // (bytes.ToHex()) never name their static class in source, so without this the
+                // class would look unused and be pruned.
+                else if (Symbol.ContainingType != null)
+                {
+                    types.Add(Symbol.ContainingType);
                 }
             });
             return new HashSet<ITypeSymbol>(types, SymbolEqualityComparer.Default);
