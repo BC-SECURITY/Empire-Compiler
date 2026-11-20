@@ -201,6 +201,66 @@ public class PinnedReferenceCompilationTests : IDisposable
     }
 
     [Fact]
+    public void PinnedReference_OsProvidedWithMergeReferences_Compiles()
+    {
+        var root = _outputs.NewDir("pinref-");
+        var dll = BuildFixture(root, PinLibLocation, "PinLib", "PinLib.cs", Common.DotNetVersion.Net40);
+        var yaml = BuildYaml("Net40", PinLibCode, NuGetEntry("PinLib", PinLibLocation, Sha256Of(dll), "OsProvided"));
+
+        var output = CompileYaml(yaml, Common.DotNetVersion.Net40, mergeReferences: true, [root]);
+
+        var (refs, types) = ReadMetadata(output);
+        Assert.Contains("PinLib", refs);
+        Assert.DoesNotContain("PinLib.Widget", types);
+    }
+
+    private static ReferenceAssembly PinnedEntry(string name, string location, string sha256, ReferenceDeploy deploy) => new()
+    {
+        Name = name,
+        Location = location,
+        Source = new ReferenceAssemblySource { NuGet = "PinLib@1.0.0", Path = "lib/net40/PinLib.dll" },
+        Sha256 = sha256,
+        Deploy = deploy
+    };
+
+    [Fact]
+    public void PinnedReference_SameFileConflictingDeploy_Throws()
+    {
+        var root = _outputs.NewDir("pinref-");
+        var sha = Sha256Of(BuildFixture(root, PinLibLocation, "PinLib", "PinLib.cs", Common.DotNetVersion.Net40));
+        var entries = new[]
+        {
+            PinnedEntry("PinLibKept", PinLibLocation, sha, ReferenceDeploy.OsProvided),
+            PinnedEntry("PinLibMerged", PinLibLocation, sha, ReferenceDeploy.Merge),
+        };
+
+        var ex = Assert.Throws<CompilerException>(() => PinnedReferences.Resolve(
+            entries, Common.DotNetVersion.Net40, [root], Common.GetAssemblyReferenceDirectory(Common.DotNetVersion.Net40), true));
+
+        Assert.Contains("PinLibKept", ex.Message);
+        Assert.Contains("PinLibMerged", ex.Message);
+        Assert.Contains("PinLib.dll", ex.Message);
+    }
+
+    [Fact]
+    public void PinnedReference_SameFileSameDeploy_ReferencedOnce()
+    {
+        var root = _outputs.NewDir("pinref-");
+        var sha = Sha256Of(BuildFixture(root, PinLibLocation, "PinLib", "PinLib.cs", Common.DotNetVersion.Net40));
+        var entries = new[]
+        {
+            PinnedEntry("PinLibA", PinLibLocation, sha, ReferenceDeploy.OsProvided),
+            PinnedEntry("PinLibB", PinLibLocation, sha, ReferenceDeploy.OsProvided),
+        };
+
+        var resolved = PinnedReferences.Resolve(
+            entries, Common.DotNetVersion.Net40, [root], Common.GetAssemblyReferenceDirectory(Common.DotNetVersion.Net40), false);
+
+        var single = Assert.Single(resolved);
+        Assert.Equal(ReferenceDeploy.OsProvided, single.Deploy);
+    }
+
+    [Fact]
     public void PinnedReference_HashMismatch_Throws()
     {
         var root = _outputs.NewDir("pinref-");

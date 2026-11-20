@@ -28,6 +28,7 @@ public static class PinnedReferences
             StringComparer.OrdinalIgnoreCase);
 
         var resolved = new List<ResolvedReference>();
+        var byFile = new Dictionary<string, ResolvedReference>(StringComparer.Ordinal);
         foreach (var entry in entries.Where(e => e.IsPinned && (e.DotNetVersion == null || e.DotNetVersion == target)))
         {
             entry.ValidatePinned();
@@ -63,7 +64,19 @@ public static class PinnedReferences
                     $"Reference assembly '{entry.Name}': Deploy: Merge of '{file}' requires MergeReferences: true.");
             }
 
-            resolved.Add(new ResolvedReference(entry.Name, file, deploy));
+            if (byFile.TryGetValue(file, out var earlier))
+            {
+                if (earlier.Deploy != deploy)
+                {
+                    throw new CompilerException(
+                        $"Reference assemblies '{earlier.Name}' (Deploy: {earlier.Deploy}) and '{entry.Name}' (Deploy: {deploy}) resolve to the same file '{file}' with conflicting Deploy.");
+                }
+                continue;
+            }
+
+            var reference = new ResolvedReference(entry.Name, file, deploy);
+            byFile[file] = reference;
+            resolved.Add(reference);
         }
         return resolved;
     }

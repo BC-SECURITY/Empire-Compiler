@@ -220,7 +220,7 @@ namespace EmpireCompiler.Models.Agents
                 EmbedInteropTypes = R.Deploy == ReferenceDeploy.EmbedInterop
             }));
             List<string> PinnedFiles(ReferenceDeploy deploy) =>
-                pinned.Where(R => R.Deploy == deploy).Select(R => R.File).Distinct().ToList();
+                pinned.Where(R => R.Deploy == deploy).Select(R => R.File).ToList();
 
             var compiledBytes = Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
             {
