@@ -40,6 +40,15 @@ public class AgentTaskCompilationTests : IDisposable
         Assert.True(outputBytes > 0, $"Expected non-empty output for profile {profileName}: {outputPath}");
     }
 
+    [Theory]
+    [InlineData("Seatbelt")]
+    [InlineData("SharpHound")]
+    [InlineData("KrbRelayUp")]
+    public void NoPruneLibraries_IncludesLibrary(string name)
+    {
+        Assert.Contains(name, AgentTask.NoPruneLibraries);
+    }
+
     public void Dispose()
     {
         _outputs.Dispose();
