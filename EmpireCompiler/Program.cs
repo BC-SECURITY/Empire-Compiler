@@ -123,7 +123,7 @@ namespace EmpireCompiler
                     try
                     {
                         var template = File.ReadAllText(confuserProject);
-                        Compiler.ObfuscateFile(obfuscateOnly, outputPath, template);
+                        Compiler.ObfuscateFile(obfuscateOnly, outputPath, template, parseResult.GetValue(referenceRootOption) ?? Array.Empty<string>());
                         DebugUtility.DebugPrint($"Final Task Path: {outputPath}");
                         Console.WriteLine($"Final Task Path: {outputPath}");
                     }

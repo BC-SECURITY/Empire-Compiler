@@ -1,6 +1,9 @@
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 using System.Text;
 
 using EmpireCompiler.Core;
+using EmpireCompiler.Models.Agents;
 using EmpireCompiler.Tests.Helpers;
 
 namespace EmpireCompiler.Tests.Integration;
@@ -149,6 +152,82 @@ public class ObfuscateOnlyTests : IDisposable
         var ex = Assert.Throws<CompilerException>(() => Compiler.ObfuscateFile(bogus, Path.Combine(dir, "o.exe"), Template));
 
         Assert.Contains("ConfuserEx log tail:", ex.Message);
+        Assert.Empty(Directory.GetDirectories(Common.EmpireTempDirectory, "obf-*"));
+    }
+
+    private string BuildOsProvidedAssembly(out string referenceRoot, bool confuse = false)
+    {
+        referenceRoot = _outputs.NewDir("pinref-");
+        var dll = PinnedReferenceCompilationTests.BuildFixture(referenceRoot, PinnedReferenceCompilationTests.PinLibLocation, "PinLib", "PinLib.cs", Common.DotNetVersion.Net40);
+        var yaml = PinnedReferenceCompilationTests.BuildYaml("Net40", PinnedReferenceCompilationTests.PinLibCode,
+            PinnedReferenceCompilationTests.NuGetEntry("PinLib", PinnedReferenceCompilationTests.PinLibLocation, PinnedReferenceCompilationTests.Sha256Of(dll), "OsProvided"));
+        var task = new AgentTask().FromSerializedGruntTask(TestHelper.DeserializeSerializedGruntTasks(yaml)[0]);
+        task.OutputPath = _outputs.NewPath();
+        task.ReferenceRoots = [referenceRoot];
+        if (confuse)
+        {
+            task.Confuse = true;
+            task.ConfuserProjectTemplate = Template;
+        }
+        task.Compile(Common.DotNetVersion.Net40);
+        return task.OutputPath;
+    }
+
+    private static List<string> AssemblyRefs(string path)
+    {
+        using var pe = new PEReader(File.OpenRead(path));
+        var md = pe.GetMetadataReader();
+        return md.AssemblyReferences.Select(h => md.GetString(md.GetAssemblyReference(h).Name)).ToList();
+    }
+
+    [Fact]
+    public void Confuse_WithOsProvidedReference_Succeeds()
+    {
+        var output = BuildOsProvidedAssembly(out _, confuse: true);
+
+        Assert.True(new FileInfo(output).Length > 0);
+        Assert.Contains("PinLib", AssemblyRefs(output));
+        Assert.Empty(Directory.GetDirectories(Common.EmpireTempDirectory, "obf-*"));
+    }
+
+    [Fact]
+    public void ObfuscateOnly_WithReferenceRoot_ResolvesOsProvided()
+    {
+        var input = BuildOsProvidedAssembly(out var root);
+        var dir = _outputs.NewDir("obftest-");
+        var output = Path.Combine(dir, "o.exe");
+
+        Compiler.ObfuscateFile(input, output, Template, [root]);
+
+        Assert.True(new FileInfo(output).Length > 0);
+        Assert.Contains("PinLib", AssemblyRefs(output));
+        Assert.Empty(Directory.GetDirectories(Common.EmpireTempDirectory, "obf-*"));
+    }
+
+    [Fact]
+    public async Task ObfuscateOnly_ReferenceRootFlag_ResolvesOsProvided()
+    {
+        var input = BuildOsProvidedAssembly(out var root);
+        var dir = _outputs.NewDir("obftest-");
+        var tpl = Path.Combine(dir, "t.crproj");
+        File.WriteAllText(tpl, Template);
+        var output = Path.Combine(dir, "o.exe");
+
+        var (code, so, se) = await TestHelper.RunCompilerAsync(build: false, "--obfuscate-only", input, "--confuser-project", tpl, "--output", output, "--reference-root", root);
+
+        Assert.True(code == 0, $"exit {code}\nSTDOUT:\n{so}\nSTDERR:\n{se}");
+        Assert.True(File.Exists(output) && new FileInfo(output).Length > 0);
+    }
+
+    [Fact]
+    public void ObfuscateOnly_WithoutReferenceRoot_FailsOnUnresolved()
+    {
+        var input = BuildOsProvidedAssembly(out _);
+        var output = Path.Combine(_outputs.NewDir("obftest-"), "o.exe");
+
+        var ex = Assert.Throws<CompilerException>(() => Compiler.ObfuscateFile(input, output, Template));
+
+        Assert.Contains("PinLib", ex.Message);
         Assert.Empty(Directory.GetDirectories(Common.EmpireTempDirectory, "obf-*"));
     }
 

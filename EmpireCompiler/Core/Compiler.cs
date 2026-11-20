@@ -206,7 +206,7 @@ namespace EmpireCompiler.Core
             }
             if (request.Confuse)
             {
-                return ConfuseAssembly(ILbytes, request.ConfuserProjectTemplate);
+                return ConfuseAssembly(ILbytes, request.ConfuserProjectTemplate, request.ObfuscationDependencies);
             }
             return ILbytes;
         }
@@ -380,7 +380,7 @@ namespace EmpireCompiler.Core
             }
         }
 
-        private static byte[] ConfuseAssembly(byte[] ILBytes, string confuserProjectTemplate)
+        private static byte[] ConfuseAssembly(byte[] ILBytes, string confuserProjectTemplate, IEnumerable<string> dependencyFiles)
         {
             DebugUtility.DebugPrint("Confusing assembly...");
 
@@ -402,7 +402,8 @@ namespace EmpireCompiler.Core
             {
                 protectedBytes = ConfuseInRunDir(
                     runDir => File.WriteAllBytes(Path.Combine(runDir, ConfusedFileName), ILBytes),
-                    confuserProjectTemplate);
+                    confuserProjectTemplate,
+                    dependencyFiles: dependencyFiles);
             }
 
             DebugUtility.DebugPrint($"Confusion completed. Output size: {protectedBytes.Length} bytes.");
@@ -419,9 +420,11 @@ namespace EmpireCompiler.Core
 
         /// <summary>
         /// Obfuscates an existing assembly with a server-supplied crproj template, using a
-        /// private per-run temp directory (removed on success and failure).
+        /// private per-run temp directory (removed on success and failure). Every DLL found
+        /// recursively under <paramref name="referenceRoots"/> is staged next to the module so
+        /// ConfuserEx can resolve OsProvided references that the assembly keeps as AssemblyRefs.
         /// </summary>
-        public static void ObfuscateFile(string inputAssembly, string outputPath, string confuserProjectTemplate, string dotNetProbeDir = null)
+        public static void ObfuscateFile(string inputAssembly, string outputPath, string confuserProjectTemplate, IReadOnlyList<string> referenceRoots = null, string dotNetProbeDir = null)
         {
             if (!File.Exists(inputAssembly))
             {
@@ -431,11 +434,14 @@ namespace EmpireCompiler.Core
             var bytes = ConfuseInRunDir(
                 runDir => File.Copy(inputAssembly, Path.Combine(runDir, ConfusedFileName)),
                 confuserProjectTemplate,
-                dotNetProbeDir);
+                dotNetProbeDir,
+                (referenceRoots ?? Array.Empty<string>())
+                    .Where(Directory.Exists)
+                    .SelectMany(root => Directory.EnumerateFiles(root, "*.dll", SearchOption.AllDirectories)));
             File.WriteAllBytes(outputPath, bytes);
         }
 
-        private static byte[] ConfuseInRunDir(Action<string> stageInput, string confuserProjectTemplate, string probeDir = null)
+        private static byte[] ConfuseInRunDir(Action<string> stageInput, string confuserProjectTemplate, string probeDir = null, IEnumerable<string> dependencyFiles = null)
         {
             var runDir = Path.Combine(Common.EmpireTempDirectory, "obf-" + Guid.NewGuid().ToString("N"));
             var outputDir = Path.Combine(runDir, "out");
@@ -443,6 +449,14 @@ namespace EmpireCompiler.Core
             try
             {
                 stageInput(runDir);
+                foreach (var dependency in dependencyFiles ?? Enumerable.Empty<string>())
+                {
+                    var staged = Path.Combine(runDir, Path.GetFileName(dependency));
+                    if (!File.Exists(staged))
+                    {
+                        File.Copy(dependency, staged);
+                    }
+                }
 
                 var rendered = CrprojRenderer.Render(confuserProjectTemplate, new Dictionary<string, string>
                 {

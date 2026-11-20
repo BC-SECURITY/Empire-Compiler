@@ -18,7 +18,7 @@ namespace EmpireCompiler.Tests.Integration;
 public class PinnedReferenceCompilationTests : IDisposable
 {
     private static readonly string FixtureSourceDir = Path.Combine(AppContext.BaseDirectory, "Fixtures", "References");
-    private const string PinLibLocation = "nuget/PinLib/1.0.0/PinLib.dll";
+    internal const string PinLibLocation = "nuget/PinLib/1.0.0/PinLib.dll";
     private const string PinInteropLocation = "com/PinInterop.dll";
 
     private readonly TempOutputs _outputs = new();
@@ -29,7 +29,7 @@ public class PinnedReferenceCompilationTests : IDisposable
         TestHelper.EnsureEmbeddedLauncherFile();
     }
 
-    private const string PinLibCode = """
+    internal const string PinLibCode = """
         using System;
 
         public static class Program
@@ -56,7 +56,7 @@ public class PinnedReferenceCompilationTests : IDisposable
         """;
 
     /// <summary>Builds Fixtures/References/&lt;source&gt; into root/location against the target's mscorlib.</summary>
-    private static string BuildFixture(string root, string location, string assemblyName, string source, Common.DotNetVersion version)
+    internal static string BuildFixture(string root, string location, string assemblyName, string source, Common.DotNetVersion version)
     {
         var mscorlib = Path.Combine(Common.GetAssemblyReferenceDirectory(version), "mscorlib.dll");
         var compilation = CSharpCompilation.Create(
@@ -71,9 +71,9 @@ public class PinnedReferenceCompilationTests : IDisposable
         return path;
     }
 
-    private static string Sha256Of(string path) => Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(path)));
+    internal static string Sha256Of(string path) => Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(path)));
 
-    private static string NuGetEntry(string name, string location, string sha256, string deploy, string? dotNetVersion = null) => $"""
+    internal static string NuGetEntry(string name, string location, string sha256, string deploy, string? dotNetVersion = null) => $"""
           - Name: {name}
             Location: {location}
         {(dotNetVersion == null ? "" : $"    DotNetVersion: {dotNetVersion}\n")}    Source:
@@ -99,7 +99,7 @@ public class PinnedReferenceCompilationTests : IDisposable
         return string.Join("\n", text.Split('\n').Select(line => line.Length == 0 ? line : pad + line));
     }
 
-    private static string BuildYaml(string version, string code, string taskEntries, string? libraryName = null, string libraryEntries = "")
+    internal static string BuildYaml(string version, string code, string taskEntries, string? libraryName = null, string libraryEntries = "")
     {
         var libraries = libraryName == null
             ? "  ReferenceSourceLibraries: []"
