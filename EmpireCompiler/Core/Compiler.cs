@@ -22,6 +22,10 @@ namespace EmpireCompiler.Core
         {
             public EmpireCompiler.Models.Agents.ImplantLanguage Language { get; set; } = Models.Agents.ImplantLanguage.CSharp;
             public Platform Platform { get; set; } = Platform.X64;
+            /// <summary>Pack reference files (Deploy: Merge) that ILRepack merges into the output.</summary>
+            public List<string> PackMergeAssemblies { get; set; } = new List<string>();
+            /// <summary>Pack reference files (Deploy: OsProvided) the obfuscator must be able to resolve.</summary>
+            public List<string> ObfuscationDependencies { get; set; } = new List<string>();
         }
 
         public class CsharpCompilationRequest : CompilationRequest
@@ -59,6 +63,7 @@ namespace EmpireCompiler.Core
             public string File { get; set; }
             public Common.DotNetVersion Framework { get; set; } = Common.DotNetVersion.Net35;
             public bool Enabled { get; set; }
+            public bool EmbedInteropTypes { get; set; }
         }
 
         private class SourceSyntaxTree
@@ -103,11 +108,12 @@ namespace EmpireCompiler.Core
             SyntaxTree sourceTree = CSharpSyntaxTree.ParseText(request.Source, new CSharpParseOptions());
             compilationTrees.Add(sourceTree);
 
-            List<PortableExecutableReference> references = request.References
+            List<MetadataReference> CreateReferences() => request.References
                 .Where(R => R.Framework == request.TargetDotNetVersion)
                 .Where(R => R.Enabled)
-                .Select(R => MetadataReference.CreateFromFile(R.File))
+                .Select(R => (MetadataReference)MetadataReference.CreateFromFile(R.File).WithEmbedInteropTypes(R.EmbedInteropTypes))
                 .ToList();
+            List<MetadataReference> references = CreateReferences();
 
             string entryPointClass = "Program";
 
@@ -155,10 +161,7 @@ namespace EmpireCompiler.Core
                 compilation = CSharpCompilation.Create(
                     request.AssemblyName == null ? Path.GetRandomFileName() : request.AssemblyName,
                     compilationTrees,
-                    request.References.Where(R => R.Framework == request.TargetDotNetVersion).Where(R => R.Enabled).Select(R =>
-                    {
-                        return MetadataReference.CreateFromFile(R.File);
-                    }).ToList(),
+                    CreateReferences(),
                     options
                 );
             }
@@ -198,7 +201,7 @@ namespace EmpireCompiler.Core
             if (request.MergeReferences)
             {
                 DebugUtility.DebugPrint("Starting ILRepack merge...");
-                ILbytes = MergeNonFrameworkReferences(ILbytes, request.TargetDotNetVersion, request.OutputKind);
+                ILbytes = MergeNonFrameworkReferences(ILbytes, request.TargetDotNetVersion, request.OutputKind, request.PackMergeAssemblies, request.ObfuscationDependencies);
                 DebugUtility.DebugPrint($"Merge complete, output size: {ILbytes.Length}");
             }
             if (request.Confuse)
@@ -285,7 +288,8 @@ namespace EmpireCompiler.Core
             "XamlBuildTask", "sysglobl", "netstandard",
         };
 
-        private static byte[] MergeNonFrameworkReferences(byte[] compiledBytes, Common.DotNetVersion targetVersion, OutputKind outputKind)
+        private static byte[] MergeNonFrameworkReferences(byte[] compiledBytes, Common.DotNetVersion targetVersion, OutputKind outputKind,
+            List<string> packMergeAssemblies, List<string> packKeptReferences)
         {
             DebugUtility.DebugPrint("Merging non-framework references with ILRepack...");
 
@@ -297,6 +301,7 @@ namespace EmpireCompiler.Core
             var nonFrameworkDlls = Directory.GetFiles(frameworkDir, "*.dll")
                 .Where(f => !CoreFrameworkAssemblies.Contains(
                     Path.GetFileNameWithoutExtension(f)))
+                .Concat(packMergeAssemblies)
                 .ToList();
 
             if (nonFrameworkDlls.Count == 0)
@@ -326,7 +331,13 @@ namespace EmpireCompiler.Core
                 {
                     InputAssemblies = inputAssemblies.ToArray(),
                     OutputFile = outputPath,
-                    SearchDirectories = new[] { frameworkDir },
+                    // Pack references live outside frameworkDir: their directories let ILRepack
+                    // resolve both the merged files and the OsProvided references left in place.
+                    SearchDirectories = packMergeAssemblies.Concat(packKeptReferences)
+                        .Select(Path.GetDirectoryName)
+                        .Prepend(frameworkDir)
+                        .Distinct()
+                        .ToArray(),
                     Internalize = true,
                     DebugInfo = false,
                     TargetKind = outputKind == OutputKind.ConsoleApplication
