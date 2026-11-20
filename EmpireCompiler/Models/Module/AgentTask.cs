@@ -24,6 +24,9 @@ namespace EmpireCompiler.Models.Agents
 
     public class AgentTask : ISerializable<AgentTask>
     {
+        // Reference source libraries whose sources must not be pruned by the Optimize pass.
+        internal static readonly string[] NoPruneLibraries = { "Seatbelt", "SharpHound", "KrbRelayUp" };
+
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string OutputPath { get; set; }
@@ -218,7 +221,7 @@ namespace EmpireCompiler.Models.Agents
                 Confuse = this.Confuse,
                 ConfuserProjectTemplate = this.ConfuserProjectTemplate,
                 MergeReferences = this.MergeReferences,
-                Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Any(n => n == "Seatbelt" || n == "SharpHound")
+                Optimize = !this.ReferenceSourceLibraries.Any(RSL => NoPruneLibraries.Contains(RSL.Name))
             });
             if (compiledBytes == null || compiledBytes.Length == 0)
             {
