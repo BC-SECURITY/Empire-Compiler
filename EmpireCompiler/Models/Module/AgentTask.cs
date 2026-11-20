@@ -57,6 +57,7 @@ namespace EmpireCompiler.Models.Agents
         public bool TokenTask { get; set; }
         public bool MergeReferences { get; set; }
         public IReadOnlyList<string> SourceRoots { get; set; } = Array.Empty<string>();
+        public IReadOnlyList<string> ReferenceRoots { get; set; } = Array.Empty<string>();
 
         public void Add(ReferenceSourceLibrary library)
         {
@@ -208,6 +209,19 @@ namespace EmpireCompiler.Models.Agents
                 .Select(dll => new Compiler.Reference { File = dll, Framework = dotnetVersion, Enabled = true })
                 .ToList();
 
+            List<ResolvedReference> pinned = PinnedReferences.Resolve(
+                this.ReferenceAssemblies.Concat(this.ReferenceSourceLibraries.SelectMany(RSL => RSL.ReferenceAssemblies)),
+                dotnetVersion, this.ReferenceRoots, frameworkDir, this.MergeReferences);
+            references.AddRange(pinned.Select(R => new Compiler.Reference
+            {
+                File = R.File,
+                Framework = dotnetVersion,
+                Enabled = true,
+                EmbedInteropTypes = R.Deploy == ReferenceDeploy.EmbedInterop
+            }));
+            List<string> PinnedFiles(ReferenceDeploy deploy) =>
+                pinned.Where(R => R.Deploy == deploy).Select(R => R.File).ToList();
+
             var compiledBytes = Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
             {
                 Language = this.Language,
@@ -221,6 +235,8 @@ namespace EmpireCompiler.Models.Agents
                 Confuse = this.Confuse,
                 ConfuserProjectTemplate = this.ConfuserProjectTemplate,
                 MergeReferences = this.MergeReferences,
+                PackMergeAssemblies = PinnedFiles(ReferenceDeploy.Merge),
+                ObfuscationDependencies = PinnedFiles(ReferenceDeploy.OsProvided),
                 Optimize = !this.ReferenceSourceLibraries.Any(RSL => NoPruneLibraries.Contains(RSL.Name))
             });
             if (compiledBytes == null || compiledBytes.Length == 0)

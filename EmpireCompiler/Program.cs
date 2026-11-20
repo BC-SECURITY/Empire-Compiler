@@ -58,6 +58,13 @@ namespace EmpireCompiler
                 AllowMultipleArgumentsPerToken = false
             };
 
+            var referenceRootOption = new Option<string[]>("--reference-root")
+            {
+                Description = "Reference assembly root directory (repeatable)",
+                Arity = ArgumentArity.ZeroOrMore,
+                AllowMultipleArgumentsPerToken = false
+            };
+
             var obfuscateOnlyOption = new Option<string>("--obfuscate-only")
             {
                 Description = "Path to an existing assembly to obfuscate (obfuscate-only mode)"
@@ -77,6 +84,7 @@ namespace EmpireCompiler
                 debugOption,
                 mergeReferencesOption,
                 sourceRootOption,
+                referenceRootOption,
                 obfuscateOnlyOption,
                 confuserProjectOption
             };
@@ -115,7 +123,7 @@ namespace EmpireCompiler
                     try
                     {
                         var template = File.ReadAllText(confuserProject);
-                        Compiler.ObfuscateFile(obfuscateOnly, outputPath, template);
+                        Compiler.ObfuscateFile(obfuscateOnly, outputPath, template, parseResult.GetValue(referenceRootOption) ?? Array.Empty<string>());
                         DebugUtility.DebugPrint($"Final Task Path: {outputPath}");
                         Console.WriteLine($"Final Task Path: {outputPath}");
                     }
@@ -140,6 +148,7 @@ namespace EmpireCompiler
                     agentTask.ConfuserProjectTemplate = confuserProject != null ? File.ReadAllText(confuserProject) : null;
                     agentTask.MergeReferences = parseResult.GetValue(mergeReferencesOption);
                     agentTask.SourceRoots = parseResult.GetValue(sourceRootOption) ?? Array.Empty<string>();
+                    agentTask.ReferenceRoots = parseResult.GetValue(referenceRootOption) ?? Array.Empty<string>();
 
                     if (!Enum.TryParse(dotnetVersion, true, out Common.DotNetVersion parsedVersion))
                     {

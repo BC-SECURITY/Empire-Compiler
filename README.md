@@ -13,7 +13,7 @@ The Empire Compiler started as the compiler of the Covenant project. It has sinc
 dotnet build
 ```
 
-The repository has no submodules and bundles no library source, and the engine ships no prebuilt RunCOFF (ABI 3). Pass every library's source with `--source-root <dir>` (repeatable), where each task's `ReferenceSourceLibraries[].Location` names a directory under one of the roots.
+The repository has no submodules and bundles no library source, and the engine ships no prebuilt RunCOFF (ABI 4). Pass every library's source with `--source-root <dir>` (repeatable; ABI 4 adds `--reference-root <dir>`, repeatable, for pack reference DLLs), where each task's `ReferenceSourceLibraries[].Location` names a directory under one of the roots.
 
 ## Test
 

@@ -11,7 +11,7 @@ public class AbiTests
     }
 
     [Fact]
-    public void Abi_Version_Is_3() => Assert.Equal(3, Abi.Version);
+    public void Abi_Is4() => Assert.Equal(4, Abi.Version);
 
     [Fact]
     public void DataAbiFile_Matches_Constant()
