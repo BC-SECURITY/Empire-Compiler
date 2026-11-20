@@ -131,6 +131,7 @@ public class AgentTaskDeserializationTests
             "    - Name: Partial.dll\n      Location: x/Partial.dll\n" +
             "      source:\n        NuGet: X@1\n        Path: lib/X.dll\n" +
             $"      Sha256: {Hex64}\n      Deploy: Merge\n");
+        Assert.Null(reference.Source);
         var ex = Assert.Throws<CompilerException>(() => reference.ValidatePinned());
         Assert.Contains("Partial.dll", ex.Message);
     }
@@ -166,6 +167,57 @@ public class AgentTaskDeserializationTests
         var ex = Assert.Throws<CompilerException>(() => reference.ValidatePinned());
         Assert.Contains("Bad.dll", ex.Message);
     }
+
+    private static ReferenceAssembly Pinned(string sourceYaml, string sha = Hex64, string deploy = "Merge") =>
+        ParseReference(
+            "    - Name: P.dll\n      Location: x/P.dll\n      Source:\n" + sourceYaml +
+            $"      Sha256: {sha}\n      Deploy: {deploy}\n");
+
+    private const string NuGetPath = "        Path: lib/X.dll\n";
+
+    [Fact]
+    public void Sha256WithTrailingNewline_Throws() =>
+        Assert.Throws<CompilerException>(() => Pinned("        NuGet: X@1\n" + NuGetPath, "\"" + Hex64 + "\\n\"").ValidatePinned());
+
+    [Fact]
+    public void UppercaseSha256_Throws() =>
+        Assert.Throws<CompilerException>(() => Pinned("        NuGet: X@1\n" + NuGetPath, Hex64.ToUpperInvariant()).ValidatePinned());
+
+    [Theory]
+    [InlineData("X")]
+    [InlineData("X@")]
+    [InlineData("@1")]
+    [InlineData("X@1@2")]
+    public void NuGetMalformed_Throws(string nuget) =>
+        Assert.Throws<CompilerException>(() => Pinned($"        NuGet: \"{nuget}\"\n" + NuGetPath).ValidatePinned());
+
+    [Fact]
+    public void NuGetWithoutAt_Throws() =>
+        Assert.Throws<CompilerException>(() => Pinned("        NuGet: BouncyCastle\n" + NuGetPath).ValidatePinned());
+
+    [Fact]
+    public void NuGetEmptyVersion_Throws() =>
+        Assert.Throws<CompilerException>(() => Pinned("        NuGet: BouncyCastle@\n" + NuGetPath).ValidatePinned());
+
+    [Fact]
+    public void NuGetWithoutPath_Throws() =>
+        Assert.Throws<CompilerException>(() => Pinned("        NuGet: X@1\n").ValidatePinned());
+
+    [Fact]
+    public void CommittedWithPath_Throws() =>
+        Assert.Throws<CompilerException>(() => Pinned("        Path: lib/X.dll\n        Committed:\n          Tlbimp: tlbimp foo.tlb\n", deploy: "EmbedInterop").ValidatePinned());
+
+    [Fact]
+    public void NuGetAndCommittedBoth_Throws() =>
+        Assert.Throws<CompilerException>(() => Pinned("        NuGet: X@1\n" + NuGetPath + "        Committed:\n          Tlbimp: t\n", deploy: "EmbedInterop").ValidatePinned());
+
+    [Fact]
+    public void SourceWithNeither_Throws() =>
+        Assert.Throws<CompilerException>(() => Pinned("        Path: lib/X.dll\n").ValidatePinned());
+
+    [Fact]
+    public void CommittedWithNeither_Throws() =>
+        Assert.Throws<CompilerException>(() => Pinned("        Committed: {}\n", deploy: "EmbedInterop").ValidatePinned());
 
     public static IEnumerable<object[]> Profiles => ProfileYamlData.AllProfiles();
 }

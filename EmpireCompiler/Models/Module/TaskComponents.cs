@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 using EmpireCompiler.Core;
 
@@ -13,6 +14,8 @@ namespace EmpireCompiler.Models.Agents
 {
     public class ReferenceAssembly : ISerializable<ReferenceAssembly>
     {
+        private static readonly Regex Sha256Pattern = new Regex(@"\A[0-9a-f]{64}\z", RegexOptions.Compiled);
+
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string Name { get; set; }
@@ -70,13 +73,18 @@ namespace EmpireCompiler.Models.Agents
                 {
                     throw new CompilerException($"Reference assembly '{Name}': Source.NuGet requires Source.Path.");
                 }
-                if (!Source.NuGet.Contains('@'))
+                string[] parts = Source.NuGet.Split('@');
+                if (parts.Length != 2 || parts[0].Length == 0 || parts[1].Length == 0)
                 {
                     throw new CompilerException($"Reference assembly '{Name}': Source.NuGet must be '<id>@<version>'.");
                 }
             }
             else
             {
+                if (!string.IsNullOrWhiteSpace(Source.Path))
+                {
+                    throw new CompilerException($"Reference assembly '{Name}': Source.Path is only valid with Source.NuGet.");
+                }
                 bool hasUpstream = !string.IsNullOrWhiteSpace(Source.Committed.Upstream);
                 bool hasTlbimp = !string.IsNullOrWhiteSpace(Source.Committed.Tlbimp);
                 if (hasUpstream == hasTlbimp)
@@ -89,7 +97,7 @@ namespace EmpireCompiler.Models.Agents
                 }
             }
 
-            if (!System.Text.RegularExpressions.Regex.IsMatch(Sha256, "^[0-9a-f]{64}$"))
+            if (!Sha256Pattern.IsMatch(Sha256))
             {
                 throw new CompilerException($"Reference assembly '{Name}': Sha256 must be 64 lowercase hex characters.");
             }
