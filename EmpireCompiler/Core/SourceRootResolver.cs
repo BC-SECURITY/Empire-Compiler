@@ -69,7 +69,7 @@ public static class SourceRootResolver
     /// closed) for any link whose raw target contains a ".." segment: the OS resolves ".."
     /// physically after traversing a link, which lexical normalization cannot reproduce.
     /// </summary>
-    private static string? RealPath(string fullPath, int depth)
+    internal static string? RealPath(string fullPath, int depth)
     {
         if (depth > MaxSymlinkDepth)
         {

@@ -57,6 +57,7 @@ namespace EmpireCompiler.Models.Agents
         public bool TokenTask { get; set; }
         public bool MergeReferences { get; set; }
         public IReadOnlyList<string> SourceRoots { get; set; } = Array.Empty<string>();
+        public IReadOnlyList<string> ReferenceRoots { get; set; } = Array.Empty<string>();
 
         public void Add(ReferenceSourceLibrary library)
         {
