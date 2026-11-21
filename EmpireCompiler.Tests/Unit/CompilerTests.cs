@@ -394,6 +394,46 @@ public class CompilerTests : IDisposable
         Assert.Contains("Lib.DepB", typeNames);
     }
 
+    [Fact]
+    public void Compile_WithOptimization_PrunesLibraryTypeNamedLikeAnEntrySourceType()
+    {
+        // The Sharpire stagers compile an entry-source Program against agent source whose own
+        // Program.cs also declares a global Program with a Main. Members referenced from inside
+        // the entry Program (its locals, its own methods) must not mark the name Program used,
+        // or the library file is kept and the compile fails with CS0101/CS0017.
+        var typeNames = CompileOptimizedWithLibrary("""
+            using System;
+            using Lib;
+            public static class Program
+            {
+                public static void Main(string[] args)
+                {
+                    string name = Helper.Name();
+                    Console.WriteLine(Describe(name));
+                }
+
+                private static string Describe(string value) { return "[" + value + "]"; }
+            }
+            """, new Dictionary<string, string>
+        {
+            ["Program.cs"] = """
+                public static class Program
+                {
+                    public static void Main(string[] args) { System.Console.WriteLine(Lib.Helper.Name()); }
+                }
+                """,
+            ["Helper.cs"] = """
+                namespace Lib
+                {
+                    public static class Helper { public static string Name() { return "lib"; } }
+                }
+                """,
+        });
+
+        Assert.Contains("Lib.Helper", typeNames);
+        Assert.Single(typeNames, n => n == ".Program");
+    }
+
     private List<string> CompileOptimizedWithLibrary(string source, Dictionary<string, string> libraryFiles)
     {
         var libDir = _outputs.NewDir("empire-treeshake-");
