@@ -642,7 +642,12 @@ namespace EmpireCompiler.Core
                 // usedNamespaceNames filter also reads this, which keeps the class's using.
                 // Not covered: extension methods bound implicitly (collection-initializer Add,
                 // foreach GetEnumerator, Deconstruct), which GetSymbolInfo does not return.
-                else if (Symbol.ContainingType != null)
+                // A class referencing its own members (locals, its own methods) is skipped: this
+                // tree is kept already, and trees are matched by type name, so recording it
+                // would keep a library file declaring a same-named type (the Sharpire
+                // stagers' entry Program vs Sharpire/Program.cs: CS0101, CS0017).
+                else if (Symbol.ContainingType != null
+                    && !Symbol.ContainingType.DeclaringSyntaxReferences.Any(R => R.SyntaxTree == sourceTree))
                 {
                     types.Add(Symbol.ContainingType);
                 }
