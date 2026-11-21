@@ -666,7 +666,6 @@ namespace EmpireCompiler.Core
                     SourceSyntaxTree sst = sourceSyntaxTrees.FirstOrDefault(SST => SST.SyntaxTree == sr.SyntaxTree);
                     if (sst != null)
                     { sst.UsedTypes.Add(symbol); }
-                    string fullyQualifiedTypeName = GetFullyQualifiedTypeName(symbol);
                     searchTrees.Add(sr.SyntaxTree);
                 }
             }
