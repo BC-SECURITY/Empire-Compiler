@@ -1,4 +1,6 @@
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 
 using EmpireCompiler.Core;
 using EmpireCompiler.Tests.Helpers;
@@ -9,6 +11,8 @@ namespace EmpireCompiler.Tests.Unit;
 
 public class CompilerTests : IDisposable
 {
+    private readonly TempOutputs _outputs = new();
+
     static CompilerTests()
     {
         TestHelper.SetupEmpireDataPaths();
@@ -270,6 +274,158 @@ public class CompilerTests : IDisposable
         Assert.True(bytes.Length > 0);
     }
 
+    [Fact]
+    public void Compile_WithOptimization_KeepsExtensionMethodOnlyClasses()
+    {
+        // Regression: the Optimize pass used to record only symbols that resolve to types, so a
+        // static class reached solely through extension-method calls was pruned (CS1061).
+        // Covers a direct call from the entry source (ToHex), a transitive call from a library
+        // tree (Helper -> IsSet), and confirms an unreferenced class (Unused) is still pruned.
+        var typeNames = CompileOptimizedWithLibrary("""
+            using System;
+            using Lib;
+            using Lib.Ext;
+            public static class Program
+            {
+                public static void Main(string[] args)
+                {
+                    Console.WriteLine(new byte[] { 1, 2 }.ToHex());
+                    Console.WriteLine(Helper.Check(3));
+                }
+            }
+            """, new Dictionary<string, string>
+        {
+            ["ByteArrayExtensions.cs"] = """
+                namespace Lib.Ext
+                {
+                    public static class ByteArrayExtensions
+                    {
+                        public static string ToHex(this byte[] bytes) { return System.BitConverter.ToString(bytes); }
+                    }
+                }
+                """,
+            ["FlagExtensions.cs"] = """
+                namespace Lib.Ext
+                {
+                    public static class FlagExtensions
+                    {
+                        public static bool IsSet(this int flags, int flag) { return (flags & flag) == flag; }
+                    }
+                }
+                """,
+            ["Helper.cs"] = """
+                using Lib.Ext;
+                namespace Lib
+                {
+                    public static class Helper
+                    {
+                        public static bool Check(int flags) { return flags.IsSet(1); }
+                    }
+                }
+                """,
+            ["Unused.cs"] = """
+                namespace Lib
+                {
+                    public static class Unused
+                    {
+                        public static void Nothing() { }
+                    }
+                }
+                """,
+        });
+
+        Assert.Contains("Lib.Ext.ByteArrayExtensions", typeNames);
+        Assert.Contains("Lib.Ext.FlagExtensions", typeNames);
+        Assert.Contains("Lib.Helper", typeNames);
+        Assert.DoesNotContain("Lib.Unused", typeNames);
+    }
+
+    [Fact]
+    public void Compile_WithOptimization_SearchesEveryPartOfAPartialClass()
+    {
+        // Each part of the partial class depends on its own library type. The Optimize pass used
+        // to search only the first declaring file, so whichever part came second lost its
+        // dependency (CS0246), regardless of file enumeration order.
+        var typeNames = CompileOptimizedWithLibrary("""
+            using System;
+            using Lib.Ext;
+            public static class Program
+            {
+                public static void Main(string[] args)
+                {
+                    Console.WriteLine("a".First() + "b".Second());
+                }
+            }
+            """, new Dictionary<string, string>
+        {
+            ["StringExtensions.First.cs"] = """
+                namespace Lib.Ext
+                {
+                    public static partial class StringExtensions
+                    {
+                        public static string First(this string s) { return Lib.DepA.Wrap(s); }
+                    }
+                }
+                """,
+            ["StringExtensions.Second.cs"] = """
+                namespace Lib.Ext
+                {
+                    public static partial class StringExtensions
+                    {
+                        public static string Second(this string s) { return Lib.DepB.Wrap(s); }
+                    }
+                }
+                """,
+            ["DepA.cs"] = """
+                namespace Lib
+                {
+                    public static class DepA { public static string Wrap(string s) { return "[" + s + "]"; } }
+                }
+                """,
+            ["DepB.cs"] = """
+                namespace Lib
+                {
+                    public static class DepB { public static string Wrap(string s) { return "(" + s + ")"; } }
+                }
+                """,
+        });
+
+        Assert.Contains("Lib.DepA", typeNames);
+        Assert.Contains("Lib.DepB", typeNames);
+    }
+
+    private List<string> CompileOptimizedWithLibrary(string source, Dictionary<string, string> libraryFiles)
+    {
+        var libDir = _outputs.NewDir("empire-treeshake-");
+        foreach (var (name, contents) in libraryFiles)
+        {
+            File.WriteAllText(Path.Combine(libDir, name), contents);
+        }
+
+        var request = new Compiler.CsharpFrameworkCompilationRequest
+        {
+            Source = source,
+            SourceDirectories = new List<string> { libDir },
+            TargetDotNetVersion = Common.DotNetVersion.Net40,
+            OutputKind = OutputKind.ConsoleApplication,
+            References = GetDefaultReferences(Common.DotNetVersion.Net40),
+            Optimize = true
+        };
+
+        return GetDefinedTypeNames(Compiler.Compile(request));
+    }
+
+    private static List<string> GetDefinedTypeNames(byte[] assembly)
+    {
+        using var pe = new PEReader(new MemoryStream(assembly));
+        var reader = pe.GetMetadataReader();
+        return reader.TypeDefinitions.Select(h =>
+        {
+            var type = reader.GetTypeDefinition(h);
+            return reader.GetString(type.Namespace) + "." + reader.GetString(type.Name);
+        }).ToList();
+    }
+
     private static byte[] CompileSource(string source, Common.DotNetVersion version, bool optimize = false)
     {
         var request = new Compiler.CsharpFrameworkCompilationRequest
@@ -315,6 +471,7 @@ public class CompilerTests : IDisposable
 
     public void Dispose()
     {
+        _outputs.Dispose();
         GC.SuppressFinalize(this);
     }
 }

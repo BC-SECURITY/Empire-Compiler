@@ -627,10 +627,24 @@ namespace EmpireCompiler.Core
             List<ITypeSymbol> types = new List<ITypeSymbol>();
             sourceTree.GetRoot().DescendantNodes().Select(N => sm.GetSymbolInfo(N).Symbol).ToList().ForEach(Symbol =>
             {
-                if (Symbol != null && typeKinds.Contains(Symbol.Kind))
+                if (Symbol == null)
                 {
-                    ITypeSymbol typeSymbol = (ITypeSymbol)Symbol;
-                    types.Add(typeSymbol);
+                    return;
+                }
+                if (typeKinds.Contains(Symbol.Kind))
+                {
+                    types.Add((ITypeSymbol)Symbol);
+                }
+                // Any other symbol a node binds to (method, property, field, event, local,
+                // parameter) keeps its ContainingType alive. Extension-method calls
+                // (bytes.ToHex()) and attribute usages ([Foo] binds to the constructor) never
+                // name their class in source, so without this the class would be pruned. The
+                // usedNamespaceNames filter also reads this, which keeps the class's using.
+                // Not covered: extension methods bound implicitly (collection-initializer Add,
+                // foreach GetEnumerator, Deconstruct), which GetSymbolInfo does not return.
+                else if (Symbol.ContainingType != null)
+                {
+                    types.Add(Symbol.ContainingType);
                 }
             });
             return new HashSet<ITypeSymbol>(types, SymbolEqualityComparer.Default);
@@ -646,13 +660,12 @@ namespace EmpireCompiler.Core
             HashSet<SyntaxTree> searchTrees = new HashSet<SyntaxTree>();
             foreach (ITypeSymbol symbol in usedTypes)
             {
-                SyntaxReference sr = symbol.DeclaringSyntaxReferences.FirstOrDefault();
-                if (sr != null)
+                // Search every declaring tree: a partial type split across files has one per part.
+                foreach (SyntaxReference sr in symbol.DeclaringSyntaxReferences)
                 {
                     SourceSyntaxTree sst = sourceSyntaxTrees.FirstOrDefault(SST => SST.SyntaxTree == sr.SyntaxTree);
                     if (sst != null)
                     { sst.UsedTypes.Add(symbol); }
-                    string fullyQualifiedTypeName = GetFullyQualifiedTypeName(symbol);
                     searchTrees.Add(sr.SyntaxTree);
                 }
             }
