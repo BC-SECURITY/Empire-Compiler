@@ -7,6 +7,8 @@
     <FileVersion>0.2.3</FileVersion>
     <InformationalVersion>0.2.3</InformationalVersion>
     <OutputType>Exe</OutputType>
+    <!-- Single source of truth for the engine ABI. Core/Abi.cs and Data/abi are generated from this. -->
+    <EngineAbi>4</EngineAbi>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -63,4 +65,27 @@
       <HintPath>refs\Donut.dll</HintPath>
     </Reference>
   </ItemGroup>
+
+  <!-- Generate Abi.cs (into obj/) from EngineAbi so the constant cannot drift from the property. -->
+  <Target Name="GenerateAbiSource" BeforeTargets="BeforeBuild;CoreCompile">
+    <PropertyGroup>
+      <AbiSourceFile>$(IntermediateOutputPath)Abi.cs</AbiSourceFile>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(AbiSourceFile)"
+                      Lines="namespace EmpireCompiler.Core%3B public static class Abi { public const int Version = $(EngineAbi)%3B }"
+                      Overwrite="true"
+                      WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <Compile Include="$(AbiSourceFile)" Link="Core/Abi.cs" />
+      <FileWrites Include="$(AbiSourceFile)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Emit Data/abi on every build so consumers can read the ABI without running the binary. -->
+  <Target Name="WriteAbiFile" BeforeTargets="Build" DependsOnTargets="GenerateAbiSource">
+    <WriteLinesToFile File="$(MSBuildProjectDirectory)/Data/abi"
+                      Lines="$(EngineAbi)"
+                      Overwrite="true"
+                      WriteOnlyWhenDifferent="true" />
+  </Target>
 </Project>

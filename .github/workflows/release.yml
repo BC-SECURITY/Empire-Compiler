@@ -11,6 +11,10 @@ on:
       release_version:
         description: 'Release version (e.g., v1.0.0)'
         required: true
+      prerelease:
+        description: 'Publish as a pre-release (betas); it is then not marked Latest'
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -39,7 +43,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
-          submodules: recursive
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v5
@@ -60,6 +63,23 @@ jobs:
           python scripts/git_archive_all.py \
             --include "EmpireCompiler" \
             publish/EmpireCompiler-${{ env.runtime }}-${{ github.event.inputs.release_version }}.tgz
+        shell: bash
+
+      # Data/abi is an untracked build output written by the WriteAbiFile MSBuild target.
+      # git_archive_all.py --include adds the EmpireCompiler directory recursively via tarfile,
+      # so it is archived even though git does not track it.
+      - name: Verify archive contents (ABI, no bundled source libraries)
+        run: |
+          archive=publish/EmpireCompiler-${{ env.runtime }}-${{ github.event.inputs.release_version }}.tgz
+          members=$(tar -tzf "$archive")
+          # Here-string, not `echo | grep -q`: grep -q exits on the first match, echo then dies of
+          # SIGPIPE on a long member list, and the runner's pipefail reports a present file as missing.
+          grep -qE "(^|/)EmpireCompiler/Data/abi$" <<<"$members" || { echo "::error::EmpireCompiler/Data/abi missing from $archive"; exit 1; }
+          for d in EmpireCompiler/Data/AssemblyReferences/ EmpireCompiler/Data/EmbeddedResources/ EmpireCompiler/Data/ConfuserEx-CLI/; do
+            grep -qE "(^|/)${d}" <<<"$members" || { echo "::error::$d missing from $archive"; exit 1; }
+          done
+          extra=$(grep -E "(^|/)EmpireCompiler/Data/ReferenceSourceLibraries/.+" <<<"$members" || true)
+          [ -z "$extra" ] || { echo "::error::$archive ships bundled source libraries:"; head -5 <<<"$extra"; exit 1; }
         shell: bash
 
       - name: Upload build artifacts
@@ -88,6 +108,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ./publish
+          pattern: EmpireCompiler-*
           merge-multiple: true
 
       - name: Create Git tag
@@ -102,5 +123,7 @@ jobs:
         with:
           files: ./publish/*
           tag_name: ${{ github.event.inputs.release_version }}
+          prerelease: ${{ github.event.inputs.prerelease == 'true' }}
+          make_latest: ${{ github.event.inputs.prerelease != 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

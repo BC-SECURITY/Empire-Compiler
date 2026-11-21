@@ -1,0 +1,276 @@
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
+using System.Text;
+
+using EmpireCompiler.Core;
+using EmpireCompiler.Models.Agents;
+using EmpireCompiler.Tests.Helpers;
+
+namespace EmpireCompiler.Tests.Integration;
+
+[Collection(DotnetRunCollection.Name)]
+public class ObfuscateOnlyTests : IDisposable
+{
+    private readonly TempOutputs _outputs = new();
+
+    static ObfuscateOnlyTests()
+    {
+        TestHelper.SetupEmpireDataPaths();
+        TestHelper.EnsureEmbeddedLauncherFile();
+    }
+
+    private const string Template = """
+<project baseDir="{confuser_base_dir}" outputDir="{confuser_output_dir}" xmlns="http://confuser.codeplex.com">
+      <rule pattern="true" preset="none" inherit="false">
+        <protection id="rename" />
+        <protection id="anti ildasm" />
+        <protection id="ctrl flow" />
+      </rule>
+      <rule pattern="namespace('Program')" preset="none" inherit="false">
+        <protection id="rename" action="remove"/>
+        <protection id="anti ildasm" action="remove" />
+        <protection id="ctrl flow" action="remove" />
+      </rule>
+      <rule preset="none" pattern="match-type-name('^Program$')">
+        <protection id="rename" action="remove" />
+      </rule>
+      <module path="{confuser_module_path}" />
+      <probePath>{confuser_proj_dir}/Data/AssemblyReferences/net35/</probePath>
+      <probePath>{confuser_proj_dir}/Data/AssemblyReferences/net40/</probePath>
+      <probePath>{confuser_proj_dir}/Data/AssemblyReferences/net45/</probePath>
+      <probePath>{confuser_proj_dir}/Data/AssemblyReferences/net47/</probePath>
+</project>
+""";
+
+    private const string PlainYaml = """
+- Name: ObfTask
+  Aliases: []
+  Description: ''
+  Author:
+    Name: ''
+    Handle: ''
+    Link: ''
+  Help: ''
+  Language: CSharp
+  CompatibleDotNetVersions:
+  - Net40
+  Code: |
+    using System;
+    public static class Program
+    {
+        public static void Main(string[] args) { Console.WriteLine(new Helper().SecretName()); }
+    }
+    public class Helper { public string SecretName() { return "x"; } }
+  TaskingType: Assembly
+  UnsafeCompile: false
+  TokenTask: false
+  Options: []
+  ReferenceSourceLibraries: []
+  ReferenceAssemblies: []
+  EmbeddedResources: []
+""";
+
+    private async Task<string> BuildPlainAssembly()
+    {
+        var output = _outputs.NewPath();
+        var enc = Convert.ToBase64String(Encoding.UTF8.GetBytes(PlainYaml));
+        var (code, so, se) = await TestHelper.RunCompilerAsync(build: false, "--yaml", enc, "--output", output, "--dotnet-version", "Net40");
+        Assert.True(code == 0, $"compile exit {code}\n{so}\n{se}");
+        return output;
+    }
+
+    [Fact]
+    public async Task ObfuscateOnly_Produces_Output_And_Prints_Final_Task_Path()
+    {
+        var input = await BuildPlainAssembly();
+        var dir = _outputs.NewDir("obftest-");
+        var tpl = Path.Combine(dir, "t.crproj");
+        File.WriteAllText(tpl, Template);
+        var output = Path.Combine(dir, "out.exe");
+
+        var (code, so, se) = await TestHelper.RunCompilerAsync(build: false, "--obfuscate-only", input, "--confuser-project", tpl, "--output", output);
+
+        Assert.True(code == 0, $"exit {code}\nSTDOUT:\n{so}\nSTDERR:\n{se}");
+        Assert.Contains($"Final Task Path: {output}", so);
+        Assert.True(File.Exists(output) && new FileInfo(output).Length > 0);
+        Assert.NotEqual(File.ReadAllBytes(input), File.ReadAllBytes(output));
+        Assert.Empty(Directory.GetDirectories(Common.EmpireTempDirectory, "obf-*"));
+    }
+
+    [Fact]
+    public async Task Confuse_With_ConfuserProject_Uses_PerRun_Dir()
+    {
+        var dir = _outputs.NewDir("obftest-");
+        var tpl = Path.Combine(dir, "t.crproj");
+        File.WriteAllText(tpl, Template);
+        var yaml = PlainYaml;
+        var output = Path.Combine(dir, "c.exe");
+
+        var (code, so, se) = await TestHelper.RunCompilerAsync(build: false, "--yaml", Convert.ToBase64String(Encoding.UTF8.GetBytes(yaml)),
+            "--output", output, "--dotnet-version", "Net40", "--confuse", "--confuser-project", tpl);
+
+        Assert.True(code == 0, $"exit {code}\nSTDOUT:\n{so}\nSTDERR:\n{se}");
+        Assert.True(File.Exists(output) && new FileInfo(output).Length > 0);
+        Assert.Empty(Directory.GetDirectories(Common.EmpireTempDirectory, "obf-*"));
+    }
+
+    [Fact]
+    public async Task ObfuscateOnly_And_Confuse_Apply_Same_Protections()
+    {
+        var dir = _outputs.NewDir("obftest-");
+        var tpl = Path.Combine(dir, "t.crproj");
+        File.WriteAllText(tpl, Template);
+        var plain = await BuildPlainAssembly();
+        var viaConfuse = Path.Combine(dir, "confuse.exe");
+        var viaObfOnly = Path.Combine(dir, "obfonly.exe");
+
+        var (c1, o1, e1) = await TestHelper.RunCompilerAsync(build: false, "--yaml", Convert.ToBase64String(Encoding.UTF8.GetBytes(PlainYaml)),
+            "--output", viaConfuse, "--dotnet-version", "Net40", "--confuse", "--confuser-project", tpl);
+        var (c2, o2, e2) = await TestHelper.RunCompilerAsync(build: false, "--obfuscate-only", plain, "--confuser-project", tpl, "--output", viaObfOnly);
+
+        Assert.True(c1 == 0, $"confuse exit {c1}\n{o1}\n{e1}");
+        Assert.True(c2 == 0, $"obfuscate-only exit {c2}\n{o2}\n{e2}");
+
+        // The rename protection hides the non-Program type name in both outputs but not in the input.
+        var needle = Encoding.UTF8.GetBytes("Helper");
+        Assert.True(Contains(File.ReadAllBytes(plain), needle), "input should contain the type name");
+        Assert.False(Contains(File.ReadAllBytes(viaConfuse), needle), "--confuse output still has 'Helper'");
+        Assert.False(Contains(File.ReadAllBytes(viaObfOnly), needle), "--obfuscate-only output still has 'Helper'");
+        // The excluded Program type keeps its name in both.
+        var program = Encoding.UTF8.GetBytes("Program");
+        Assert.True(Contains(File.ReadAllBytes(viaConfuse), program));
+        Assert.True(Contains(File.ReadAllBytes(viaObfOnly), program));
+    }
+
+    [Fact]
+    public void ObfuscateFile_Failure_Includes_Log_Tail_And_Cleans_Up()
+    {
+        var dir = _outputs.NewDir("obftest-");
+        var bogus = Path.Combine(dir, "bogus.exe");
+        File.WriteAllBytes(bogus, new byte[] { 1, 2, 3, 4 });
+
+        var ex = Assert.Throws<CompilerException>(() => Compiler.ObfuscateFile(bogus, Path.Combine(dir, "o.exe"), Template));
+
+        Assert.Contains("ConfuserEx log tail:", ex.Message);
+        Assert.Empty(Directory.GetDirectories(Common.EmpireTempDirectory, "obf-*"));
+    }
+
+    private string BuildOsProvidedAssembly(out string referenceRoot, bool confuse = false)
+    {
+        referenceRoot = _outputs.NewDir("pinref-");
+        var dll = PinnedReferenceCompilationTests.BuildFixture(referenceRoot, PinnedReferenceCompilationTests.PinLibLocation, "PinLib", "PinLib.cs", Common.DotNetVersion.Net40);
+        var yaml = PinnedReferenceCompilationTests.BuildYaml("Net40", PinnedReferenceCompilationTests.PinLibCode,
+            PinnedReferenceCompilationTests.NuGetEntry("PinLib", PinnedReferenceCompilationTests.PinLibLocation, PinnedReferenceCompilationTests.Sha256Of(dll), "OsProvided"));
+        var task = new AgentTask().FromSerializedGruntTask(TestHelper.DeserializeSerializedGruntTasks(yaml)[0]);
+        task.OutputPath = _outputs.NewPath();
+        task.ReferenceRoots = [referenceRoot];
+        if (confuse)
+        {
+            task.Confuse = true;
+            task.ConfuserProjectTemplate = Template;
+        }
+        task.Compile(Common.DotNetVersion.Net40);
+        return task.OutputPath;
+    }
+
+    private static List<string> AssemblyRefs(string path)
+    {
+        using var pe = new PEReader(File.OpenRead(path));
+        var md = pe.GetMetadataReader();
+        return md.AssemblyReferences.Select(h => md.GetString(md.GetAssemblyReference(h).Name)).ToList();
+    }
+
+    [Fact]
+    public void Confuse_WithOsProvidedReference_Succeeds()
+    {
+        var output = BuildOsProvidedAssembly(out _, confuse: true);
+
+        Assert.True(new FileInfo(output).Length > 0);
+        Assert.Contains("PinLib", AssemblyRefs(output));
+        Assert.Empty(Directory.GetDirectories(Common.EmpireTempDirectory, "obf-*"));
+    }
+
+    [Fact]
+    public void ObfuscateOnly_WithReferenceRoot_ResolvesOsProvided()
+    {
+        var input = BuildOsProvidedAssembly(out var root);
+        var dir = _outputs.NewDir("obftest-");
+        var output = Path.Combine(dir, "o.exe");
+
+        Compiler.ObfuscateFile(input, output, Template, [root]);
+
+        Assert.True(new FileInfo(output).Length > 0);
+        Assert.Contains("PinLib", AssemblyRefs(output));
+        Assert.Empty(Directory.GetDirectories(Common.EmpireTempDirectory, "obf-*"));
+    }
+
+    [Fact]
+    public async Task ObfuscateOnly_ReferenceRootFlag_ResolvesOsProvided()
+    {
+        var input = BuildOsProvidedAssembly(out var root);
+        var dir = _outputs.NewDir("obftest-");
+        var tpl = Path.Combine(dir, "t.crproj");
+        File.WriteAllText(tpl, Template);
+        var output = Path.Combine(dir, "o.exe");
+
+        var (code, so, se) = await TestHelper.RunCompilerAsync(build: false, "--obfuscate-only", input, "--confuser-project", tpl, "--output", output, "--reference-root", root);
+
+        Assert.True(code == 0, $"exit {code}\nSTDOUT:\n{so}\nSTDERR:\n{se}");
+        Assert.True(File.Exists(output) && new FileInfo(output).Length > 0);
+    }
+
+    [Fact]
+    public void ObfuscateOnly_WithoutReferenceRoot_FailsOnUnresolved()
+    {
+        var input = BuildOsProvidedAssembly(out _);
+        var output = Path.Combine(_outputs.NewDir("obftest-"), "o.exe");
+
+        var ex = Assert.Throws<CompilerException>(() => Compiler.ObfuscateFile(input, output, Template));
+
+        Assert.Contains("PinLib", ex.Message);
+        Assert.Empty(Directory.GetDirectories(Common.EmpireTempDirectory, "obf-*"));
+    }
+
+    private static bool Contains(byte[] haystack, byte[] needle) =>
+        haystack.AsSpan().IndexOf(needle) >= 0;
+
+    [Fact]
+    public async Task Concurrent_ObfuscateOnly_Do_Not_Collide()
+    {
+        var input = await BuildPlainAssembly();
+        var dir = _outputs.NewDir("obftest-");
+        var outputs = new[] { Path.Combine(dir, "a.exe"), Path.Combine(dir, "b.exe") };
+
+        await Task.WhenAll(outputs.Select(o => Task.Run(() => Compiler.ObfuscateFile(input, o, Template))));
+
+        foreach (var o in outputs)
+        {
+            Assert.True(File.Exists(o) && new FileInfo(o).Length > 0);
+        }
+    }
+
+    [Fact]
+    public async Task ObfuscateOnly_Rejects_Invalid_Combinations()
+    {
+        var dir = _outputs.NewDir("obftest-");
+        var tpl = Path.Combine(dir, "t.crproj");
+        File.WriteAllText(tpl, Template);
+        var o = Path.Combine(dir, "o.exe");
+
+        var (c1, _, e1) = await TestHelper.RunCompilerAsync(build: false, "--obfuscate-only", "x.exe", "--output", o);
+        var (c2, _, e2) = await TestHelper.RunCompilerAsync(build: false, "--obfuscate-only", "x.exe", "--output", o, "--confuser-project", tpl, "--yaml", "abc");
+        var (c3, _, e3) = await TestHelper.RunCompilerAsync(build: false, "--obfuscate-only", "x.exe", "--output", o, "--confuser-project", tpl, "--dotnet-version", "Net40");
+        var (c4, _, e4) = await TestHelper.RunCompilerAsync(build: false, "--output", o);
+
+        Assert.All(new[] { c1, c2, c3, c4 }, c => Assert.NotEqual(0, c));
+        Assert.Contains("--confuser-project is required", e1);
+        Assert.Contains("--yaml cannot be used", e2);
+        Assert.Contains("--dotnet-version cannot be used", e3);
+        Assert.Contains("--yaml is required", e4);
+    }
+
+    public void Dispose()
+    {
+        _outputs.Dispose();
+    }
+}

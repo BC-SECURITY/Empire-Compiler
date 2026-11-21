@@ -13,13 +13,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.x'
+
+      # ObfuscateOnlyTests run ConfuserEx, which the engine launches through mono on Linux.
+      # mono-complete, not mono-runtime: ConfuserEx needs Mono.Posix and facades from the GAC.
+      - name: Install mono
+        run: |
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y mono-complete
 
       - name: Restore dependencies
         run: dotnet restore

@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 using EmpireCompiler.Core;
 using EmpireCompiler.Models.Agents;
 
@@ -5,8 +7,21 @@ namespace EmpireCompiler.Tests.Helpers;
 
 public static class TestHelper
 {
-    private static readonly HashSet<string> TempFiles = new(StringComparer.OrdinalIgnoreCase);
-    private static readonly object Sync = new();
+    private static readonly Lazy<string> LauncherFile = new(() =>
+    {
+        SetupEmpireDataPaths();
+        Directory.CreateDirectory(Common.EmpireEmbeddedResourcesCommonDirectory);
+        var launcherPath = Path.Combine(Common.EmpireEmbeddedResourcesCommonDirectory, "launcher.txt");
+        if (!File.Exists(launcherPath))
+        {
+            File.WriteAllText(launcherPath, "Write-Host \"Test launcher\"");
+        }
+
+        return launcherPath;
+    });
+
+    /// <summary>First-party fixture libraries, copied next to the test assembly; pass as a source root.</summary>
+    public static string FixtureSourceRoot { get; } = Path.Combine(AppContext.BaseDirectory, "Fixtures", "SourceLibraries");
 
     public static string GetSolutionRoot()
     {
@@ -43,7 +58,6 @@ public static class TestHelper
         Common.EmpireAssemblyReferenceNet48Directory = Path.Combine(referenceDirectory, "net48") + Path.DirectorySeparatorChar;
         Common.EmpireEmbeddedResourcesDirectory = Path.Combine(empireDataDirectory, "EmbeddedResources") + Path.DirectorySeparatorChar;
         Common.EmpireEmbeddedResourcesCommonDirectory = Path.Combine(empireDataDirectory, "EmbeddedResources", "common") + Path.DirectorySeparatorChar;
-        Common.EmpireReferenceSourceLibraries = Path.Combine(empireDataDirectory, "ReferenceSourceLibraries") + Path.DirectorySeparatorChar;
 
         Directory.CreateDirectory(Common.EmpireTempDirectory);
     }
@@ -53,44 +67,55 @@ public static class TestHelper
         return Path.Combine(GetSolutionRoot(), "EmpireCompiler", "EmpireCompiler.csproj");
     }
 
-    public static string GetTempOutputPath()
-    {
-        SetupEmpireDataPaths();
-        var outputPath = Path.Combine(Common.EmpireTempDirectory, $"test-{Guid.NewGuid():N}.exe");
+    public static void EnsureEmbeddedLauncherFile() => _ = LauncherFile.Value;
 
-        lock (Sync)
+    /// <summary>
+    /// The configuration this test assembly was built in. The ProjectReference builds the
+    /// compiler in the same one, so <c>dotnet run --no-build</c> finds it there.
+    /// </summary>
+    private const string BuildConfiguration =
+#if DEBUG
+        "Debug";
+#else
+        "Release";
+#endif
+
+    /// <summary>
+    /// Runs the compiler with <c>dotnet run --project</c>, adding <c>--no-build</c> unless
+    /// <paramref name="build"/> is set. Callers belong to <see cref="DotnetRunCollection"/>.
+    /// </summary>
+    public static async Task<(int Code, string Out, string Err)> RunCompilerAsync(bool build, params string[] args)
+    {
+        var startInfo = new ProcessStartInfo
         {
-            TempFiles.Add(outputPath);
+            FileName = "dotnet",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+        startInfo.ArgumentList.Add("run");
+        if (!build)
+        {
+            startInfo.ArgumentList.Add("--no-build");
         }
 
-        return outputPath;
-    }
-
-    public static void CleanupTempFiles()
-    {
-        lock (Sync)
+        startInfo.ArgumentList.Add("--configuration");
+        startInfo.ArgumentList.Add(BuildConfiguration);
+        startInfo.ArgumentList.Add("--project");
+        startInfo.ArgumentList.Add(GetEmpireCompilerProjectPath());
+        startInfo.ArgumentList.Add("--");
+        foreach (var arg in args)
         {
-            foreach (var file in TempFiles.ToList())
-            {
-                if (File.Exists(file))
-                {
-                    File.Delete(file);
-                }
-
-                TempFiles.Remove(file);
-            }
+            startInfo.ArgumentList.Add(arg);
         }
-    }
 
-    public static void EnsureEmbeddedLauncherFile()
-    {
-        SetupEmpireDataPaths();
-        Directory.CreateDirectory(Common.EmpireEmbeddedResourcesCommonDirectory);
-        var launcherPath = Path.Combine(Common.EmpireEmbeddedResourcesCommonDirectory, "launcher.txt");
-        if (!File.Exists(launcherPath))
-        {
-            File.WriteAllText(launcherPath, "Write-Host \"Test launcher\"");
-        }
+        using var process = new Process { StartInfo = startInfo };
+        process.Start();
+        var stdOut = process.StandardOutput.ReadToEndAsync();
+        var stdErr = process.StandardError.ReadToEndAsync();
+        await process.WaitForExitAsync();
+        return (process.ExitCode, await stdOut, await stdErr);
     }
 
     internal static List<SerializedGruntTask> DeserializeSerializedGruntTasks(string yaml)

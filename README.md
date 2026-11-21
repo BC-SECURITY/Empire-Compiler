@@ -5,14 +5,15 @@ The Empire Compiler started as the compiler of the Covenant project. It has sinc
 ## Prerequisites
 
 - [.NET 10.0 SDK](https://dotnet.microsoft.com/download)
-- Git (with submodule support)
+- Git
 
 ## Build
 
 ```bash
-git submodule update --init --recursive
 dotnet build
 ```
+
+The repository has no submodules and bundles no library source, and the engine ships no prebuilt RunCOFF (ABI 4). Pass every library's source with `--source-root <dir>` (repeatable; ABI 4 adds `--reference-root <dir>`, repeatable, for pack reference DLLs), where each task's `ReferenceSourceLibraries[].Location` names a directory under one of the roots.
 
 ## Test
 
@@ -26,7 +27,7 @@ To run a specific test profile:
 dotnet test --filter "profileName=CSharpPS"
 ```
 
-Available profiles: `CSharpPS`, `Seatbelt`, `Powershell-Old`, `Powershell-New`
+Available profiles: `CSharpPS`, `FixtureLib`, `Powershell-New`
 
 ## Lint & Format
 

@@ -8,6 +8,7 @@ namespace EmpireCompiler.Tests.Unit;
 
 public class AgentTaskMultiFrameworkTests : IDisposable
 {
+    private readonly TempOutputs _outputs = new();
     static AgentTaskMultiFrameworkTests()
     {
         TestHelper.SetupEmpireDataPaths();
@@ -17,8 +18,8 @@ public class AgentTaskMultiFrameworkTests : IDisposable
     [Theory]
     [InlineData("CSharpPS", Common.DotNetVersion.Net35)]
     [InlineData("CSharpPS", Common.DotNetVersion.Net40)]
-    [InlineData("Seatbelt", Common.DotNetVersion.Net35)]
-    [InlineData("Seatbelt", Common.DotNetVersion.Net40)]
+    [InlineData("FixtureLib", Common.DotNetVersion.Net35)]
+    [InlineData("FixtureLib", Common.DotNetVersion.Net40)]
     [InlineData("Powershell-New", Common.DotNetVersion.Net35)]
     [InlineData("Powershell-New", Common.DotNetVersion.Net40)]
     public void Compile_ProfileWithFrameworkVersion_CreatesOutput(string profileName, Common.DotNetVersion version)
@@ -26,29 +27,23 @@ public class AgentTaskMultiFrameworkTests : IDisposable
         var base64Yaml = profileName switch
         {
             "CSharpPS" => ProfileYamlData.CSharpPs,
-            "Seatbelt" => ProfileYamlData.Seatbelt,
+            "FixtureLib" => ProfileYamlData.FixtureLib,
             "Powershell-New" => ProfileYamlData.PowerShellNew,
             _ => throw new ArgumentException($"Unknown profile: {profileName}")
         };
 
-        var outputPath = TestHelper.GetTempOutputPath();
-        try
-        {
-            var yaml = Encoding.UTF8.GetString(Convert.FromBase64String(base64Yaml));
-            var serializedTasks = TestHelper.DeserializeSerializedGruntTasks(yaml);
+        var outputPath = _outputs.NewPath();
+        var yaml = Encoding.UTF8.GetString(Convert.FromBase64String(base64Yaml));
+        var serializedTasks = TestHelper.DeserializeSerializedGruntTasks(yaml);
 
-            var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
-            agentTask.OutputPath = outputPath;
+        var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
+        agentTask.OutputPath = outputPath;
+        agentTask.SourceRoots = new[] { TestHelper.FixtureSourceRoot };
 
-            var exception = Record.Exception(() => agentTask.Compile(version));
-            Assert.Null(exception);
-            Assert.True(File.Exists(outputPath), $"Expected output for {profileName}/{version}");
-            Assert.True(new FileInfo(outputPath).Length > 0, $"Expected non-empty output for {profileName}/{version}");
-        }
-        finally
-        {
-            TestHelper.CleanupTempFiles();
-        }
+        var exception = Record.Exception(() => agentTask.Compile(version));
+        Assert.Null(exception);
+        Assert.True(File.Exists(outputPath), $"Expected output for {profileName}/{version}");
+        Assert.True(new FileInfo(outputPath).Length > 0, $"Expected non-empty output for {profileName}/{version}");
     }
 
     [Fact]
@@ -59,7 +54,7 @@ public class AgentTaskMultiFrameworkTests : IDisposable
         var serializedTasks = TestHelper.DeserializeSerializedGruntTasks(yaml);
 
         var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
-        agentTask.OutputPath = TestHelper.GetTempOutputPath();
+        agentTask.OutputPath = _outputs.NewPath();
 
         // Net45 is not in CompatibleDotNetVersions for CSharpPS
         // The Compile method calls Environment.Exit(1) for incompatible versions,
@@ -71,33 +66,27 @@ public class AgentTaskMultiFrameworkTests : IDisposable
     [MemberData(nameof(Profiles))]
     public void Compile_OutputIsValidPE(string profileName, string base64Yaml)
     {
-        var outputPath = TestHelper.GetTempOutputPath();
-        try
-        {
-            var yaml = Encoding.UTF8.GetString(Convert.FromBase64String(base64Yaml));
-            var serializedTasks = TestHelper.DeserializeSerializedGruntTasks(yaml);
+        var outputPath = _outputs.NewPath();
+        var yaml = Encoding.UTF8.GetString(Convert.FromBase64String(base64Yaml));
+        var serializedTasks = TestHelper.DeserializeSerializedGruntTasks(yaml);
 
-            var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
-            agentTask.OutputPath = outputPath;
-            agentTask.Compile(Common.DotNetVersion.Net40);
+        var agentTask = new AgentTask().FromSerializedGruntTask(serializedTasks[0]);
+        agentTask.OutputPath = outputPath;
+        agentTask.SourceRoots = new[] { TestHelper.FixtureSourceRoot };
+        agentTask.Compile(Common.DotNetVersion.Net40);
 
-            var bytes = File.ReadAllBytes(outputPath);
-            // Valid PE files start with MZ header
-            Assert.True(bytes.Length >= 2, $"Output too small for {profileName}");
-            Assert.Equal(0x4D, bytes[0]);
-            Assert.Equal(0x5A, bytes[1]);
-        }
-        finally
-        {
-            TestHelper.CleanupTempFiles();
-        }
+        var bytes = File.ReadAllBytes(outputPath);
+        // Valid PE files start with MZ header
+        Assert.True(bytes.Length >= 2, $"Output too small for {profileName}");
+        Assert.Equal(0x4D, bytes[0]);
+        Assert.Equal(0x5A, bytes[1]);
     }
 
     public static IEnumerable<object[]> Profiles => ProfileYamlData.AllProfiles();
 
     public void Dispose()
     {
-        TestHelper.CleanupTempFiles();
+        _outputs.Dispose();
         GC.SuppressFinalize(this);
     }
 }

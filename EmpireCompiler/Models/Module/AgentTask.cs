@@ -24,6 +24,9 @@ namespace EmpireCompiler.Models.Agents
 
     public class AgentTask : ISerializable<AgentTask>
     {
+        // Reference source libraries whose sources must not be pruned by the Optimize pass.
+        internal static readonly string[] NoPruneLibraries = { "Seatbelt", "SharpHound", "KrbRelayUp" };
+
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string OutputPath { get; set; }
@@ -39,6 +42,7 @@ namespace EmpireCompiler.Models.Agents
         public string Code { get; set; } = "";
         public bool Compiled { get; set; }
         public bool Confuse { get; set; }
+        public string ConfuserProjectTemplate { get; set; }
         private List<AgentTaskReferenceSourceLibrary> GruntTaskReferenceSourceLibraries { get; set; } = new List<AgentTaskReferenceSourceLibrary>();
         private List<AgentTaskReferenceAssembly> GruntTaskReferenceAssemblies { get; set; } = new List<AgentTaskReferenceAssembly>();
         private List<AgentTaskEmbeddedResource> GruntTaskEmbeddedResources { get; set; } = new List<AgentTaskEmbeddedResource>();
@@ -52,6 +56,8 @@ namespace EmpireCompiler.Models.Agents
         public bool UnsafeCompile { get; set; }
         public bool TokenTask { get; set; }
         public bool MergeReferences { get; set; }
+        public IReadOnlyList<string> SourceRoots { get; set; } = Array.Empty<string>();
+        public IReadOnlyList<string> ReferenceRoots { get; set; } = Array.Empty<string>();
 
         public void Add(ReferenceSourceLibrary library)
         {
@@ -203,19 +209,35 @@ namespace EmpireCompiler.Models.Agents
                 .Select(dll => new Compiler.Reference { File = dll, Framework = dotnetVersion, Enabled = true })
                 .ToList();
 
+            List<ResolvedReference> pinned = PinnedReferences.Resolve(
+                this.ReferenceAssemblies.Concat(this.ReferenceSourceLibraries.SelectMany(RSL => RSL.ReferenceAssemblies)),
+                dotnetVersion, this.ReferenceRoots, frameworkDir, this.MergeReferences);
+            references.AddRange(pinned.Select(R => new Compiler.Reference
+            {
+                File = R.File,
+                Framework = dotnetVersion,
+                Enabled = true,
+                EmbedInteropTypes = R.Deploy == ReferenceDeploy.EmbedInterop
+            }));
+            List<string> PinnedFiles(ReferenceDeploy deploy) =>
+                pinned.Where(R => R.Deploy == deploy).Select(R => R.File).ToList();
+
             var compiledBytes = Compiler.Compile(new Compiler.CsharpFrameworkCompilationRequest
             {
                 Language = this.Language,
                 Source = this.Code,
-                SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => Common.EmpireReferenceSourceLibraries + RSL.Location).ToList(),
+                SourceDirectories = this.ReferenceSourceLibraries.Select(RSL => SourceRootResolver.Resolve(RSL.Location, this.SourceRoots)).ToList(),
                 TargetDotNetVersion = dotnetVersion,
                 References = references,
                 EmbeddedResources = resources,
                 UnsafeCompile = this.UnsafeCompile,
                 OutputKind = OutputKind.ConsoleApplication,
                 Confuse = this.Confuse,
+                ConfuserProjectTemplate = this.ConfuserProjectTemplate,
                 MergeReferences = this.MergeReferences,
-                Optimize = !this.ReferenceSourceLibraries.Select(RSL => RSL.Name).Any(n => n == "Seatbelt" || n == "SharpHound")
+                PackMergeAssemblies = PinnedFiles(ReferenceDeploy.Merge),
+                ObfuscationDependencies = PinnedFiles(ReferenceDeploy.OsProvided),
+                Optimize = !this.ReferenceSourceLibraries.Any(RSL => NoPruneLibraries.Contains(RSL.Name))
             });
             if (compiledBytes == null || compiledBytes.Length == 0)
             {
